@@ -1,19 +1,23 @@
 package moe.gabriella.herobrine.game;
 
+import moe.gabriella.herobrine.game.runnables.ShardHandler;
 import moe.gabriella.herobrine.game.runnables.StartingRunnable;
-import moe.gabriella.herobrine.utils.GameState;
-import moe.gabriella.herobrine.utils.Message;
-import moe.gabriella.herobrine.utils.PlayerUtil;
-import moe.gabriella.herobrine.utils.WinType;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import moe.gabriella.herobrine.utils.*;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class GMListener implements Listener {
@@ -30,7 +34,7 @@ public class GMListener implements Listener {
         }
 
         event.setJoinMessage("");
-        Message.broadcast(Message.format("" + ChatColor.AQUA + event.getPlayer().getName() + " " + ChatColor.YELLOW + " has joined!"));
+        Message.broadcast(Message.format("" + ChatColor.AQUA + event.getPlayer().getName() + " " + ChatColor.YELLOW + "has joined!"));
         gm.getSurvivors().add(event.getPlayer());
         if (gm.getSurvivors().size() >= gm.getRequiredToStart()) {
             if (gm.getGameState() != GameState.STARTING) {
@@ -55,11 +59,7 @@ public class GMListener implements Listener {
         event.setQuitMessage("");
         gm.getSurvivors().remove(event.getPlayer());
         if (gm.getGameState() == GameState.LIVE) {
-            if (gm.getSurvivors().size() == 0) {
-                gm.end(WinType.HEROBRINE);
-            } else if (!gm.getHerobrine().isOnline()) {
-                gm.end(WinType.SURVIVORS);
-            }
+            gm.endCheck();
         }
     }
 
@@ -87,7 +87,8 @@ public class GMListener implements Listener {
             PlayerUtil.sendTitle(p, "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard", ChatColor.YELLOW + "Help them return it!", 5, 60, 5);
         }
         PlayerUtil.sendTitle(gm.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
-
+        gm.setShardState(ShardState.CARRYING);
+        gm.setShardCarrier(player);
     }
 
     @EventHandler
@@ -95,13 +96,101 @@ public class GMListener implements Listener {
         Player player = event.getPlayer();
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ENCHANTED_BOOK && player == gm.getShardCarrier()) {
+            if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ENCHANTING_TABLE && player == gm.getShardCarrier()) {
                 player.getInventory().getItemInMainHand();
                 if (player.getInventory().getItemInMainHand().getType() == Material.NETHER_STAR) {
-                    player.getInventory().remove(Material.NETHER_STAR);
-                    //todo shard capture logic
+                    event.setCancelled(true);
+                    gm.capture(player);
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (event.getPlayer() == gm.getShardCarrier())
+            for (Player p : Bukkit.getServer().getOnlinePlayers()) { p.setCompassTarget(event.getPlayer().getLocation()); }
+    }
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (event.getPlayer().getGameMode() != GameMode.CREATIVE)
+            event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        if (event.getPlayer().getGameMode() != GameMode.CREATIVE)
+            event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onDamage(EntityDamageByEntityEvent event) {
+        // Allows arrow damage
+        if (event.getEntity() instanceof Player && event.getDamager() instanceof Projectile) { // If the damaged is a player and damager is an arrow
+            Projectile proj = (Projectile) event.getEntity();
+            if (proj.getShooter() instanceof Player) { // if the entity who shot the arrow is a player
+                Player player = (Player) event.getEntity();
+                Player attacker = (Player) proj.getShooter();
+
+                if (!(gm.getSurvivors().contains(attacker) && player == gm.getHerobrine())) { // Evals to true if either a) the attacker isnt a survivor b) the damaged isnt herobrine
+                    event.setCancelled(true);
+                }
+            } else {
+                event.setCancelled(true);
+            }
+            return;
+        }
+
+        if (!(event.getEntity() instanceof Player) || !(event.getDamager() instanceof Player)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        Player player = (Player) event.getEntity();
+        Player attacker = (Player) event.getDamager();
+
+        if (gm.getSurvivors().contains(attacker)) { // If attacker is a survivor
+            if (gm.getSurvivors().contains(player)) { // If the person taking damage is also a survivor, cancel
+                event.setCancelled(true);
+                return;
+            }
+
+            // Attacking THB
+            double damage = gm.getHitDamage(attacker.getInventory().getItemInMainHand().getType(), false);
+            if (damage != -1)
+                event.setDamage(damage);
+        } else if (attacker != gm.getHerobrine()) { // Attacker isn't herobrine
+            event.setCancelled(true);
+        }
+        // Herobrine, as of right now, doesn't need any damage modifiers.
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        event.setDeathMessage("");
+        event.getDrops().clear();
+        if (gm.getGameState() != GameState.LIVE) {
+            player.setHealth(20);
+            return;
+        }
+
+        if (player == gm.getHerobrine()) {
+            if (player.getKiller() != null)
+                Message.broadcast(Message.format(ChatColor.AQUA + player.getKiller().getName() + ChatColor.GREEN + " has defeated " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
+            PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_WITHER_HURT, 1f, 1f);
+            gm.end(WinType.SURVIVORS);
+        } else {
+            gm.getSurvivors().remove(player);
+            if (player.getKiller() != null && player.getKiller() == gm.getHerobrine())
+                Message.broadcast(Message.format(ChatColor.AQUA + player.getName() + ChatColor.YELLOW + " was killed by " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
+
+            if (player == gm.getShardCarrier()) {
+                ShardHandler.drop(player.getLocation());
+            }
+
+            //gm.endCheck();
         }
     }
 

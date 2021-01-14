@@ -29,8 +29,7 @@ public class StartingRunnable extends BukkitRunnable {
         gm.startTimer--;
 
         if (gm.startTimer == 0) {
-            // start logic
-
+            gm.start();
             cancel();
             return;
         }

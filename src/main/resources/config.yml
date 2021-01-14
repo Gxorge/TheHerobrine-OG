@@ -2,4 +2,4 @@ networkName: gabriella.moe # Name of your network
 networkWeb: gabriella.moe # Website of your network
 minPlayers: 2 # Minimum players needed to start a game
 maxPlayers: 16 # Maximum players in a game
-allowOverflow: false # Alow more than the max players to join
+allowOverflow: false # Allow more than the max players to join

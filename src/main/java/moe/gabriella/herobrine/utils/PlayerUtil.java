@@ -43,9 +43,7 @@ public class PlayerUtil {
     }
 
     public static void playSoundAt(Location loc, Sound sound, float volume, float pitch) {
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            p.playSound(loc, sound, volume, pitch);
-        }
+        loc.getWorld().playSound(loc, sound, volume, pitch);
     }
 
     public static void clearInventory(Player player) {
