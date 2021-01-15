@@ -57,7 +57,7 @@ public class NarrationRunnable extends BukkitRunnable {
     }
 
     private boolean firstMsg() {
-        return timer > 5;
+        return timer <= 5;
     }
 
     private void all(String msg) {

@@ -15,10 +15,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.potion.PotionEffectType;
 
 public class GMListener implements Listener {
 
@@ -78,17 +76,23 @@ public class GMListener implements Listener {
             return;
         }
 
-        if (player == gm.getHerobrine()) {
+        if (!gm.getSurvivors().contains(player)) {
             event.setCancelled(true);
             return;
         }
 
-        for (Player p : gm.getSurvivors()) {
-            PlayerUtil.sendTitle(p, "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard", ChatColor.YELLOW + "Help them return it!", 5, 60, 5);
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            if (p == gm.getHerobrine()) continue;
+            PlayerUtil.sendTitle(p, "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Help them return it!", 5, 60, 5);
         }
-        PlayerUtil.sendTitle(gm.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
+        PlayerUtil.sendTitle(gm.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
         gm.setShardState(ShardState.CARRYING);
         gm.setShardCarrier(player);
+        PlayerUtil.broadcastSound(Sound.ENTITY_BAT_DEATH, 1f, 0f);
+        PlayerUtil.addEffect(player, PotionEffectType.BLINDNESS, 100, 1, false, false);
+        PlayerUtil.addEffect(player, PotionEffectType.SLOW, 400, 2, false, false);
+        PlayerUtil.addEffect(player, PotionEffectType.CONFUSION, 300, 1, false, false);
+        player.sendMessage(Message.format(ChatColor.GOLD + "You have a shard! Take it to the alter (Enchanting Table)!"));
     }
 
     @EventHandler
@@ -96,10 +100,10 @@ public class GMListener implements Listener {
         Player player = event.getPlayer();
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            event.setCancelled(true);
             if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ENCHANTING_TABLE && player == gm.getShardCarrier()) {
                 player.getInventory().getItemInMainHand();
                 if (player.getInventory().getItemInMainHand().getType() == Material.NETHER_STAR) {
-                    event.setCancelled(true);
                     gm.capture(player);
                 }
             }
@@ -160,10 +164,11 @@ public class GMListener implements Listener {
             double damage = gm.getHitDamage(attacker.getInventory().getItemInMainHand().getType(), false);
             if (damage != -1)
                 event.setDamage(damage);
-        } else if (attacker != gm.getHerobrine()) { // Attacker isn't herobrine
+        } else if (attacker == gm.getHerobrine()) {
+            PlayerUtil.playSoundAt(attacker.getLocation(), Sound.ENTITY_GHAST_AMBIENT, 1f, 0f);
+        } else {
             event.setCancelled(true);
         }
-        // Herobrine, as of right now, doesn't need any damage modifiers.
     }
 
     @EventHandler
@@ -190,8 +195,7 @@ public class GMListener implements Listener {
                 ShardHandler.drop(player.getLocation());
             }
 
-            //gm.endCheck();
+            gm.endCheck();
         }
     }
-
 }

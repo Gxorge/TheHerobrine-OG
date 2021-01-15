@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.Random;
 
@@ -58,6 +59,11 @@ public class PlayerUtil {
         for (PotionEffect e : player.getActivePotionEffects()) {
             player.removePotionEffect(e.getType());
         }
+    }
+
+    public static void addEffect(Player player, PotionEffectType type, int duration, int amplifier, boolean particles, boolean icon) {
+        PotionEffect effect = new PotionEffect(type, duration, amplifier, true, particles, icon);
+        player.addPotionEffect(effect);
     }
 
     public static Player randomPlayer() {

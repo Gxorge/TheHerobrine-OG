@@ -1,5 +1,6 @@
 package moe.gabriella.herobrine.game;
 
+import com.comphenix.protocol.events.PacketAdapter;
 import lombok.Getter;
 import lombok.Setter;
 import moe.gabriella.herobrine.events.GameStateUpdateEvent;
@@ -11,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -111,13 +113,20 @@ public class GameManager {
             herobrine = PlayerUtil.randomPlayer();
         }
         survivors.remove(herobrine);
-        //todo items, tp
+        plugin.getServer().getScheduler().runTask(plugin, this::itemSetupHb);
         new HerobrineSetup().runTaskAsynchronously(plugin);
         for (Player p : survivors) {
             //todo items, tp
             new SurvivorSetup(p).runTaskAsynchronously(plugin);
         }
         new ShardHandler().runTaskTimer(plugin, 0, 20);
+        new HerobrineItemHider().runTaskTimer(plugin, 0, 1);
+    }
+
+    public void itemSetupHb() {
+        PlayerUtil.addEffect(herobrine, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
+        PlayerUtil.addEffect(herobrine, PotionEffectType.JUMP, Integer.MAX_VALUE, 1, false, false);
+        PlayerUtil.addEffect(herobrine, PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false);
     }
 
     public void end(WinType type) {
@@ -148,8 +157,10 @@ public class GameManager {
         player.getInventory().remove(Material.NETHER_STAR);
         shardCarrier = null;
         shardCount++;
-        if (shardCount == 3)
+        if (shardCount == 3) {
             setShardState(ShardState.INACTIVE);
+            herobrine.removePotionEffect(PotionEffectType.INVISIBILITY);
+        }
         else
             setShardState(ShardState.WAITING);
         new CaptureSequence(player).runTaskAsynchronously(plugin);

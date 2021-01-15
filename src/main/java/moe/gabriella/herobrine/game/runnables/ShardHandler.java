@@ -2,10 +2,7 @@ package moe.gabriella.herobrine.game.runnables;
 
 import me.gabriella.gabsgui.GUIItem;
 import moe.gabriella.herobrine.game.GameManager;
-import moe.gabriella.herobrine.utils.GameState;
-import moe.gabriella.herobrine.utils.Message;
-import moe.gabriella.herobrine.utils.PlayerUtil;
-import moe.gabriella.herobrine.utils.ShardState;
+import moe.gabriella.herobrine.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -79,7 +76,7 @@ public class ShardHandler extends BukkitRunnable {
 
     private static ItemStack createShard() {
         GUIItem shardItem = new GUIItem(Material.NETHER_STAR);
-        shardItem.displayName(ChatColor.RED + "Shard of " + ChatColor.BOLD + "Fury");
+        shardItem.displayName(ChatColor.RED + "Shard of " + ShardName.getRandom().getName());
         return shardItem.build();
     }
 }
