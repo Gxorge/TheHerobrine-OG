@@ -1,12 +1,12 @@
 package moe.gabriella.herobrine.game;
 
-import com.comphenix.protocol.events.PacketAdapter;
 import lombok.Getter;
 import lombok.Setter;
 import moe.gabriella.herobrine.events.GameStateUpdateEvent;
 import moe.gabriella.herobrine.events.ShardStateUpdateEvent;
 import moe.gabriella.herobrine.game.runnables.*;
 import moe.gabriella.herobrine.utils.*;
+import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -22,6 +22,7 @@ public class GameManager {
     @Getter private JavaPlugin plugin;
 
     @Getter private static GameManager instance;
+    private WorldManager worldManager;
 
     @Getter private GameState gameState;
     @Getter private ShardState shardState;
@@ -44,10 +45,11 @@ public class GameManager {
     public boolean stAlmost = false;
     public boolean stFull = false;
 
-    public GameManager(JavaPlugin plugin) {
+    public GameManager(JavaPlugin plugin, WorldManager worldManager) {
         Console.info("Starting Game Manager...");
         this.plugin = plugin;
         instance = this;
+        this.worldManager = worldManager;
         plugin.getServer().getPluginManager().registerEvents(new GMListener(this), plugin);
 
         gameState = GameState.BOOTING;
@@ -113,7 +115,7 @@ public class GameManager {
             herobrine = PlayerUtil.randomPlayer();
         }
         survivors.remove(herobrine);
-        plugin.getServer().getScheduler().runTask(plugin, this::itemSetupHb);
+        plugin.getServer().getScheduler().runTask(plugin, this::setupHerobrine);
         new HerobrineSetup().runTaskAsynchronously(plugin);
         for (Player p : survivors) {
             //todo items, tp
@@ -121,12 +123,22 @@ public class GameManager {
         }
         new ShardHandler().runTaskTimer(plugin, 0, 20);
         new HerobrineItemHider().runTaskTimer(plugin, 0, 1);
+        new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 10);
     }
 
-    public void itemSetupHb() {
+    public void setupHerobrine() {
         PlayerUtil.addEffect(herobrine, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
         PlayerUtil.addEffect(herobrine, PotionEffectType.JUMP, Integer.MAX_VALUE, 1, false, false);
         PlayerUtil.addEffect(herobrine, PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false);
+
+        herobrine.teleport(worldManager.herobrineSpawn);
+    }
+
+    public void setupSurvivor() {
+        for (Player p : survivors) {
+            // TODO: kit items
+            p.teleport(worldManager.survivorSpawn);
+        }
     }
 
     public void end(WinType type) {
@@ -167,7 +179,7 @@ public class GameManager {
         //update hb inv
     }
 
-    public double getHitDamage(Material item, boolean payedKit) {
+    public double getSurvivorHitDamage(Material item, boolean payedKit) {
         double finalDamage = 0;
         double shardModifier = 0;
         boolean normal = false;
@@ -198,6 +210,25 @@ public class GameManager {
 
         if (shardCount > 0)
             finalDamage += (shardModifier * shardCount);
+
+        return finalDamage;
+    }
+
+    public double getHerobrineHitDamage(Material item) {
+        double finalDamage = 0;
+        switch (item) {
+            case STONE_AXE:
+                finalDamage = 1.5;
+                break;
+            case IRON_AXE:
+                finalDamage = 2;
+                break;
+            case IRON_SWORD:
+                finalDamage = 2.5;
+                break;
+            default:
+                return -1;
+        }
 
         return finalDamage;
     }

@@ -4,5 +4,4 @@ author: Gabriella
 version: 1.0.0
 api-version: 1.16
 description: Remake of "The Herobrine!" v2 from HiveMC.
-depend: [ProtocolLib]
 softdepend: [Vault]

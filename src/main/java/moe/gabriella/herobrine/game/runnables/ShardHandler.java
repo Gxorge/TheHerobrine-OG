@@ -3,6 +3,7 @@ package moe.gabriella.herobrine.game.runnables;
 import me.gabriella.gabsgui.GUIItem;
 import moe.gabriella.herobrine.game.GameManager;
 import moe.gabriella.herobrine.utils.*;
+import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -34,6 +35,7 @@ public class ShardHandler extends BukkitRunnable {
                 timer--;
                 if (timer == 0)
                     spawn();
+                for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(WorldManager.getInstance().alter);
                 break;
             }
             case SPAWNED: {
@@ -53,15 +55,15 @@ public class ShardHandler extends BukkitRunnable {
 
 
     private void spawn() {
-        //todo decide where to spawn in
-        Location spawn = gm.getHerobrine().getLocation();
+        Random rand = new Random();
+        Location spawn = WorldManager.getInstance().shardSpawns.get(rand.nextInt(WorldManager.getInstance().shardSpawns.size()));
 
         shard = spawn.getWorld().dropItem(spawn.add(0, 1, 0), createShard());
 
         spawn.getWorld().strikeLightningEffect(spawn.add(0, 1, 0));
         gm.setShardState(ShardState.SPAWNED);
         timer = 45;
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) { p.setCompassTarget(spawn); }
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(spawn);
 
         PlayerUtil.broadcastTitle("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "A Shard has spawned!", ChatColor.AQUA + "Use your compass to find it!", 10, 60, 10);
         Message.broadcast(Message.format(ChatColor.LIGHT_PURPLE  + "A new shard has " + ChatColor.AQUA + ChatColor.BOLD + "been SUMMONED!"));

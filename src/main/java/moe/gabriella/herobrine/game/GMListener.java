@@ -3,6 +3,7 @@ package moe.gabriella.herobrine.game;
 import moe.gabriella.herobrine.game.runnables.ShardHandler;
 import moe.gabriella.herobrine.game.runnables.StartingRunnable;
 import moe.gabriella.herobrine.utils.*;
+import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -57,6 +58,10 @@ public class GMListener implements Listener {
         event.setQuitMessage("");
         gm.getSurvivors().remove(event.getPlayer());
         if (gm.getGameState() == GameState.LIVE) {
+            if (event.getPlayer() == gm.getShardCarrier()) {
+                ShardHandler.drop(event.getPlayer().getLocation());
+            }
+
             gm.endCheck();
         }
     }
@@ -161,11 +166,12 @@ public class GMListener implements Listener {
             }
 
             // Attacking THB
-            double damage = gm.getHitDamage(attacker.getInventory().getItemInMainHand().getType(), false);
-            if (damage != -1)
-                event.setDamage(damage);
-        } else if (attacker == gm.getHerobrine()) {
+            double damage = gm.getSurvivorHitDamage(attacker.getInventory().getItemInMainHand().getType(), false);
+            if (damage != -1) event.setDamage(damage);
+        } else if (attacker == gm.getHerobrine()) { //
             PlayerUtil.playSoundAt(attacker.getLocation(), Sound.ENTITY_GHAST_AMBIENT, 1f, 0f);
+            double damage = gm.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType());
+            if (damage != -1) event.setDamage(damage);
         } else {
             event.setCancelled(true);
         }
@@ -196,6 +202,13 @@ public class GMListener implements Listener {
             }
 
             gm.endCheck();
+        }
+    }
+
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent event) {
+        if (gm.getGameState() == GameState.LIVE || gm.getGameState() == GameState.ENDING) {
+            event.setRespawnLocation(WorldManager.getInstance().survivorSpawn);
         }
     }
 }
