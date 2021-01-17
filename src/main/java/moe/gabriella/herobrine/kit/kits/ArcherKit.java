@@ -46,7 +46,7 @@ public class ArcherKit extends Kit {
         helmet.setItemMeta(helMeta);
         player.getInventory().setHelmet(helmet);
 
-        player.getInventory().setChestplate(new ItemStack(Material.CHAINMAIL_LEGGINGS));
+        player.getInventory().setChestplate(new ItemStack(Material.CHAINMAIL_CHESTPLATE));
         player.getInventory().setBoots(new ItemStack(Material.CHAINMAIL_BOOTS));
     }
 }

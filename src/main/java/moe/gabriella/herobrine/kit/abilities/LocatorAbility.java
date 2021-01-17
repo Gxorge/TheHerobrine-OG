@@ -15,8 +15,7 @@ public class LocatorAbility extends KitAbility {
 
     @Override
     public void apply(Player player) {
-        GUIItem item = new GUIItem(Material.COMPASS);
-        item.displayName(ChatColor.GRAY + "Objective Locator");
+        GUIItem item = new GUIItem(Material.COMPASS).displayName(ChatColor.GRAY + "Objective Locator");
 
         player.getInventory().setItem(8, item.build());
     }

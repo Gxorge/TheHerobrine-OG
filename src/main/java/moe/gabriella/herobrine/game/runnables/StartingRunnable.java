@@ -16,11 +16,6 @@ public class StartingRunnable extends BukkitRunnable {
     public void run() {
         GameManager gm = GameManager.getInstance();
 
-        if (gm.getGameState() != GameState.STARTING) {
-            cancel();
-            return;
-        }
-
         if (gm.getRequiredToStart() > gm.getSurvivors().size()) {
             Message.broadcast(Message.format("" + ChatColor.RED + "Cancelled! Waiting for players..."));
             gm.startWaiting();
@@ -34,7 +29,7 @@ public class StartingRunnable extends BukkitRunnable {
             Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), () -> WorldManager.getInstance().selectAndLoadMapFromVote());
 
         if (gm.startTimer == 0) {
-            gm.start();
+            Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), gm::start);
             cancel();
             return;
         }

@@ -14,10 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.potion.PotionEffectType;
 
@@ -119,7 +116,7 @@ public class GMListener implements Listener {
                     }
                 }
             }
-        } else if (gm.getGameState() == GameState.WAITING) {
+        } else if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS)
                     new KitGui(gm.getPlugin(), player).open(false);
@@ -204,6 +201,20 @@ public class GMListener implements Listener {
         } else {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player))
+            return;
+
+        Player player = (Player) event.getEntity();
+
+        if (gm.getGameState() != GameState.LIVE)
+            return;
+
+        if (player == gm.getHerobrine() && event.getCause() == EntityDamageEvent.DamageCause.FALL)
+            event.setCancelled(true);
     }
 
     @EventHandler

@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 
 public abstract class KitAbility implements Listener {
 
-    private GameManager gm;
+    public GameManager gm;
 
     @Getter private String displayName;
 

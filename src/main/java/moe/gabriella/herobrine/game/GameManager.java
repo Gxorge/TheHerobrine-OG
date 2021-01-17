@@ -8,7 +8,12 @@ import moe.gabriella.herobrine.events.ShardStateUpdateEvent;
 import moe.gabriella.herobrine.game.runnables.*;
 import moe.gabriella.herobrine.kit.Kit;
 import moe.gabriella.herobrine.kit.KitAbility;
+import moe.gabriella.herobrine.kit.abilities.BatBombAbility;
+import moe.gabriella.herobrine.kit.abilities.DreamweaverAbility;
+import moe.gabriella.herobrine.kit.abilities.LocatorAbility;
 import moe.gabriella.herobrine.kit.kits.ArcherKit;
+import moe.gabriella.herobrine.kit.kits.PriestKit;
+import moe.gabriella.herobrine.kit.kits.ScoutKit;
 import moe.gabriella.herobrine.redis.RedisManager;
 import moe.gabriella.herobrine.utils.*;
 import moe.gabriella.herobrine.world.WorldManager;
@@ -43,6 +48,8 @@ public class GameManager {
     @Getter private String networkName;
 
     @Getter private Player herobrine;
+    private BatBombAbility hbBatBomb;
+    private DreamweaverAbility hbDream;
     @Getter private ArrayList<Player> survivors;
     @Getter private Player passUser;
 
@@ -77,7 +84,9 @@ public class GameManager {
         survivors = new ArrayList<>();
 
         kits = new Kit[] {
-                new ArcherKit(this)
+                new ArcherKit(this),
+                new PriestKit(this),
+                new ScoutKit(this)
         };
 
         for (Kit k : kits) {
@@ -138,9 +147,9 @@ public class GameManager {
             herobrine = PlayerUtil.randomPlayer();
         }
         survivors.remove(herobrine);
-        plugin.getServer().getScheduler().runTask(plugin, this::setupHerobrine);
+        setupHerobrine();
+        setupSurvivors();
         new HerobrineSetup().runTaskAsynchronously(plugin);
-        plugin.getServer().getScheduler().runTask(plugin, this::setupSurvivors);
         for (Player p : survivors) {
             //todo items, tp
             new SurvivorSetup(p).runTaskAsynchronously(plugin);
@@ -156,6 +165,54 @@ public class GameManager {
         PlayerUtil.addEffect(herobrine, PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false);
 
         herobrine.teleport(worldManager.herobrineSpawn);
+    }
+
+    public void updateHerobrine() {
+        switch (shardCount) {
+            case 0: {
+                GUIItem item = new GUIItem(Material.STONE_AXE).displayName(ChatColor.GRAY + "The Thorbringer");
+                herobrine.getInventory().setItem(0, item.build());
+                hbBatBomb = new BatBombAbility(this, 1, 4);
+                hbBatBomb.apply(herobrine);
+                //vile (x1)
+                hbDream = new DreamweaverAbility(this, 3, 2);
+                hbDream.apply(herobrine);
+
+                new LocatorAbility(this).apply(herobrine);
+                break;
+            }
+            case 1: {
+                herobrine.getInventory().remove(Material.STONE_AXE);
+                GUIItem item = new GUIItem(Material.IRON_AXE).displayName(ChatColor.GRAY + "Axe of " + ChatColor.BOLD + "Deceit!");
+                herobrine.getInventory().addItem(item.build());
+                // nuggets (x3) and viles (x2)
+                break;
+            }
+            case 2: {
+                herobrine.getInventory().remove(Material.IRON_AXE);
+                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.GRAY + "Sword of " + ChatColor.BOLD + "Hellbringing!");
+                herobrine.getInventory().addItem(item.build());
+
+                hbBatBomb.slot = -1;
+                hbBatBomb.amount = 3;
+                hbBatBomb.apply(herobrine);
+
+                hbDream.slot = -1;
+                hbDream.amount = 1;
+                hbDream.apply(herobrine);
+
+                //vile x2
+                break;
+            }
+            case 3: {
+                herobrine.getInventory().clear();
+                // viles
+
+                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.GRAY + "Sword of " + ChatColor.BOLD + "Chances!");
+                herobrine.getInventory().addItem(item.build());
+                break;
+            }
+        }
     }
 
     public void setupSurvivors() {
@@ -204,7 +261,7 @@ public class GameManager {
         else
             setShardState(ShardState.WAITING);
         new CaptureSequence(player).runTaskAsynchronously(plugin);
-        //update hb inv
+        updateHerobrine();
     }
 
     public double getSurvivorHitDamage(Material item, boolean payedKit) {

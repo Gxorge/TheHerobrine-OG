@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -73,6 +74,15 @@ public class PlayerUtil {
                 [random.nextInt(Bukkit.getOnlinePlayers().size())];
 
         return player;
+    }
+
+    public static double getDistance(Player player, Location location) {
+        return player.getLocation().distance(location);
+    }
+
+    public static void removeAmountOfItem(Player player, ItemStack item, int amount) {
+        if (item.getAmount() - amount <= 0) player.getInventory().remove(item);
+        else item.setAmount(item.getAmount() - amount);
     }
 
 }
