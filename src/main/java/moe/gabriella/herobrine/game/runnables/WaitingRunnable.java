@@ -23,9 +23,9 @@ public class WaitingRunnable extends BukkitRunnable {
             int required = GameManager.getInstance().getRequiredToStart() - GameManager.getInstance().getSurvivors().size();
             PlayerUtil.broadcastActionbar("" + ChatColor.YELLOW + "Waiting for " + ChatColor.AQUA + required + ChatColor.YELLOW + " player" + (required == 1 ? "" : "s"));
         } else if (time == 5 || time == 6 || time == 6.5) {
-            PlayerUtil.broadcastActionbar("" + ChatColor.YELLOW + "You are playing " + ChatColor.AQUA + "The Herobrine");
+            PlayerUtil.broadcastActionbar(ChatColor.AQUA + "Playing " + ChatColor.GRAY + "» " + ChatColor.YELLOW + "TheHerobrine");
         } else if (time == 7 || time == 8 || time == 8.5) {
-            PlayerUtil.broadcastActionbar("" + ChatColor.YELLOW + "on " + ChatColor.AQUA + GameManager.getInstance().getNetworkName());
+            PlayerUtil.broadcastActionbar(ChatColor.LIGHT_PURPLE + GameManager.getInstance().getNetworkName());
         } else if (time >= 9){
             time = 0;
         }

@@ -37,6 +37,7 @@ public class WorldManager {
 
     public WorldManager(JavaPlugin plugin) {
         this.plugin = plugin;
+        instance = this;
         fileBase = plugin.getConfig().getString("mapBase");
         maxVotingMaps = plugin.getConfig().getInt("votingMaps");
 
@@ -61,17 +62,21 @@ public class WorldManager {
             e.printStackTrace();
             Console.error("Error parsing maps.yaml! Is it correctly formatted?");
             plugin.getServer().shutdown();
+            return;
         }
+        pickVotingMaps();
     }
 
     public void pickVotingMaps() {
         List<String> maps = availableMaps.getMaps();
         int reps = 0;
-        while (reps <= maxVotingMaps) {
+        while (reps < maxVotingMaps) {
             Random rand = new Random();
             String map = maps.get(rand.nextInt(maps.size()));
+            Console.debug("Map -> " + map);
             votingMaps.put(map, 0);
             maps.remove(map);
+            reps++;
         }
     }
 
@@ -105,6 +110,12 @@ public class WorldManager {
         }
 
         gameWorld = Bukkit.getServer().createWorld(new WorldCreator(map));
+
+        gameWorld.setGameRule(GameRule.DO_FIRE_TICK, false);
+        gameWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        gameWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+        gameWorld.setDifficulty(Difficulty.EASY);
+        gameWorld.setTime(18000);
 
         // Load data points
         File file = new File(map + "/mapdata.yaml");

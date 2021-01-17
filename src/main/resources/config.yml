@@ -5,3 +5,8 @@ maxPlayers: 16 # Maximum players in a game
 allowOverflow: false # Allow more than the max players to join
 mapBase: "maps" # Folder where the map base and maps folder is.
 votingMaps: 3 # How many maps should be chosen for players to vote on. Don't go over the amount of maps you have
+
+## Redis Configuration
+redisHost: "localhost"
+redisPort: 6379
+redisPassword: "" # Leave this blank for no password

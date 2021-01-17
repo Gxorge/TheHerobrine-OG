@@ -1,7 +1,9 @@
 package moe.gabriella.herobrine;
 
 import moe.gabriella.herobrine.game.GameManager;
+import moe.gabriella.herobrine.redis.RedisManager;
 import moe.gabriella.herobrine.utils.Console;
+import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class HerobrinePlugin extends JavaPlugin {
@@ -12,8 +14,16 @@ public class HerobrinePlugin extends JavaPlugin {
 
         this.saveDefaultConfig();
 
-        GameManager gameManager = new GameManager(this);
+        RedisManager redisManager = new RedisManager(this);
+
+        WorldManager worldManager = new WorldManager(this);
+        GameManager gameManager = new GameManager(this, worldManager, redisManager);
 
         Console.info("The Herobrine! is ready.");
+    }
+
+    @Override
+    public void onDisable() {
+        WorldManager.getInstance().clean();
     }
 }

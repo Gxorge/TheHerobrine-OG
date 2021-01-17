@@ -2,6 +2,7 @@ package moe.gabriella.herobrine.game;
 
 import moe.gabriella.herobrine.game.runnables.ShardHandler;
 import moe.gabriella.herobrine.game.runnables.StartingRunnable;
+import moe.gabriella.herobrine.kit.KitGui;
 import moe.gabriella.herobrine.utils.*;
 import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.*;
@@ -15,6 +16,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.potion.PotionEffectType;
@@ -51,6 +53,9 @@ public class GMListener implements Listener {
                 }
             }
         }
+
+        gm.hubInventory(event.getPlayer());
+        gm.setKit(event.getPlayer(), gm.getSavedKit(event.getPlayer()), false);
     }
 
     @EventHandler
@@ -95,7 +100,7 @@ public class GMListener implements Listener {
         gm.setShardCarrier(player);
         PlayerUtil.broadcastSound(Sound.ENTITY_BAT_DEATH, 1f, 0f);
         PlayerUtil.addEffect(player, PotionEffectType.BLINDNESS, 100, 1, false, false);
-        PlayerUtil.addEffect(player, PotionEffectType.SLOW, 400, 2, false, false);
+        PlayerUtil.addEffect(player, PotionEffectType.SLOW, 600, 2, false, false);
         PlayerUtil.addEffect(player, PotionEffectType.CONFUSION, 300, 1, false, false);
         player.sendMessage(Message.format(ChatColor.GOLD + "You have a shard! Take it to the alter (Enchanting Table)!"));
     }
@@ -104,21 +109,34 @@ public class GMListener implements Listener {
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            event.setCancelled(true);
-            if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ENCHANTING_TABLE && player == gm.getShardCarrier()) {
-                player.getInventory().getItemInMainHand();
-                if (player.getInventory().getItemInMainHand().getType() == Material.NETHER_STAR) {
-                    gm.capture(player);
+        if (gm.getGameState() == GameState.LIVE) {
+            if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                event.setCancelled(true);
+                if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ENCHANTING_TABLE && player == gm.getShardCarrier()) {
+                    player.getInventory().getItemInMainHand();
+                    if (player.getInventory().getItemInMainHand().getType() == Material.NETHER_STAR) {
+                        gm.capture(player);
+                    }
                 }
+            }
+        } else if (gm.getGameState() == GameState.WAITING) {
+            if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS)
+                    new KitGui(gm.getPlugin(), player).open(false);
             }
         }
     }
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (event.getPlayer() == gm.getShardCarrier())
-            for (Player p : Bukkit.getServer().getOnlinePlayers()) { p.setCompassTarget(event.getPlayer().getLocation()); }
+        if (event.getPlayer() == gm.getShardCarrier()) {
+            for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+                if (p != event.getPlayer())
+                    p.setCompassTarget(event.getPlayer().getLocation());
+                else
+                    p.setCompassTarget(WorldManager.getInstance().alter);
+            }
+        }
     }
 
     @EventHandler
@@ -133,8 +151,19 @@ public class GMListener implements Listener {
             event.setCancelled(true);
     }
 
+    @EventHandler
+    public void onHunger(FoodLevelChangeEvent event) {
+        event.setFoodLevel(20);
+        event.setCancelled(true);
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDamage(EntityDamageByEntityEvent event) {
+        if (gm.getGameState() != GameState.LIVE) {
+            event.setCancelled(true);
+            return;
+        }
+
         // Allows arrow damage
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Projectile) { // If the damaged is a player and damager is an arrow
             Projectile proj = (Projectile) event.getEntity();

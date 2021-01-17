@@ -3,6 +3,7 @@ package moe.gabriella.herobrine.game.runnables;
 import moe.gabriella.herobrine.game.GameManager;
 import moe.gabriella.herobrine.utils.Message;
 import moe.gabriella.herobrine.utils.PlayerUtil;
+import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -22,7 +23,7 @@ public class CaptureSequence extends BukkitRunnable {
 
     @Override
     public void run() {
-        Location l = player.getLocation(); // change to alter
+        Location l = WorldManager.getInstance().alter;
 
         PlayerUtil.broadcastTitle("" + ChatColor.AQUA + ChatColor.BOLD + "Shard Captured", ChatColor.YELLOW + "by " + ChatColor.BOLD + player.getName(), 10, 60, 20);
         if (gm.getShardCount() == 3)

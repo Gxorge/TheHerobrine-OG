@@ -2,20 +2,27 @@ package moe.gabriella.herobrine.game;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.gabriella.gabsgui.GUIItem;
 import moe.gabriella.herobrine.events.GameStateUpdateEvent;
 import moe.gabriella.herobrine.events.ShardStateUpdateEvent;
 import moe.gabriella.herobrine.game.runnables.*;
+import moe.gabriella.herobrine.kit.Kit;
+import moe.gabriella.herobrine.kit.KitAbility;
+import moe.gabriella.herobrine.kit.kits.ArcherKit;
+import moe.gabriella.herobrine.redis.RedisManager;
 import moe.gabriella.herobrine.utils.*;
 import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GameManager {
 
@@ -23,6 +30,7 @@ public class GameManager {
 
     @Getter private static GameManager instance;
     private WorldManager worldManager;
+    private RedisManager redis;
 
     @Getter private GameState gameState;
     @Getter private ShardState shardState;
@@ -41,15 +49,20 @@ public class GameManager {
     @Getter public int shardCount;
     @Getter @Setter private Player shardCarrier;
 
-    public int startTimer = 10; //todo set to 90
+    public int startTimer = 15; //todo set to 90
     public boolean stAlmost = false;
     public boolean stFull = false;
 
-    public GameManager(JavaPlugin plugin, WorldManager worldManager) {
+    @Getter private Kit[] kits;
+    @Getter private Kit defaultKit;
+    @Getter private HashMap<Player, Kit> playerKits;
+
+    public GameManager(JavaPlugin plugin, WorldManager worldManager, RedisManager redis) {
         Console.info("Starting Game Manager...");
         this.plugin = plugin;
         instance = this;
         this.worldManager = worldManager;
+        this.redis = redis;
         plugin.getServer().getPluginManager().registerEvents(new GMListener(this), plugin);
 
         gameState = GameState.BOOTING;
@@ -63,6 +76,16 @@ public class GameManager {
         shardCount = 0;
         survivors = new ArrayList<>();
 
+        kits = new Kit[] {
+                new ArcherKit(this)
+        };
+
+        for (Kit k : kits) {
+            if (k.getInternalName().equals("archer"))
+                defaultKit = k;
+        }
+
+        playerKits = new HashMap<>();
 
         startWaiting();
         Console.info("Game Manager is ready!");
@@ -117,13 +140,14 @@ public class GameManager {
         survivors.remove(herobrine);
         plugin.getServer().getScheduler().runTask(plugin, this::setupHerobrine);
         new HerobrineSetup().runTaskAsynchronously(plugin);
+        plugin.getServer().getScheduler().runTask(plugin, this::setupSurvivors);
         for (Player p : survivors) {
             //todo items, tp
             new SurvivorSetup(p).runTaskAsynchronously(plugin);
         }
         new ShardHandler().runTaskTimer(plugin, 0, 20);
         new HerobrineItemHider().runTaskTimer(plugin, 0, 1);
-        new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 10);
+        new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 20); //todo this needs working on, its very tps heavy
     }
 
     public void setupHerobrine() {
@@ -134,16 +158,20 @@ public class GameManager {
         herobrine.teleport(worldManager.herobrineSpawn);
     }
 
-    public void setupSurvivor() {
+    public void setupSurvivors() {
+        setupKits();
+        applyKits();
         for (Player p : survivors) {
             // TODO: kit items
             p.teleport(worldManager.survivorSpawn);
+            PlayerUtil.addEffect(p, PotionEffectType.BLINDNESS, 60, 1, false, false);
         }
     }
 
     public void end(WinType type) {
         setGameState(GameState.ENDING);
         setShardState(ShardState.INACTIVE);
+        voidKits();
         if (type == WinType.SURVIVORS) {
             PlayerUtil.broadcastTitle(ChatColor.GREEN + "SURVIVORS WIN!", "", 20, 60, 20);
             Message.broadcast(Message.format("" + ChatColor.GREEN + ChatColor.BOLD + "The Survivors " + ChatColor.YELLOW + "have defeated " + ChatColor.RED + ChatColor.BOLD + "The Herobrine!"));
@@ -185,7 +213,7 @@ public class GameManager {
         boolean normal = false;
         switch (item) {
             case IRON_AXE:
-                finalDamage = (payedKit ? 1.7 : 1);
+                finalDamage = (payedKit ? 1.7 : 1.4);
                 shardModifier = (payedKit ? 0.4 : 0.5);
                 break;
             case STONE_SWORD: // 0 - 1.5 | 1 - 2.0 | 2 - 2.5 | 3 - 3.0
@@ -231,6 +259,78 @@ public class GameManager {
         }
 
         return finalDamage;
+    }
+    
+    public void hubInventory(Player player) {
+        PlayerUtil.clearEffects(player);
+        PlayerUtil.clearInventory(player);
+
+        GUIItem kitItem = new GUIItem(Material.COMPASS);
+        kitItem.displayName(ChatColor.GREEN + "" + ChatColor.BOLD + "Choose " + ChatColor.AQUA + ChatColor.BOLD + "Class");
+        player.getInventory().setItem(0, kitItem.build());
+    }
+
+    // Kits
+    public void setupKits() {
+        for (Kit kit : kits) {
+            plugin.getServer().getPluginManager().registerEvents(kit, plugin);
+
+            for (KitAbility ability : kit.getAbilities()) {
+                plugin.getServer().getPluginManager().registerEvents(ability, plugin);
+                ability.initialize();
+            }
+        }
+    }
+
+    public void voidKits() {
+        for (Kit kit : kits) {
+            HandlerList.unregisterAll(kit);
+
+            for (KitAbility ability : kit.getAbilities())
+                HandlerList.unregisterAll(ability);
+        }
+    }
+
+    public void applyKits() {
+        for (Player p : survivors) {
+            Kit k = getLocalKit(p);
+            k.apply(p);
+        }
+    }
+
+    public void setKit(Player player, Kit kit, boolean inform) {
+        playerKits.remove(player);
+        playerKits.put(player, kit);
+        saveKit(player, kit);
+
+        if (inform)
+            player.sendMessage(Message.format(ChatColor.YELLOW + "Set your class to " + kit.getDisplayName()));
+    }
+
+    public void saveKit(Player player, Kit kit) {
+        redis.setKey("hb:kit:" + player.getUniqueId().toString(), kit.getInternalName());
+    }
+
+    public Kit getSavedKit(Player player) {
+        String key = "hb:kit:" + player.getUniqueId().toString();
+        if (!redis.exists(key))
+            return defaultKit;
+
+        String result = redis.getKey(key);
+        for (Kit k : kits)
+            if (k.getInternalName().equals(result))
+                return k;
+
+        return defaultKit;
+    }
+
+    public Kit getLocalKit(Player player) {
+        if (!playerKits.containsKey(player)) {
+            setKit(player, defaultKit, false);
+            return defaultKit;
+        } else {
+            return playerKits.get(player);
+        }
     }
 
 }

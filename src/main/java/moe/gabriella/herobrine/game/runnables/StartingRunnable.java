@@ -4,6 +4,8 @@ import moe.gabriella.herobrine.game.GameManager;
 import moe.gabriella.herobrine.utils.GameState;
 import moe.gabriella.herobrine.utils.Message;
 import moe.gabriella.herobrine.utils.PlayerUtil;
+import moe.gabriella.herobrine.world.WorldManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -27,6 +29,9 @@ public class StartingRunnable extends BukkitRunnable {
         }
 
         gm.startTimer--;
+
+        if (gm.startTimer == 10)
+            Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), () -> WorldManager.getInstance().selectAndLoadMapFromVote());
 
         if (gm.startTimer == 0) {
             gm.start();

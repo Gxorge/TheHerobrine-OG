@@ -1,0 +1,59 @@
+name: Ancient
+builder: Pure Ambience
+datapoints:
+  - type: SURVIVOR_SPAWN
+    x: -2
+    y: 156
+    z: 925
+  - type: HEROBRINE_SPAWN
+    x: 110
+    y: 140
+    z: 854
+  - type: ALTER
+    x: -6
+    y: 157
+    z: 925
+  - type: SHARD_SPAWN
+    x: 110
+    y: 149
+    z: 834
+  - type: SHARD_SPAWN
+    x: 110
+    y: 140
+    z: 854
+  - type: SHARD_SPAWN
+    x: 86
+    y: 142
+    z: 976
+  - type: SHARD_SPAWN
+    x: 142
+    y: 135
+    z: 862
+  - type: SHARD_SPAWN
+    x: 96
+    y: 136
+    z: 874
+  - type: SHARD_SPAWN
+    x: 74
+    y: 137
+    z: 864
+  - type: SHARD_SPAWN
+    x: 63
+    y: 137
+    z: 815
+  - type: SHARD_SPAWN
+    x: 139
+    y: 137
+    z: 923
+  - type: SHARD_SPAWN
+    x: 112
+    y: 137
+    z: 938
+  - type: SHARD_SPAWN
+    x: 95
+    y: 135
+    z: 891
+  - type: SHARD_SPAWN
+    x: 113
+    y: 137
+    z: 926

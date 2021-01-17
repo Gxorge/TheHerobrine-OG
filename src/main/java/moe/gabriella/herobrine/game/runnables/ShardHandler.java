@@ -18,7 +18,7 @@ import java.util.Random;
 public class ShardHandler extends BukkitRunnable {
 
     int timer = 30;
-    int despawnTimer = 240; // 4 minutes
+    int despawnTimer = 300; // 5 minutes
     static Item shard;
     static GameManager gm = GameManager.getInstance();
 
@@ -31,11 +31,11 @@ public class ShardHandler extends BukkitRunnable {
 
         switch (gm.getShardState()) {
             case WAITING: {
-                despawnTimer = 240;
+                despawnTimer = 300;
                 timer--;
+                for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(WorldManager.getInstance().alter);
                 if (timer == 0)
                     spawn();
-                for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(WorldManager.getInstance().alter);
                 break;
             }
             case SPAWNED: {
