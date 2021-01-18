@@ -18,6 +18,6 @@ public class HerobrineSmokeRunnable extends BukkitRunnable {
         }
 
         Location loc = gm.getHerobrine().getLocation();
-        loc.getWorld().spawnParticle(Particle.SMOKE_LARGE, loc.getX(), loc.getY(), loc.getZ(), 2);
+        loc.getWorld().spawnParticle(Particle.SMOKE_LARGE, loc.getX(), loc.getY(), loc.getZ(), 0, 0, 1, 0);
     }
 }

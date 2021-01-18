@@ -23,14 +23,16 @@ public class PriestKit extends Kit {
                 ChatColor.WHITE + "Priest",
                 null,
                 "",
-                new GUIItem(Material.BONE).displayName(ChatColor.WHITE + "Priest"),
-                new KitAbility[]{
-                        new LocatorAbility(gm),
-                        new DreamweaverAbility(gm, 1, 2),
-                        new WisdomAbility(gm, 2),
-                        new WooflessAbility(gm, 3)
-                }
+                new GUIItem(Material.BONE).displayName(ChatColor.WHITE + "Priest")
         );
+    }
+
+    @Override
+    public void setupAbilities(Player player) {
+        addAbilityToPlayer(player, new LocatorAbility(gm));
+        addAbilityToPlayer(player, new DreamweaverAbility(gm, 1, 2));
+        addAbilityToPlayer(player, new WisdomAbility(gm, 2, 2));
+        addAbilityToPlayer(player, new WooflessAbility(gm, 3));
     }
 
     @Override

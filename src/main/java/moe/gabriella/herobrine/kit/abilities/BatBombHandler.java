@@ -1,5 +1,7 @@
 package moe.gabriella.herobrine.kit.abilities;
 
+import moe.gabriella.herobrine.game.GameManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -25,13 +27,15 @@ public class BatBombHandler extends BukkitRunnable {
         Location loc = coal.getLocation();
         coal.remove();
         for (int i = 0; i<15; i++) {
-            bats.add(loc.getWorld().spawnEntity(loc, EntityType.BAT));
+            Bukkit.getServer().getScheduler().runTask(GameManager.getInstance().getPlugin(), () -> bats.add(loc.getWorld().spawnEntity(loc, EntityType.BAT)));
         }
-        try { TimeUnit.SECONDS.sleep(3); } catch (Exception e) { e.printStackTrace(); }
-        for (Entity bat : bats) {
-            Location batLoc = bat.getLocation();
-            bat.remove();
-            batLoc.getWorld().createExplosion(batLoc, 2f, false, false);
-        }
+        try { TimeUnit.SECONDS.sleep(2); } catch (Exception e) { e.printStackTrace(); }
+        Bukkit.getServer().getScheduler().runTask(GameManager.getInstance().getPlugin(), () -> {
+            for (Entity bat : bats) {
+                Location batLoc = bat.getLocation();
+                bat.remove();
+                batLoc.getWorld().createExplosion(batLoc, 3f, false, false);
+            }
+        });
     }
 }

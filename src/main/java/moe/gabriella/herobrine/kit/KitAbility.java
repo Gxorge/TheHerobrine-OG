@@ -17,13 +17,6 @@ public abstract class KitAbility implements Listener {
     }
 
     /**
-     * @implNote Runs during the loading of the game (called from setupKits)
-     */
-    public void initialize() {
-
-    }
-
-    /**
      * @implNote Runs when the game starts, called from (apply in Kit)
      * @param player
      */

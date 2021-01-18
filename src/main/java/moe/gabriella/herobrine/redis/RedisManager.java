@@ -18,6 +18,7 @@ public class RedisManager {
     private boolean pwRequired;
 
     public RedisManager(JavaPlugin plugin) {
+        Console.info("Loading Redis Manager...");
         this.plugin = plugin;
         instance = this;
 
@@ -29,10 +30,11 @@ public class RedisManager {
         readPool = new JedisPool(new JedisPoolConfig(), host, port);
         writePool = new JedisPool(new JedisPoolConfig(), host, port);
 
-        testConnection();
+        if (testConnection())
+            Console.info("Redis Manager is ready!");
     }
 
-    private void testConnection() {
+    private boolean testConnection() {
         Console.debug("Testing redis connection...");
         try {
             try (Jedis jedis = readPool.getResource()) {
@@ -41,10 +43,12 @@ public class RedisManager {
                 boolean e = jedis.exists("testing");
 
                 Console.debug("Test successful!");
+                return true;
             }
         } catch (Exception e) {
             Console.error("Error testing connection! Please see below:");
             e.printStackTrace();
+            return false;
         }
     }
 

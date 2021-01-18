@@ -3,7 +3,6 @@ package moe.gabriella.herobrine.kit.kits;
 import me.gabriella.gabsgui.GUIItem;
 import moe.gabriella.herobrine.game.GameManager;
 import moe.gabriella.herobrine.kit.Kit;
-import moe.gabriella.herobrine.kit.KitAbility;
 import moe.gabriella.herobrine.kit.abilities.LocatorAbility;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -21,11 +20,13 @@ public class ArcherKit extends Kit {
                 ChatColor.GREEN + "Archer",
                 null,
                 "",
-                new GUIItem(Material.BOW).displayName(ChatColor.GREEN + "Archer"),
-                new KitAbility[] {
-                        new LocatorAbility(gm)
-                }
+                new GUIItem(Material.BOW).displayName(ChatColor.GREEN + "Archer")
         );
+    }
+
+    @Override
+    public void setupAbilities(Player player) {
+        addAbilityToPlayer(player, new LocatorAbility(gm));
     }
 
     @Override

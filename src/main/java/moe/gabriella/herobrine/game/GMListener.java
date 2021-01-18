@@ -6,6 +6,7 @@ import moe.gabriella.herobrine.kit.KitGui;
 import moe.gabriella.herobrine.utils.*;
 import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.*;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -17,6 +18,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 public class GMListener implements Listener {
 
@@ -162,14 +164,16 @@ public class GMListener implements Listener {
         }
 
         // Allows arrow damage
-        if (event.getEntity() instanceof Player && event.getDamager() instanceof Projectile) { // If the damaged is a player and damager is an arrow
-            Projectile proj = (Projectile) event.getEntity();
+        if (event.getEntity() instanceof Player && event.getDamager() instanceof Arrow) { // If the damaged is a player and damager is an arrow
+            Arrow proj = (Arrow) event.getEntity();
             if (proj.getShooter() instanceof Player) { // if the entity who shot the arrow is a player
                 Player player = (Player) event.getEntity();
                 Player attacker = (Player) proj.getShooter();
 
                 if (!(gm.getSurvivors().contains(attacker) && player == gm.getHerobrine())) { // Evals to true if either a) the attacker isnt a survivor b) the damaged isnt herobrine
                     event.setCancelled(true);
+                } else {
+                    event.setDamage(4.5);
                 }
             } else {
                 event.setCancelled(true);
@@ -192,9 +196,16 @@ public class GMListener implements Listener {
             }
 
             // Attacking THB
-            double damage = gm.getSurvivorHitDamage(attacker.getInventory().getItemInMainHand().getType(), false);
+            double damage = gm.getSurvivorHitDamage(attacker.getInventory().getItemInMainHand().getType());
             if (damage != -1) event.setDamage(damage);
-        } else if (attacker == gm.getHerobrine()) { //
+
+            PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 1f, 1f);
+            PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
+
+            player.getLocation().getWorld().spawnParticle(Particle.DRIP_LAVA, player.getLocation().clone().add(0, 1, 0), 2);
+
+            player.setVelocity(new Vector(0, 0, 0));
+        } else if (attacker == gm.getHerobrine()) {
             PlayerUtil.playSoundAt(attacker.getLocation(), Sound.ENTITY_GHAST_AMBIENT, 1f, 0f);
             double damage = gm.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType());
             if (damage != -1) event.setDamage(damage);

@@ -7,20 +7,23 @@ import moe.gabriella.herobrine.utils.Console;
 import moe.gabriella.herobrine.utils.GameState;
 import moe.gabriella.herobrine.utils.PlayerUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
-public class WisdomAbility extends KitAbility {
+public class BlindingAbility extends KitAbility {
 
-    public int slot;
-    public int amount;
-    public Player player;
+    int slot;
+    int amount;
+    Player player;
 
-    public WisdomAbility(GameManager gm, int slot, int amount) {
-        super(gm, "Notch's Wisdom");
+    public BlindingAbility(GameManager gm, int slot, int amount) {
+        super(gm, "Charge of Blinding");
         this.slot = slot;
         this.amount = amount;
     }
@@ -28,9 +31,11 @@ public class WisdomAbility extends KitAbility {
     @Override
     public void apply(Player player) {
         this.player = player;
-        GUIItem wiz = new GUIItem(Material.BLAZE_POWDER).displayName(ChatColor.GREEN + "Notch's Wisdom").amount(amount);
-
-        player.getInventory().setItem(slot, wiz.build());
+        GUIItem charge = new GUIItem(Material.GOLD_NUGGET).displayName(ChatColor.GOLD + "Charge of " + ChatColor.BOLD + "Blinding!").amount(amount);
+        if (slot == -1)
+            player.getInventory().addItem(charge.build());
+        else
+            player.getInventory().setItem(slot, charge.build());
     }
 
     @EventHandler
@@ -39,14 +44,17 @@ public class WisdomAbility extends KitAbility {
             return;
 
         Player player = event.getPlayer();
+        Location l = player.getLocation();
 
         if (this.player != player)
             return;
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
-            if (player.getInventory().getItemInMainHand().getType() == Material.BLAZE_POWDER) {
+            if (player.getInventory().getItemInMainHand().getType() == Material.GOLD_NUGGET) {
+                Item nugget = player.getWorld().dropItem(l, new ItemStack(Material.GOLD_NUGGET));
+                nugget.setVelocity(l.getDirection().normalize().multiply(2f));
+                new BlindingHandler(nugget).runTaskAsynchronously(gm.getPlugin());
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
-                new WisdomHandler(player.getLocation()).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
             }
         }
     }

@@ -9,11 +9,13 @@ import moe.gabriella.herobrine.game.runnables.*;
 import moe.gabriella.herobrine.kit.Kit;
 import moe.gabriella.herobrine.kit.KitAbility;
 import moe.gabriella.herobrine.kit.abilities.BatBombAbility;
+import moe.gabriella.herobrine.kit.abilities.BlindingAbility;
 import moe.gabriella.herobrine.kit.abilities.DreamweaverAbility;
 import moe.gabriella.herobrine.kit.abilities.LocatorAbility;
 import moe.gabriella.herobrine.kit.kits.ArcherKit;
 import moe.gabriella.herobrine.kit.kits.PriestKit;
 import moe.gabriella.herobrine.kit.kits.ScoutKit;
+import moe.gabriella.herobrine.kit.kits.WizardKit;
 import moe.gabriella.herobrine.redis.RedisManager;
 import moe.gabriella.herobrine.utils.*;
 import moe.gabriella.herobrine.world.WorldManager;
@@ -22,8 +24,12 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -50,6 +56,7 @@ public class GameManager {
     @Getter private Player herobrine;
     private BatBombAbility hbBatBomb;
     private DreamweaverAbility hbDream;
+    private BlindingAbility hbBlinding;
     @Getter private ArrayList<Player> survivors;
     @Getter private Player passUser;
 
@@ -65,7 +72,7 @@ public class GameManager {
     @Getter private HashMap<Player, Kit> playerKits;
 
     public GameManager(JavaPlugin plugin, WorldManager worldManager, RedisManager redis) {
-        Console.info("Starting Game Manager...");
+        Console.info("Loading Game Manager...");
         this.plugin = plugin;
         instance = this;
         this.worldManager = worldManager;
@@ -86,7 +93,8 @@ public class GameManager {
         kits = new Kit[] {
                 new ArcherKit(this),
                 new PriestKit(this),
-                new ScoutKit(this)
+                new ScoutKit(this),
+                new WizardKit(this)
         };
 
         for (Kit k : kits) {
@@ -151,7 +159,6 @@ public class GameManager {
         setupSurvivors();
         new HerobrineSetup().runTaskAsynchronously(plugin);
         for (Player p : survivors) {
-            //todo items, tp
             new SurvivorSetup(p).runTaskAsynchronously(plugin);
         }
         new ShardHandler().runTaskTimer(plugin, 0, 20);
@@ -160,11 +167,13 @@ public class GameManager {
     }
 
     public void setupHerobrine() {
+        herobrine.teleport(worldManager.herobrineSpawn);
+
         PlayerUtil.addEffect(herobrine, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
         PlayerUtil.addEffect(herobrine, PotionEffectType.JUMP, Integer.MAX_VALUE, 1, false, false);
         PlayerUtil.addEffect(herobrine, PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false);
 
-        herobrine.teleport(worldManager.herobrineSpawn);
+        updateHerobrine();
     }
 
     public void updateHerobrine() {
@@ -172,11 +181,19 @@ public class GameManager {
             case 0: {
                 GUIItem item = new GUIItem(Material.STONE_AXE).displayName(ChatColor.GRAY + "The Thorbringer");
                 herobrine.getInventory().setItem(0, item.build());
+
                 hbBatBomb = new BatBombAbility(this, 1, 4);
                 hbBatBomb.apply(herobrine);
-                //vile (x1)
+                plugin.getServer().getPluginManager().registerEvents(hbBatBomb, plugin);
+
+                giveVials(2, 1);
+
                 hbDream = new DreamweaverAbility(this, 3, 2);
                 hbDream.apply(herobrine);
+                plugin.getServer().getPluginManager().registerEvents(hbDream, plugin);
+
+                hbBlinding = new BlindingAbility(this, -1, 3);
+                plugin.getServer().getPluginManager().registerEvents(hbBlinding, plugin);
 
                 new LocatorAbility(this).apply(herobrine);
                 break;
@@ -185,12 +202,16 @@ public class GameManager {
                 herobrine.getInventory().remove(Material.STONE_AXE);
                 GUIItem item = new GUIItem(Material.IRON_AXE).displayName(ChatColor.GRAY + "Axe of " + ChatColor.BOLD + "Deceit!");
                 herobrine.getInventory().addItem(item.build());
-                // nuggets (x3) and viles (x2)
+
+                hbBlinding.apply(herobrine);
+
+                giveVials(-1, 2);
+
                 break;
             }
             case 2: {
                 herobrine.getInventory().remove(Material.IRON_AXE);
-                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.GRAY + "Sword of " + ChatColor.BOLD + "Hellbringing!");
+                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.GRAY + "Sword of " + ChatColor.BOLD + "HELLBRINGING!");
                 herobrine.getInventory().addItem(item.build());
 
                 hbBatBomb.slot = -1;
@@ -201,25 +222,41 @@ public class GameManager {
                 hbDream.amount = 1;
                 hbDream.apply(herobrine);
 
-                //vile x2
+                giveVials(-1, 2);
                 break;
             }
             case 3: {
                 herobrine.getInventory().clear();
-                // viles
 
-                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.GRAY + "Sword of " + ChatColor.BOLD + "Chances!");
+                giveVials(-1, 2);
+
+                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.AQUA + "Sword of " + ChatColor.BOLD + "Chances!");
                 herobrine.getInventory().addItem(item.build());
                 break;
             }
         }
     }
 
+    public void giveVials(int slot, int amount) {
+        ItemStack potion = new ItemStack(Material.SPLASH_POTION);
+        potion.setAmount(amount);
+        PotionMeta pm = (PotionMeta) potion.getItemMeta();
+
+        pm.setDisplayName(ChatColor.GREEN + "Poisonous Vial");
+
+        pm.setBasePotionData(new PotionData(PotionType.POISON, false, true));
+        potion.setItemMeta(pm);
+
+        if (slot == -1)
+            herobrine.getInventory().addItem(potion);
+        else
+            herobrine.getInventory().setItem(slot, potion);
+    }
+
     public void setupSurvivors() {
         setupKits();
         applyKits();
         for (Player p : survivors) {
-            // TODO: kit items
             p.teleport(worldManager.survivorSpawn);
             PlayerUtil.addEffect(p, PotionEffectType.BLINDNESS, 60, 1, false, false);
         }
@@ -264,26 +301,27 @@ public class GameManager {
         updateHerobrine();
     }
 
-    public double getSurvivorHitDamage(Material item, boolean payedKit) {
+    public double getSurvivorHitDamage(Material item) {
         double finalDamage = 0;
         double shardModifier = 0;
+        double strengthModifier = 0; // TODO implement after nerfing the fuck out of survivor's damage
         boolean normal = false;
         switch (item) {
             case IRON_AXE:
-                finalDamage = (payedKit ? 1.7 : 1.4);
-                shardModifier = (payedKit ? 0.4 : 0.5);
+                finalDamage = 3.3;
+                shardModifier = 2;
                 break;
-            case STONE_SWORD: // 0 - 1.5 | 1 - 2.0 | 2 - 2.5 | 3 - 3.0
-                finalDamage = 1.5;
-                shardModifier = 0.5;
+            case STONE_SWORD:
+                finalDamage = 3;
+                shardModifier = 1.5;
                 break;
-            case WOODEN_SWORD: // 0 - 1.3 | 1 - 1.7 | 2 - 2.1 | 3 - 2.5
-                finalDamage = 1.3;
-                shardModifier = 0.4;
+            case WOODEN_SWORD:
+                finalDamage = 2.7;
+                shardModifier = 2.5;
                 break;
-            case IRON_SWORD: // 0 - 1.8 | 1 - 2.5 | 2 - 3.2 | 3 - 3.9
-                finalDamage = 1.8;
-                shardModifier = 0.7;
+            case IRON_SWORD:
+                finalDamage = 3.5;
+                shardModifier = 1.7;
                 break;
             default:
                 normal = true;
@@ -303,13 +341,13 @@ public class GameManager {
         double finalDamage = 0;
         switch (item) {
             case STONE_AXE:
-                finalDamage = 1.5;
+                finalDamage = 2.5;
                 break;
             case IRON_AXE:
-                finalDamage = 2;
+                finalDamage = 3.5;
                 break;
             case IRON_SWORD:
-                finalDamage = 2.5;
+                finalDamage = (shardCount == 2 ? 4.5 : 6.5);
                 break;
             default:
                 return -1;
@@ -331,11 +369,6 @@ public class GameManager {
     public void setupKits() {
         for (Kit kit : kits) {
             plugin.getServer().getPluginManager().registerEvents(kit, plugin);
-
-            for (KitAbility ability : kit.getAbilities()) {
-                plugin.getServer().getPluginManager().registerEvents(ability, plugin);
-                ability.initialize();
-            }
         }
     }
 
@@ -343,9 +376,12 @@ public class GameManager {
         for (Kit kit : kits) {
             HandlerList.unregisterAll(kit);
 
-            for (KitAbility ability : kit.getAbilities())
-                HandlerList.unregisterAll(ability);
+            kit.voidAbilities();
         }
+
+        HandlerList.unregisterAll(hbBatBomb);
+        HandlerList.unregisterAll(hbDream);
+        HandlerList.unregisterAll(hbBlinding);
     }
 
     public void applyKits() {

@@ -19,7 +19,7 @@ public class WisdomHandler extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (time >= 5) {
+        if (time > 5) {
             cancel();
             return;
         }
@@ -27,14 +27,17 @@ public class WisdomHandler extends BukkitRunnable {
         for (Player p : GameManager.getInstance().getSurvivors()) {
             if (PlayerUtil.getDistance(p, location) <= 2.5) {
                 if (p.getHealth() < 20) {
-                    p.setHealth(p.getHealth() + 1);
-                    PlayerUtil.playSound(p, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 2f);
+                    p.setHealth(p.getHealth() + 2);
+                    PlayerUtil.playSound(p, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
                 }
             }
         }
 
         PlayerUtil.playSoundAt(location, Sound.ENTITY_CAT_PURREOW, 1f, 1f);
-        location.getWorld().spawnParticle(Particle.REVERSE_PORTAL, location, 2);
+        PlayerUtil.playSoundAt(location, Sound.BLOCK_LAVA_POP, 1f, 1f);
+        PlayerUtil.playSoundAt(location, Sound.ENTITY_ENDERMAN_TELEPORT, 0.3f, 1f);
+        location.getWorld().spawnParticle(Particle.REVERSE_PORTAL, location, 10);
 
+        time++;
     }
 }

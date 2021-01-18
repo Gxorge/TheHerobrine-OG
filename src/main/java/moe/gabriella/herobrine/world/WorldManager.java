@@ -36,6 +36,7 @@ public class WorldManager {
 
 
     public WorldManager(JavaPlugin plugin) {
+        Console.info("Loading World Manager...");
         this.plugin = plugin;
         instance = this;
         fileBase = plugin.getConfig().getString("mapBase");
@@ -46,6 +47,7 @@ public class WorldManager {
         shardSpawns = new ArrayList<>();
 
         loadMapBase();
+        Console.info("World manager is ready!");
     }
 
     public void loadMapBase() {
@@ -64,6 +66,7 @@ public class WorldManager {
             plugin.getServer().shutdown();
             return;
         }
+        Console.info("Map base loaded!");
         pickVotingMaps();
     }
 
@@ -78,6 +81,7 @@ public class WorldManager {
             maps.remove(map);
             reps++;
         }
+        Console.info("Picked voting maps!");
     }
 
     public void selectAndLoadMapFromVote() {
@@ -90,12 +94,14 @@ public class WorldManager {
             }
         }
 
+        Console.info("Selected highest voted map -> " + highest);
         Message.broadcast(Message.format(ChatColor.GOLD + "Voting has ended! The map " + ChatColor.AQUA + highest + ChatColor.GOLD + " has won!"));
 
         loadMap(highest);
     }
 
     public void loadMap(String map) {
+        Console.info("Loading map " + map);
         File currentDir;
         File toCopy;
 
@@ -116,6 +122,8 @@ public class WorldManager {
         gameWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
         gameWorld.setDifficulty(Difficulty.EASY);
         gameWorld.setTime(18000);
+
+        Console.info("Loaded map! Parsing map data...");
 
         // Load data points
         File file = new File(map + "/mapdata.yaml");
@@ -148,10 +156,12 @@ public class WorldManager {
                     break;
             }
         }
+        Console.info("Finished parsing!");
     }
 
     public void clean() {
         if (gameWorld != null) {
+            Console.info("Cleaning the map...");
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 if (p.getWorld() == gameWorld) {
                     p.teleport(Bukkit.getServer().getWorld("world").getSpawnLocation());
@@ -173,6 +183,7 @@ public class WorldManager {
             herobrineSpawn = null;
             alter = null;
             shardSpawns = null;
+            Console.info("Cleaned!");
         }
     }
 }
