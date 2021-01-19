@@ -71,6 +71,11 @@
             <artifactId>jedis</artifactId>
             <version>3.4.1</version>
         </dependency>
+        <dependency>
+            <groupId>xyz.xenondevs</groupId>
+            <artifactId>particle</artifactId>
+            <version>1.5.1</version>
+        </dependency>
     </dependencies>
 
     <properties>

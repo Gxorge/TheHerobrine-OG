@@ -31,7 +31,7 @@ public class NarrationRunnable extends BukkitRunnable {
                 if (firstMsg())
                     all(ChatColor.AQUA + "Shard " + (gm.getShardCount() + 1) + " shall be summoned soon!");
                 else
-                    separate(ChatColor.RED + "BEWARE: The Herobrine is still a cloud of smoke!", ChatColor.AQUA + "Try eliminate all the Survivors");
+                    separate(ChatColor.RED + "BEWARE: The Herobrine is still a cloud of smoke!", ChatColor.AQUA + "Try eliminate all the Survivors", ChatColor.YELLOW + "You are out of the game!");
                 break;
             }
             case SPAWNED: {
@@ -42,14 +42,14 @@ public class NarrationRunnable extends BukkitRunnable {
                 if (firstMsg())
                     all("" + ChatColor.GREEN + ChatColor.BOLD + gm.getShardCarrier().getName() + ChatColor.DARK_AQUA + " has the shard!");
                 else
-                    separate(ChatColor.GREEN + "Protect your shard carrier", ChatColor.AQUA + "Kill the shard carrier first!");
+                    separate(ChatColor.GREEN + "Protect your shard carrier", ChatColor.AQUA + "Kill the shard carrier first!", ChatColor.YELLOW + "Haunt the Herobrine...");
                 break;
             }
             case INACTIVE: {
                 if (gm.getShardCount() != 3)
                     return;
 
-                separate(ChatColor.RED + "Kill the Herobrine!", ChatColor.AQUA + "You are now visible!");
+                separate(ChatColor.RED + "Kill the Herobrine!", ChatColor.AQUA + "You are now visible!", ChatColor.YELLOW + "The next game will start soon...");
                 break;
             }
         }
@@ -64,9 +64,11 @@ public class NarrationRunnable extends BukkitRunnable {
         PlayerUtil.broadcastActionbar(msg);
     }
 
-    private void separate(String survivors, String herobrine) {
+    private void separate(String survivors, String herobrine, String spectators) {
         for (Player p : gm.getSurvivors())
             PlayerUtil.sendActionbar(p, survivors);
+        for (Player p : gm.getSpectators())
+            PlayerUtil.sendActionbar(p, spectators);
         PlayerUtil.sendActionbar(gm.getHerobrine(), herobrine);
     }
 }

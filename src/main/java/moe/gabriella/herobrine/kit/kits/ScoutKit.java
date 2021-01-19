@@ -38,7 +38,7 @@ public class ScoutKit extends Kit {
         // Items
         GUIItem blade = new GUIItem(Material.STONE_SWORD).displayName(ChatColor.GREEN + "Blade of Heroism");
         GUIItem bow = new GUIItem(Material.BOW).displayName(ChatColor.GRAY + "Handcrafted Bow");
-        GUIItem arrow = new GUIItem(Material.ARROW).displayName(ChatColor.GRAY + "Owl Arrows");
+        GUIItem arrow = new GUIItem(Material.ARROW).displayName(ChatColor.GRAY + "Owl Arrows").amount(32);
 
         player.getInventory().setItem(0, blade.build());
         player.getInventory().setItem(1, bow.build());

@@ -2,9 +2,11 @@ package moe.gabriella.herobrine.game.runnables;
 
 import moe.gabriella.herobrine.game.GameManager;
 import moe.gabriella.herobrine.utils.GameState;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
+import xyz.xenondevs.particle.ParticleEffect;
 
 public class HerobrineSmokeRunnable extends BukkitRunnable {
 
@@ -17,7 +19,8 @@ public class HerobrineSmokeRunnable extends BukkitRunnable {
             return;
         }
 
-        Location loc = gm.getHerobrine().getLocation();
-        loc.getWorld().spawnParticle(Particle.SMOKE_LARGE, loc.getX(), loc.getY(), loc.getZ(), 0, 0, 1, 0);
+        Location loc = gm.getHerobrine().getLocation().clone().add(0, 1, 0);
+        ParticleEffect.SMOKE_LARGE.display(loc, new Vector(0, 0, 0), 3f, 0, null, Bukkit.getServer().getOnlinePlayers());
+        ParticleEffect.SMOKE_LARGE.display(loc, new Vector(0, 0, 0), 3f, 0, null, Bukkit.getServer().getOnlinePlayers());
     }
 }

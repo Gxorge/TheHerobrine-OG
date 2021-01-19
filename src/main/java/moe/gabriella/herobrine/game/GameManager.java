@@ -20,6 +20,7 @@ import moe.gabriella.herobrine.redis.RedisManager;
 import moe.gabriella.herobrine.utils.*;
 import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -58,6 +59,7 @@ public class GameManager {
     private DreamweaverAbility hbDream;
     private BlindingAbility hbBlinding;
     @Getter private ArrayList<Player> survivors;
+    @Getter private ArrayList<Player> spectators;
     @Getter private Player passUser;
 
     @Getter public int shardCount;
@@ -89,6 +91,7 @@ public class GameManager {
 
         shardCount = 0;
         survivors = new ArrayList<>();
+        spectators = new ArrayList<>();
 
         kits = new Kit[] {
                 new ArcherKit(this),
@@ -163,7 +166,7 @@ public class GameManager {
         }
         new ShardHandler().runTaskTimer(plugin, 0, 20);
         new HerobrineItemHider().runTaskTimer(plugin, 0, 1);
-        new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 20); //todo this needs working on, its very tps heavy
+        new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 10); //todo this needs working on, its very tps heavy
     }
 
     public void setupHerobrine() {
@@ -262,6 +265,29 @@ public class GameManager {
         }
     }
 
+    public void makeSpectator(Player player) {
+        PlayerUtil.clearInventory(player);
+        PlayerUtil.clearEffects(player);
+
+        spectators.add(player);
+
+        for (Player p : spectators) {
+            p.showPlayer(plugin, player);
+            player.showPlayer(plugin, p);
+        }
+
+        for (Player p : survivors)
+            p.hidePlayer(plugin, player);
+        herobrine.hidePlayer(plugin, player);
+
+        player.setGameMode(GameMode.SURVIVAL);
+        player.setAllowFlight(true);
+        player.setFlying(true);
+        player.setHealth(20);
+        player.setFoodLevel(20);
+        player.teleport(worldManager.survivorSpawn);
+    }
+
     public void end(WinType type) {
         setGameState(GameState.ENDING);
         setShardState(ShardState.INACTIVE);
@@ -301,27 +327,31 @@ public class GameManager {
         updateHerobrine();
     }
 
-    public double getSurvivorHitDamage(Material item) {
+    public double getSurvivorHitDamage(Material item, boolean strength) {
         double finalDamage = 0;
         double shardModifier = 0;
-        double strengthModifier = 0; // TODO implement after nerfing the fuck out of survivor's damage
+        double strengthModifier = 0;
         boolean normal = false;
         switch (item) {
             case IRON_AXE:
-                finalDamage = 3.3;
-                shardModifier = 2;
+                finalDamage = 2.7; // 0 - 1.4 | 1 - 2.15 | 2 - 3.5 | 3 - 3.5
+                shardModifier = 1.5;
+                strengthModifier = 1.5;
                 break;
             case STONE_SWORD:
-                finalDamage = 3;
-                shardModifier = 1.5;
+                finalDamage = 2.5; // 0 - 1.25 | 1 - 2.25 | 2 - 3.25 | 3 - 4.25
+                shardModifier = 2;
+                strengthModifier = 1.6;
                 break;
             case WOODEN_SWORD:
-                finalDamage = 2.7;
-                shardModifier = 2.5;
+                finalDamage = 2.3; // 0 - 1.35 | 1 - 1.55 | 2 - 2.49 | 3 - 3.2
+                shardModifier = 1.3;
+                strengthModifier = 2.3;
                 break;
             case IRON_SWORD:
-                finalDamage = 3.5;
-                shardModifier = 1.7;
+                finalDamage = 2.9; // 0 - 1.49 | 1 - 2.5 | 2 - 3.57 | 3 - 4.75
+                shardModifier = 2.2;
+                strengthModifier = 1.3;
                 break;
             default:
                 normal = true;
@@ -334,6 +364,9 @@ public class GameManager {
         if (shardCount > 0)
             finalDamage += (shardModifier * shardCount);
 
+        if (strength)
+            finalDamage += strengthModifier;
+
         return finalDamage;
     }
 
@@ -341,13 +374,13 @@ public class GameManager {
         double finalDamage = 0;
         switch (item) {
             case STONE_AXE:
-                finalDamage = 2.5;
+                finalDamage = 2.5; // 0 - 1.25
                 break;
             case IRON_AXE:
-                finalDamage = 3.5;
+                finalDamage = 3.5; // 1 - 2.75
                 break;
             case IRON_SWORD:
-                finalDamage = (shardCount == 2 ? 4.5 : 6.5);
+                finalDamage = (shardCount == 2 ? 4.5 : 6.5); // 2 - 2.25 | 3 - 3.25
                 break;
             default:
                 return -1;

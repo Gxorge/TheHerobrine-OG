@@ -7,6 +7,7 @@ import moe.gabriella.herobrine.utils.*;
 import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.*;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -17,8 +18,11 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import xyz.xenondevs.particle.ParticleEffect;
+import xyz.xenondevs.particle.data.texture.ItemTexture;
 
 public class GMListener implements Listener {
 
@@ -29,7 +33,7 @@ public class GMListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         if (gm.getGameState() == GameState.LIVE) {
-            //todo spectator
+            gm.makeSpectator(event.getPlayer());
             return;
         }
 
@@ -105,18 +109,31 @@ public class GMListener implements Listener {
     }
 
     @EventHandler
+    public void onDrop(PlayerDropItemEvent event) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
         if (gm.getGameState() == GameState.LIVE) {
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                event.setCancelled(true);
-                if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ENCHANTING_TABLE && player == gm.getShardCarrier()) {
+                if (event.getClickedBlock() == null)
+                    return;
+                Material m = event.getClickedBlock().getType();
+
+                if (m == Material.ENCHANTING_TABLE)
+                    event.setCancelled(true);
+
+                if (m == Material.ENCHANTING_TABLE && player == gm.getShardCarrier()) {
+                    event.setCancelled(true);
                     player.getInventory().getItemInMainHand();
                     if (player.getInventory().getItemInMainHand().getType() == Material.NETHER_STAR) {
                         gm.capture(player);
                     }
-                }
+                } else if (m == Material.ITEM_FRAME)
+                    event.setCancelled(true);
             }
         } else if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -165,18 +182,14 @@ public class GMListener implements Listener {
 
         // Allows arrow damage
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Arrow) { // If the damaged is a player and damager is an arrow
-            Arrow proj = (Arrow) event.getEntity();
-            if (proj.getShooter() instanceof Player) { // if the entity who shot the arrow is a player
-                Player player = (Player) event.getEntity();
-                Player attacker = (Player) proj.getShooter();
+            Player player = (Player) event.getEntity();
+            Player attacker = (Player) ((Arrow) event.getDamager()).getShooter();
 
-                if (!(gm.getSurvivors().contains(attacker) && player == gm.getHerobrine())) { // Evals to true if either a) the attacker isnt a survivor b) the damaged isnt herobrine
-                    event.setCancelled(true);
-                } else {
-                    event.setDamage(4.5);
-                }
-            } else {
+            if (!(gm.getSurvivors().contains(attacker) && player == gm.getHerobrine())) { // Evals to true if either a) the attacker isnt a survivor b) the damaged isnt herobrine
                 event.setCancelled(true);
+            } else {
+                event.setDamage(4.5);
+                animateHbHit(player.getLocation());
             }
             return;
         }
@@ -196,13 +209,10 @@ public class GMListener implements Listener {
             }
 
             // Attacking THB
-            double damage = gm.getSurvivorHitDamage(attacker.getInventory().getItemInMainHand().getType());
+            double damage = gm.getSurvivorHitDamage(attacker.getInventory().getItemInMainHand().getType(), attacker.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE));
             if (damage != -1) event.setDamage(damage);
 
-            PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_BLAZE_HURT, 1f, 1f);
-            PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
-
-            player.getLocation().getWorld().spawnParticle(Particle.DRIP_LAVA, player.getLocation().clone().add(0, 1, 0), 2);
+            animateHbHit(player.getLocation());
 
             player.setVelocity(new Vector(0, 0, 0));
         } else if (attacker == gm.getHerobrine()) {
@@ -214,7 +224,14 @@ public class GMListener implements Listener {
         }
     }
 
-    @EventHandler
+    private void animateHbHit(Location loc) {
+        PlayerUtil.playSoundAt(loc, Sound.ENTITY_BLAZE_HURT, 1f, 1f);
+        PlayerUtil.playSoundAt(loc, Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
+
+        ParticleEffect.ITEM_CRACK.display(loc, 0, 1, 0, 0.5f, 5, new ItemTexture(new ItemStack(Material.BLAZE_POWDER)), Bukkit.getOnlinePlayers());
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
     public void onDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player))
             return;
@@ -223,6 +240,11 @@ public class GMListener implements Listener {
 
         if (gm.getGameState() != GameState.LIVE)
             return;
+
+        if (gm.getSpectators().contains(player)) {
+            event.setCancelled(true);
+            return;
+        }
 
         if (player == gm.getHerobrine() && event.getCause() == EntityDamageEvent.DamageCause.FALL)
             event.setCancelled(true);
@@ -233,6 +255,7 @@ public class GMListener implements Listener {
         Player player = event.getEntity();
         event.setDeathMessage("");
         event.getDrops().clear();
+
         if (gm.getGameState() != GameState.LIVE) {
             player.setHealth(20);
             return;
@@ -260,6 +283,18 @@ public class GMListener implements Listener {
     public void onRespawn(PlayerRespawnEvent event) {
         if (gm.getGameState() == GameState.LIVE || gm.getGameState() == GameState.ENDING) {
             event.setRespawnLocation(WorldManager.getInstance().survivorSpawn);
+            gm.makeSpectator(event.getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onPotion(PotionSplashEvent event) {
+        for (LivingEntity e : event.getAffectedEntities()) {
+            if (e instanceof Player) {
+                Player player = (Player) e;
+                if (gm.getHerobrine() == player || !gm.getSurvivors().contains(player))
+                    event.setCancelled(true);
+            }
         }
     }
 }
