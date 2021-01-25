@@ -19,7 +19,7 @@ import java.util.List;
 
 public class HerobrineItemHider extends BukkitRunnable {
 
-    GameManager gm = GameManager.getInstance();
+    GameManager gm = GameManager.get();
     Player player = gm.getHerobrine();
 
     @Override

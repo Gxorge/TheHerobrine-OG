@@ -10,3 +10,9 @@ votingMaps: 3 # How many maps should be chosen for players to vote on. Don't go 
 redisHost: "localhost"
 redisPort: 6379
 redisPassword: "" # Leave this blank for no password
+
+## SQL Configuration
+sqlHost: "localhost"
+sqlUsername: "username"
+sqlPassword: "password"
+sqlPort: 3306

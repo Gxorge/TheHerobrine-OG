@@ -3,6 +3,8 @@ package moe.gabriella.herobrine.game;
 import moe.gabriella.herobrine.game.runnables.ShardHandler;
 import moe.gabriella.herobrine.game.runnables.StartingRunnable;
 import moe.gabriella.herobrine.kit.KitGui;
+import moe.gabriella.herobrine.stat.GameRank;
+import moe.gabriella.herobrine.stat.StatManager;
 import moe.gabriella.herobrine.utils.*;
 import moe.gabriella.herobrine.world.WorldManager;
 import org.bukkit.*;
@@ -32,6 +34,8 @@ public class GMListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        StatManager.get().check(event.getPlayer().getUniqueId());
+
         if (gm.getGameState() == GameState.LIVE) {
             gm.makeSpectator(event.getPlayer());
             return;
@@ -250,7 +254,7 @@ public class GMListener implements Listener {
             event.setCancelled(true);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void onDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
         event.setDeathMessage("");
@@ -262,14 +266,18 @@ public class GMListener implements Listener {
         }
 
         if (player == gm.getHerobrine()) {
-            if (player.getKiller() != null)
+            if (player.getKiller() != null) {
                 Message.broadcast(Message.format(ChatColor.AQUA + player.getKiller().getName() + ChatColor.GREEN + " has defeated " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
+                StatManager.get().pointsTracker.increment(player.getKiller().getUniqueId(), 30);
+            }
             PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_WITHER_HURT, 1f, 1f);
             gm.end(WinType.SURVIVORS);
         } else {
             gm.getSurvivors().remove(player);
-            if (player.getKiller() != null && player.getKiller() == gm.getHerobrine())
+            if (player.getKiller() != null && player.getKiller() == gm.getHerobrine()) {
                 Message.broadcast(Message.format(ChatColor.AQUA + player.getName() + ChatColor.YELLOW + " was killed by " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
+                StatManager.get().pointsTracker.increment(gm.getHerobrine().getUniqueId(), 5);
+            }
 
             if (player == gm.getShardCarrier()) {
                 ShardHandler.drop(player.getLocation());
@@ -294,6 +302,28 @@ public class GMListener implements Listener {
                 Player player = (Player) e;
                 if (gm.getHerobrine() == player || !gm.getSurvivors().contains(player))
                     event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        event.setCancelled(true);
+
+        StatManager sm = StatManager.get();
+        Player player = event.getPlayer();
+        GameRank rank = sm.getGameRank(player.getUniqueId());
+        int points = sm.points.get(player.getUniqueId());
+
+        String endMessage = ChatColor.BLUE + player.getDisplayName() + ChatColor.DARK_GRAY + " » " + ChatColor.RESET + event.getMessage();
+
+        if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
+            Message.broadcast("" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▏ " + rank.getColor() + rank.getDisplay() + " " + endMessage);
+        } else if (gm.getGameState() == GameState.LIVE || gm.getGameState() == GameState.ENDING) {
+            if (player == gm.getHerobrine() || gm.getSurvivors().contains(player)) {
+                Message.broadcast(rank.getColor() + rank.getDisplay() + " " + endMessage);
+            } else {
+                Message.broadcast("" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▍ " + ChatColor.DARK_RED + "DEAD " + ChatColor.DARK_GRAY + "▏ " + endMessage);
             }
         }
     }

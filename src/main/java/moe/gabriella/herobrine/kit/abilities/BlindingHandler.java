@@ -22,11 +22,11 @@ public class BlindingHandler extends BukkitRunnable {
     @Override
     public void run() {
         try { TimeUnit.SECONDS.sleep(2); } catch (Exception e) { e.printStackTrace(); }
-        Bukkit.getServer().getScheduler().runTask(GameManager.getInstance().getPlugin(), () -> {
+        Bukkit.getServer().getScheduler().runTask(GameManager.get().getPlugin(), () -> {
             Location loc  = nugget.getLocation();
             nugget.remove();
             loc.getWorld().createExplosion(loc, 0f, false, false);
-            for (Player p : GameManager.getInstance().getSurvivors()) {
+            for (Player p : GameManager.get().getSurvivors()) {
                 if (PlayerUtil.getDistance(p, loc) <= 3.5) {
                     PlayerUtil.addEffect(p, PotionEffectType.BLINDNESS, 100, 1, false, false);
                 }

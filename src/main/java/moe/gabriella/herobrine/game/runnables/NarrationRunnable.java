@@ -11,7 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class NarrationRunnable extends BukkitRunnable {
 
     public static double timer = 0;
-    GameManager gm = GameManager.getInstance();
+    GameManager gm = GameManager.get();
 
     @Override
     public void run() {

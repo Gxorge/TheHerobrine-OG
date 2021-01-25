@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class CaptureSequence extends BukkitRunnable {
 
     Player player;
-    GameManager gm = GameManager.getInstance();
+    GameManager gm = GameManager.get();
 
     public CaptureSequence(Player player) {
         this.player = player;

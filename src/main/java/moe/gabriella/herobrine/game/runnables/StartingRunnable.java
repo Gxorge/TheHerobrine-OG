@@ -14,7 +14,7 @@ public class StartingRunnable extends BukkitRunnable {
 
     @Override
     public void run() {
-        GameManager gm = GameManager.getInstance();
+        GameManager gm = GameManager.get();
 
         if (gm.getRequiredToStart() > gm.getSurvivors().size()) {
             Message.broadcast(Message.format("" + ChatColor.RED + "Cancelled! Waiting for players..."));

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HerobrineSetup extends BukkitRunnable {
 
-    Player player = GameManager.getInstance().getHerobrine();
+    Player player = GameManager.get().getHerobrine();
 
     @Override
     public void run() {

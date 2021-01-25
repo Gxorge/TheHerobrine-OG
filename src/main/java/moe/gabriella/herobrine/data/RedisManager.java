@@ -1,4 +1,4 @@
-package moe.gabriella.herobrine.redis;
+package moe.gabriella.herobrine.data;
 
 import lombok.Getter;
 import moe.gabriella.herobrine.utils.Console;

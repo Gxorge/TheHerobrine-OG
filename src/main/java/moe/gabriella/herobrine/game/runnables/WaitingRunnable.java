@@ -12,7 +12,7 @@ public class WaitingRunnable extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (GameManager.getInstance().getGameState() != GameState.WAITING) {
+        if (GameManager.get().getGameState() != GameState.WAITING) {
             cancel();
             return;
         }
@@ -20,12 +20,12 @@ public class WaitingRunnable extends BukkitRunnable {
         time += 0.5;
 
         if (time <= 4.5) {
-            int required = GameManager.getInstance().getRequiredToStart() - GameManager.getInstance().getSurvivors().size();
+            int required = GameManager.get().getRequiredToStart() - GameManager.get().getSurvivors().size();
             PlayerUtil.broadcastActionbar("" + ChatColor.YELLOW + "Waiting for " + ChatColor.AQUA + required + ChatColor.YELLOW + " player" + (required == 1 ? "" : "s"));
         } else if (time == 5 || time == 6 || time == 6.5) {
             PlayerUtil.broadcastActionbar(ChatColor.AQUA + "Playing " + ChatColor.GRAY + "» " + ChatColor.YELLOW + "TheHerobrine");
         } else if (time == 7 || time == 8 || time == 8.5) {
-            PlayerUtil.broadcastActionbar(ChatColor.LIGHT_PURPLE + GameManager.getInstance().getNetworkName());
+            PlayerUtil.broadcastActionbar(ChatColor.LIGHT_PURPLE + GameManager.get().getNetworkName());
         } else if (time >= 9){
             time = 0;
         }

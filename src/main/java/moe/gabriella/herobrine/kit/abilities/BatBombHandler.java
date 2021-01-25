@@ -27,10 +27,10 @@ public class BatBombHandler extends BukkitRunnable {
         Location loc = coal.getLocation();
         coal.remove();
         for (int i = 0; i<15; i++) {
-            Bukkit.getServer().getScheduler().runTask(GameManager.getInstance().getPlugin(), () -> bats.add(loc.getWorld().spawnEntity(loc, EntityType.BAT)));
+            Bukkit.getServer().getScheduler().runTask(GameManager.get().getPlugin(), () -> bats.add(loc.getWorld().spawnEntity(loc, EntityType.BAT)));
         }
         try { TimeUnit.SECONDS.sleep(2); } catch (Exception e) { e.printStackTrace(); }
-        Bukkit.getServer().getScheduler().runTask(GameManager.getInstance().getPlugin(), () -> {
+        Bukkit.getServer().getScheduler().runTask(GameManager.get().getPlugin(), () -> {
             for (Entity bat : bats) {
                 Location batLoc = bat.getLocation();
                 bat.remove();

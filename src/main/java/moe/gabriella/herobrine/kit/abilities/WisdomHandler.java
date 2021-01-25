@@ -24,7 +24,7 @@ public class WisdomHandler extends BukkitRunnable {
             return;
         }
 
-        for (Player p : GameManager.getInstance().getSurvivors()) {
+        for (Player p : GameManager.get().getSurvivors()) {
             if (PlayerUtil.getDistance(p, location) <= 2.5) {
                 if (p.getHealth() < 20) {
                     p.setHealth(p.getHealth() + 2);

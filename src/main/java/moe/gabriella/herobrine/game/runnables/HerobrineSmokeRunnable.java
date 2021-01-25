@@ -10,7 +10,7 @@ import xyz.xenondevs.particle.ParticleEffect;
 
 public class HerobrineSmokeRunnable extends BukkitRunnable {
 
-    GameManager gm = GameManager.getInstance();
+    GameManager gm = GameManager.get();
 
     @Override
     public void run() {

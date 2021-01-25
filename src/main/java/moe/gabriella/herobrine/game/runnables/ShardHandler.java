@@ -20,7 +20,7 @@ public class ShardHandler extends BukkitRunnable {
     int timer = 30;
     int despawnTimer = 300; // 5 minutes
     static Item shard;
-    static GameManager gm = GameManager.getInstance();
+    static GameManager gm = GameManager.get();
 
     @Override
     public void run() {

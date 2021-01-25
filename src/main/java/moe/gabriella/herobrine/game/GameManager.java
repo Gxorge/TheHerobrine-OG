@@ -4,10 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import me.gabriella.gabsgui.GUIItem;
 import moe.gabriella.herobrine.events.GameStateUpdateEvent;
+import moe.gabriella.herobrine.events.ShardCaptureEvent;
 import moe.gabriella.herobrine.events.ShardStateUpdateEvent;
 import moe.gabriella.herobrine.game.runnables.*;
 import moe.gabriella.herobrine.kit.Kit;
-import moe.gabriella.herobrine.kit.KitAbility;
 import moe.gabriella.herobrine.kit.abilities.BatBombAbility;
 import moe.gabriella.herobrine.kit.abilities.BlindingAbility;
 import moe.gabriella.herobrine.kit.abilities.DreamweaverAbility;
@@ -16,13 +16,12 @@ import moe.gabriella.herobrine.kit.kits.ArcherKit;
 import moe.gabriella.herobrine.kit.kits.PriestKit;
 import moe.gabriella.herobrine.kit.kits.ScoutKit;
 import moe.gabriella.herobrine.kit.kits.WizardKit;
-import moe.gabriella.herobrine.redis.RedisManager;
+import moe.gabriella.herobrine.data.RedisManager;
+import moe.gabriella.herobrine.stat.StatManager;
+import moe.gabriella.herobrine.stat.StatTracker;
 import moe.gabriella.herobrine.utils.*;
 import moe.gabriella.herobrine.world.WorldManager;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
@@ -40,7 +39,7 @@ public class GameManager {
 
     @Getter private JavaPlugin plugin;
 
-    @Getter private static GameManager instance;
+    private static GameManager instance;
     private WorldManager worldManager;
     private RedisManager redis;
 
@@ -72,6 +71,8 @@ public class GameManager {
     @Getter private Kit[] kits;
     @Getter private Kit defaultKit;
     @Getter private HashMap<Player, Kit> playerKits;
+
+    @Getter @Setter private StatTracker[] statTrackers;
 
     public GameManager(JavaPlugin plugin, WorldManager worldManager, RedisManager redis) {
         Console.info("Loading Game Manager...");
@@ -110,6 +111,8 @@ public class GameManager {
         startWaiting();
         Console.info("Game Manager is ready!");
     }
+
+    public static GameManager get() { return instance; }
 
     public void setGameState(GameState newState) {
         new BukkitRunnable() {
@@ -151,6 +154,7 @@ public class GameManager {
         setGameState(GameState.LIVE);
         new NarrationRunnable().runTaskTimerAsynchronously(plugin, 0, 10); // has to run before the shardstate updates
         setShardState(ShardState.WAITING);
+        StatManager.get().startTracking();
         if (passUser != null) {
             herobrine = passUser;
             passUser = null;
@@ -297,12 +301,17 @@ public class GameManager {
             Message.broadcast(Message.format("" + ChatColor.GREEN + ChatColor.BOLD + "The Survivors " + ChatColor.YELLOW + "have defeated " + ChatColor.RED + ChatColor.BOLD + "The Herobrine!"));
             Message.broadcast(Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(Sound.ENTITY_WITHER_DEATH, 1f, 1f);
+            for (Player p : survivors)
+                StatManager.get().pointsTracker.increment(p.getUniqueId(), 10);
         } else {
             PlayerUtil.broadcastTitle(ChatColor.RED + "HEROBRINE " + ChatColor.GREEN + " WINS!", "", 20, 60, 20);
             Message.broadcast(Message.format("" + ChatColor.RED + ChatColor.BOLD + "The Herobrine " + ChatColor.YELLOW + "has defeated all the survivors"));
             Message.broadcast(Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(Sound.ENTITY_ENDER_DRAGON_HURT, 1f, 1f);
+            StatManager.get().pointsTracker.increment(herobrine.getUniqueId(), 10);
         }
+        StatManager.get().push();
+        StatManager.get().stopTracking();
     }
 
     public void endCheck() {
@@ -325,6 +334,7 @@ public class GameManager {
             setShardState(ShardState.WAITING);
         new CaptureSequence(player).runTaskAsynchronously(plugin);
         updateHerobrine();
+        Bukkit.getServer().getPluginManager().callEvent(new ShardCaptureEvent(player));
     }
 
     public double getSurvivorHitDamage(Material item, boolean strength) {

@@ -16,7 +16,7 @@ public class KitGui extends GUIBase {
 
     @Override
     public void setupItems() {
-        GameManager gm = GameManager.getInstance();
+        GameManager gm = GameManager.get();
         int curr = 0;
         for (Kit kit : gm.getKits()) {
             GUIItem item = kit.getDisplayItem();
