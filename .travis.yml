@@ -10,5 +10,5 @@ before_install:
   - chmod +x buildtools.sh
   - if [ ! -d "$HOME/.m2/repository/org/spigotmc/spigot/1.16.5-R0.1-SNAPSHOT" ]; then ./buildtools.sh 1.16.5; else echo "Not compiling Spigot because it is already in our maven" ; fi
  
- install:
-   - mvn install -DfinalName=release -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+install:
+  - mvn install -DfinalName=release -DskipTests=true -Dmaven.javadoc.skip=true -B -V
