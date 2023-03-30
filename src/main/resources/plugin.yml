@@ -1,7 +1,6 @@
 name: TheHerobrine
-main: moe.gabriella.herobrine.HerobrinePlugin
-author: Gabriella
-version: 1.0.0
-api-version: 1.16
+main: uk.hotten.herobrine.HerobrinePlugin
+version: 1.0
+api-version: 1.18
+author: Gxorge
 description: Remake of "The Herobrine!" v2 from HiveMC.
-softdepend: [Vault]
