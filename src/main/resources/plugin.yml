@@ -1,5 +1,5 @@
-name: TheHerobrine
-main: uk.hotten.herobrine.HerobrinePlugin
+name: TheHerobrine-OG
+main: uk.hotten.herobrine.HerobrinePluginOG
 version: 1.0
 api-version: 1.18
 author: Gxorge

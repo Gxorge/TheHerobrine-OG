@@ -8,7 +8,7 @@ import uk.hotten.herobrine.utils.Console;
 import uk.hotten.herobrine.world.WorldManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class HerobrinePlugin extends JavaPlugin {
+public class HerobrinePluginOG extends JavaPlugin {
 
     @Override
     public void onEnable() {
