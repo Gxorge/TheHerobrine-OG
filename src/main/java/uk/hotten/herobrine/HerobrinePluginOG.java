@@ -1,5 +1,7 @@
 package uk.hotten.herobrine;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import uk.hotten.herobrine.data.SqlManager;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.data.RedisManager;
@@ -16,11 +18,13 @@ public class HerobrinePluginOG extends JavaPlugin {
 
         this.saveDefaultConfig();
 
+        ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+
         SqlManager sqlManager = new SqlManager(this);
         RedisManager redisManager = new RedisManager(this);
 
         WorldManager worldManager = new WorldManager(this);
-        GameManager gameManager = new GameManager(this, worldManager, redisManager);
+        GameManager gameManager = new GameManager(this, worldManager, redisManager, protocolManager);
         StatManager statManager = new StatManager(this, gameManager);
 
         Console.info("The Herobrine! is ready.");

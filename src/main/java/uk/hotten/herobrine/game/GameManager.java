@@ -1,5 +1,6 @@
 package uk.hotten.herobrine.game;
 
+import com.comphenix.protocol.ProtocolManager;
 import lombok.Getter;
 import lombok.Setter;
 import uk.hotten.gxui.GUIItem;
@@ -42,6 +43,7 @@ public class GameManager {
     private static GameManager instance;
     private WorldManager worldManager;
     private RedisManager redis;
+    @Getter private ProtocolManager protocolManager;
 
     @Getter private GameState gameState;
     @Getter private ShardState shardState;
@@ -74,12 +76,13 @@ public class GameManager {
 
     @Getter @Setter private StatTracker[] statTrackers;
 
-    public GameManager(JavaPlugin plugin, WorldManager worldManager, RedisManager redis) {
+    public GameManager(JavaPlugin plugin, WorldManager worldManager, RedisManager redis, ProtocolManager protocolManager) {
         Console.info("Loading Game Manager...");
         this.plugin = plugin;
         instance = this;
         this.worldManager = worldManager;
         this.redis = redis;
+        this.protocolManager = protocolManager;
         plugin.getServer().getPluginManager().registerEvents(new GMListener(this), plugin);
 
         gameState = GameState.BOOTING;

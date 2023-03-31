@@ -1,13 +1,10 @@
 package uk.hotten.herobrine.game.runnables;
 
+import org.bukkit.*;
 import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.*;
 import uk.hotten.herobrine.world.WorldManager;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -43,6 +40,7 @@ public class ShardHandler extends BukkitRunnable {
                 Random r = new Random();
                 int n = r.nextInt(10 - 1 + 1) + 1;
                 if (n < 3) shard.getLocation().getWorld().strikeLightningEffect(shard.getLocation().clone().add(0, 1, 0));
+                if (despawnTimer % 2 == 0) PlayerUtil.playSoundAt(shard.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 2f);
                 if (despawnTimer == 0) {
                     shard.remove();
                     gm.setShardState(ShardState.WAITING);

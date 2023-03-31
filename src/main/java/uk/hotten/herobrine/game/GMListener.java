@@ -1,5 +1,6 @@
 package uk.hotten.herobrine.game;
 
+import org.bukkit.entity.*;
 import uk.hotten.herobrine.game.runnables.ShardHandler;
 import uk.hotten.herobrine.game.runnables.StartingRunnable;
 import uk.hotten.herobrine.kit.KitGui;
@@ -8,10 +9,6 @@ import uk.hotten.herobrine.stat.StatManager;
 import uk.hotten.herobrine.utils.*;
 import uk.hotten.herobrine.world.WorldManager;
 import org.bukkit.*;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -198,6 +195,24 @@ public class GMListener implements Listener {
             return;
         }
 
+        // Hound attacks THB
+        if (event.getEntity() instanceof Player && event.getDamager() instanceof Wolf) {
+            Player player = (Player) event.getEntity();
+            if (player == gm.getHerobrine())
+                event.setDamage(2);
+            else
+                event.setCancelled(true);
+            return;
+        }
+
+        // TBH attacks hound
+        if (event.getEntity() instanceof Wolf && event.getDamager() instanceof Player) {
+            Player player = (Player) event.getDamager();
+            if (player != gm.getHerobrine())
+                event.setCancelled(true);
+            return;
+        }
+
         if (!(event.getEntity() instanceof Player) || !(event.getDamager() instanceof Player)) {
             event.setCancelled(true);
             return;
@@ -232,7 +247,9 @@ public class GMListener implements Listener {
         PlayerUtil.playSoundAt(loc, Sound.ENTITY_BLAZE_HURT, 1f, 1f);
         PlayerUtil.playSoundAt(loc, Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
 
-        ParticleEffect.ITEM_CRACK.display(loc, 0, 1, 0, 0.5f, 5, new ItemTexture(new ItemStack(Material.BLAZE_POWDER)), Bukkit.getOnlinePlayers());
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            p.spawnParticle(Particle.BLOCK_DUST, loc.add(0, 0.75, 0), 25, Material.ORANGE_WOOL.createBlockData());
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)

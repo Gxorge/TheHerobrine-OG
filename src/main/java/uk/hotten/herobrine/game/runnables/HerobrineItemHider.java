@@ -1,24 +1,32 @@
 package uk.hotten.herobrine.game.runnables;
 
-import com.mojang.datafixers.util.Pair;
-import uk.hotten.herobrine.game.GameManager;
-import uk.hotten.herobrine.utils.GameState;
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import uk.hotten.herobrine.game.GameManager;
+import uk.hotten.herobrine.utils.Console;
+import uk.hotten.herobrine.utils.GameState;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class HerobrineItemHider extends BukkitRunnable {
 
     GameManager gm = GameManager.get();
     Player player = gm.getHerobrine();
+    ProtocolManager protocolManager = GameManager.get().getProtocolManager();
 
     @Override
     public void run() {
-/*        if (gm.getGameState() != GameState.LIVE) {
+        if (gm.getGameState() != GameState.LIVE) {
             cancel();
             return;
         }
@@ -27,16 +35,22 @@ public class HerobrineItemHider extends BukkitRunnable {
             cancel();
             return;
         }
+        List<Pair<EnumWrappers.ItemSlot, ItemStack>> hideList = new ArrayList<>();
+        hideList.add(new Pair<>(EnumWrappers.ItemSlot.MAINHAND, new ItemStack(Material.AIR)));
+        hideList.add(new Pair<>(EnumWrappers.ItemSlot.OFFHAND, new ItemStack(Material.AIR)));
 
-        final List<Pair<EnumItemSlot, ItemStack>> equipList = new ArrayList<>();
-        equipList.add(new com.mojang.datafixers.util.Pair<>(EnumItemSlot.MAINHAND, CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(Material.AIR))));
-        equipList.add(new com.mojang.datafixers.util.Pair<>(EnumItemSlot.OFFHAND, CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(Material.AIR))));
-        PacketPlayOutEntityEquipment packet = new PacketPlayOutEntityEquipment(player.getEntityId(), equipList);
+        PacketContainer hideItem = protocolManager.createPacket(PacketType.Play.Server.ENTITY_EQUIPMENT);
+        hideItem.getIntegers().write(0, player.getEntityId());
+        hideItem.getSlotStackPairLists().write(0, hideList);
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             if (p == player) continue;
-            PlayerConnection pc = ((CraftPlayer) p).getHandle().playerConnection;
-            pc.sendPacket(packet);
-        }*/
+            try {
+                protocolManager.sendServerPacket(p, hideItem);
+            } catch (Exception e) {
+                Console.error("Failed to hide Herobrine's items from " + p.getName());
+                e.printStackTrace();
+            }
+        }
     }
 }
