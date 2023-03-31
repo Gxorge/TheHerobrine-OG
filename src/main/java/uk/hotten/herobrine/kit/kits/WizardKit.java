@@ -18,7 +18,12 @@ import org.bukkit.potion.PotionType;
 public class WizardKit extends Kit {
 
     public WizardKit(GameManager gm) {
-        super(gm, "wizard", ChatColor.DARK_PURPLE + "Wizard", null, "", new GUIItem(Material.SPLASH_POTION).displayName(ChatColor.DARK_PURPLE + "Wizard"));
+        super(gm,
+                "wizard",
+                ChatColor.DARK_PURPLE + "Wizard",
+                null,
+                "",
+                new GUIItem(Material.SPLASH_POTION).displayName(ChatColor.DARK_PURPLE + "Wizard"));
     }
 
     @Override

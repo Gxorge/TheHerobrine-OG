@@ -17,11 +17,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import xyz.xenondevs.particle.ParticleEffect;
-import xyz.xenondevs.particle.data.texture.ItemTexture;
 
 public class GMListener implements Listener {
 
@@ -164,6 +161,11 @@ public class GMListener implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
+        if (event.getBlock().getType() == Material.OAK_FENCE || event.getBlock().getType() == Material.NETHER_BRICK_FENCE) {
+            event.setCancelled(false);
+            return;
+        }
+
         if (event.getPlayer().getGameMode() != GameMode.CREATIVE)
             event.setCancelled(true);
     }

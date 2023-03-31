@@ -13,10 +13,7 @@ import uk.hotten.herobrine.kit.abilities.BatBombAbility;
 import uk.hotten.herobrine.kit.abilities.BlindingAbility;
 import uk.hotten.herobrine.kit.abilities.DreamweaverAbility;
 import uk.hotten.herobrine.kit.abilities.LocatorAbility;
-import uk.hotten.herobrine.kit.kits.ArcherKit;
-import uk.hotten.herobrine.kit.kits.PriestKit;
-import uk.hotten.herobrine.kit.kits.ScoutKit;
-import uk.hotten.herobrine.kit.kits.WizardKit;
+import uk.hotten.herobrine.kit.kits.*;
 import uk.hotten.herobrine.data.RedisManager;
 import uk.hotten.herobrine.stat.StatManager;
 import uk.hotten.herobrine.stat.StatTracker;
@@ -101,7 +98,10 @@ public class GameManager {
                 new ArcherKit(this),
                 new PriestKit(this),
                 new ScoutKit(this),
-                new WizardKit(this)
+                new WizardKit(this),
+                new MageKit(this),
+                new PaladinKit(this),
+                new SorcererKit(this)
         };
 
         for (Kit k : kits) {

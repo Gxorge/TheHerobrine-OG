@@ -85,4 +85,9 @@ public class PlayerUtil {
         else item.setAmount(item.getAmount() - amount);
     }
 
+    public static void increaseHealth(Player player, double hearts) {
+        double newHealth = player.getHealth() + hearts;
+        player.setHealth((newHealth > 20 ? 20 : newHealth));
+    }
+
 }
