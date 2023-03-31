@@ -16,6 +16,7 @@ public class ShardHandler extends BukkitRunnable {
 
     int timer = 30;
     int despawnTimer = 300; // 5 minutes
+    Random random = new Random();
     static Item shard;
     static GameManager gm = GameManager.get();
 
@@ -60,7 +61,8 @@ public class ShardHandler extends BukkitRunnable {
 
         spawn.getWorld().strikeLightningEffect(spawn.add(0, 1, 0));
         gm.setShardState(ShardState.SPAWNED);
-        timer = 45;
+        timer = random.nextInt(16) + 30; // random number between 30 and 45 for the next shard spawn
+        Console.debug("Next shard time to be " + timer);
         for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(spawn);
 
         PlayerUtil.broadcastTitle("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "A Shard has spawned!", ChatColor.AQUA + "Use your compass to find it!", 10, 60, 10);

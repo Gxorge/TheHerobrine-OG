@@ -27,7 +27,7 @@ public class BlindingHandler extends BukkitRunnable {
             nugget.remove();
             loc.getWorld().createExplosion(loc, 0f, false, false);
             for (Player p : GameManager.get().getSurvivors()) {
-                if (PlayerUtil.getDistance(p, loc) <= 3.5) {
+                if (PlayerUtil.getDistance(p, loc) <= 5.5) {
                     PlayerUtil.addEffect(p, PotionEffectType.BLINDNESS, 100, 1, false, false);
                 }
             }
