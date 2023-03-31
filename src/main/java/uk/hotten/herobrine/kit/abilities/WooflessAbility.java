@@ -29,7 +29,7 @@ public class WooflessAbility extends KitAbility {
     public void apply(Player player) {
         this.player = player;
 
-        GUIItem bone = new GUIItem(Material.BONE).displayName(ChatColor.DARK_GREEN + "Summon Woofless");
+        GUIItem bone = new GUIItem(Material.BONE).displayName(ChatColor.AQUA + "Summon Woofless");
         player.getInventory().setItem(slot, bone.build());
     }
 
