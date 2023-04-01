@@ -208,6 +208,8 @@ public class GameManager {
                 plugin.getServer().getPluginManager().registerEvents(hbBlinding, plugin);
 
                 new LocatorAbility(this).apply(herobrine);
+
+                PlayerUtil.addEffect(herobrine, PotionEffectType.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 2, false, false);
                 break;
             }
             case 1: {
@@ -219,6 +221,8 @@ public class GameManager {
 
                 giveVials(-1, 2);
 
+                herobrine.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
+                PlayerUtil.addEffect(herobrine, PotionEffectType.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 1, false, false);
                 break;
             }
             case 2: {
@@ -235,6 +239,9 @@ public class GameManager {
                 hbDream.apply(herobrine);
 
                 giveVials(-1, 2);
+
+                herobrine.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
+                PlayerUtil.addEffect(herobrine, PotionEffectType.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 0, false, false);
                 break;
             }
             case 3: {
@@ -244,6 +251,8 @@ public class GameManager {
 
                 GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.AQUA + "Sword of " + ChatColor.BOLD + "Chances!");
                 herobrine.getInventory().addItem(item.build());
+
+                herobrine.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
                 break;
             }
         }
@@ -344,31 +353,22 @@ public class GameManager {
         Bukkit.getServer().getPluginManager().callEvent(new ShardCaptureEvent(player));
     }
 
-    public double getSurvivorHitDamage(Material item, boolean strength) {
+    // Uses 1.8 damage, the damage towards herobrine
+    public double getHerobrineHitDamage(Material item, boolean strength) {
         double finalDamage = 0;
-        double shardModifier = 0;
-        double strengthModifier = 0;
         boolean normal = false;
         switch (item) {
-            case IRON_AXE:
-                finalDamage = 2.7; // 0 - 1.4 | 1 - 2.15 | 2 - 3.5 | 3 - 3.5
-                shardModifier = 1.5;
-                strengthModifier = 1.5;
+            case WOODEN_SWORD:
+                finalDamage = 4; // 2 hearts
                 break;
             case STONE_SWORD:
-                finalDamage = 2.5; // 0 - 1.25 | 1 - 2.25 | 2 - 3.25 | 3 - 4.25
-                shardModifier = 2;
-                strengthModifier = 1.6;
+                finalDamage = 5; // 2.5 hearts
                 break;
-            case WOODEN_SWORD:
-                finalDamage = 2.3; // 0 - 1.35 | 1 - 1.55 | 2 - 2.49 | 3 - 3.2
-                shardModifier = 1.3;
-                strengthModifier = 2.3;
+            case IRON_AXE:
+                finalDamage = 5; // 2.5 hearts
                 break;
             case IRON_SWORD:
-                finalDamage = 2.9; // 0 - 1.49 | 1 - 2.5 | 2 - 3.57 | 3 - 4.75
-                shardModifier = 2.2;
-                strengthModifier = 1.3;
+                finalDamage = 6; // 3 hearts
                 break;
             default:
                 normal = true;
@@ -377,28 +377,26 @@ public class GameManager {
 
         // Any non attacking weapon
         if (normal)
-            return (strength ? 2 : 1);
-
-        if (shardCount > 0)
-            finalDamage += (shardModifier * shardCount);
+            return -1;
 
         if (strength)
-            finalDamage += strengthModifier;
+            finalDamage += 3; // Actual strength increase
 
         return finalDamage;
     }
 
-    public double getHerobrineHitDamage(Material item) {
+    // Using 1.8 damage, the damage towards survivors
+    public double getSurvivorHitDamage(Material item) {
         double finalDamage = 0;
         switch (item) {
             case STONE_AXE:
-                finalDamage = 2.5; // 0 - 1.25
+                finalDamage = 4; // 0 shards, 2 hearts
                 break;
             case IRON_AXE:
-                finalDamage = 3.5; // 1 - 2.75
+                finalDamage = 5; // 1 shard, 2.5 hearts
                 break;
             case IRON_SWORD:
-                finalDamage = (shardCount == 2 ? 4.5 : 6.5); // 2 - 2.25 | 3 - 3.25
+                finalDamage = (shardCount == 2 ? 6 : 7); // 2 shards, 3 hearts. 3 shards, 3.5 hearts
                 break;
             default:
                 return -1;
