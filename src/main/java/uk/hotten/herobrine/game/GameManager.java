@@ -58,12 +58,12 @@ public class GameManager {
     private BlindingAbility hbBlinding;
     @Getter private ArrayList<Player> survivors;
     @Getter private ArrayList<Player> spectators;
-    @Getter private Player passUser;
+    @Getter @Setter private Player passUser;
 
     @Getter public int shardCount;
     @Getter @Setter private Player shardCarrier;
 
-    public int startTimer = 15; //todo set to 90
+    public int startTimer;
     public boolean stAlmost = false;
     public boolean stFull = false;
 
@@ -87,6 +87,7 @@ public class GameManager {
 
         requiredToStart = plugin.getConfig().getInt("minPlayers");
         maxPlayers = plugin.getConfig().getInt("maxPlayers");
+        startTimer = plugin.getConfig().getInt("startTime");
         allowOverfill = plugin.getConfig().getBoolean("allowOverfill");
         networkName = plugin.getConfig().getString("networkName");
 
@@ -150,6 +151,12 @@ public class GameManager {
 
     public void startWaiting() {
         setGameState(GameState.WAITING);
+
+        // In case the timer decreased from players leaving and a world was loaded
+        Bukkit.getServer().getScheduler().runTask(plugin, () -> WorldManager.getInstance().clean(false));
+        startTimer = plugin.getConfig().getInt("startTime");
+
+
         new WaitingRunnable().runTaskTimerAsynchronously(plugin, 0, 10);
     }
 

@@ -69,6 +69,12 @@ public class GMListener implements Listener {
             }
 
             gm.endCheck();
+            return;
+        }
+
+        if (gm.getPassUser() == event.getPlayer()) {
+            gm.setPassUser(null);
+            Message.broadcast(Message.format(ChatColor.GOLD + event.getPlayer().getName() + " has left and will no-longer be Herobrine."), "theherobrine.command.setherobrine");
         }
     }
 

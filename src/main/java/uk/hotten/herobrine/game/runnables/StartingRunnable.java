@@ -12,11 +12,21 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class StartingRunnable extends BukkitRunnable {
 
+    boolean ignorePlayerCount;
+
+    public StartingRunnable() {
+        ignorePlayerCount = false;
+    }
+
+    public StartingRunnable(boolean ignorePlayerCount) {
+        this.ignorePlayerCount = ignorePlayerCount;
+    }
+
     @Override
     public void run() {
         GameManager gm = GameManager.get();
 
-        if (gm.getRequiredToStart() > gm.getSurvivors().size()) {
+        if ((gm.getRequiredToStart() > gm.getSurvivors().size() && !ignorePlayerCount) || (ignorePlayerCount && gm.getSurvivors().size() <= 1)) {
             Message.broadcast(Message.format("" + ChatColor.RED + "Cancelled! Waiting for players..."));
             gm.startWaiting();
             cancel();
