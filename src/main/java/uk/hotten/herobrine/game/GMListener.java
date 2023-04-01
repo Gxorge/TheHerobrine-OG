@@ -231,16 +231,16 @@ public class GMListener implements Listener {
             }
 
             // Attacking THB
-            double damage = gm.getSurvivorHitDamage(attacker.getInventory().getItemInMainHand().getType(), attacker.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE));
+            double damage = gm.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType(), attacker.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE));
             if (damage != -1) event.setDamage(damage);
 
             animateHbHit(player.getLocation());
 
-            // Delay the veolicty change by a tick so it actually works
+            // Delay the velocity change by a tick so it actually works
             Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> player.setVelocity(new Vector(0, 0, 0)), 1);
         } else if (attacker == gm.getHerobrine()) {
             PlayerUtil.playSoundAt(attacker.getLocation(), Sound.ENTITY_GHAST_AMBIENT, 1f, 0f);
-            double damage = gm.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType());
+            double damage = gm.getSurvivorHitDamage(attacker.getInventory().getItemInMainHand().getType());
             if (damage != -1) event.setDamage(damage);
         } else {
             event.setCancelled(true);
