@@ -22,7 +22,7 @@ public class ProtSpiritHandler extends BukkitRunnable {
         }
 
         PlayerUtil.increaseHealth(player, 1); // half a heart every half a second
-        PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 1f, 1f);
+        PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 1f, 0.5f);
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             p.spawnParticle(Particle.FIREWORKS_SPARK, player.getLocation(), 20);
