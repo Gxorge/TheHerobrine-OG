@@ -131,7 +131,8 @@ public class WorldManager implements Listener {
         gameWorld.setGameRule(GameRule.DO_FIRE_TICK, false);
         gameWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         gameWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        gameWorld.setDifficulty(Difficulty.EASY);
+        gameWorld.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false); // Hides wolf death messages
+        gameWorld.setDifficulty(Difficulty.NORMAL);
         gameWorld.setTime(18000);
 
 

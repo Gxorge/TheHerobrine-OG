@@ -191,8 +191,9 @@ public class GMListener implements Listener {
             if (!(gm.getSurvivors().contains(attacker) && player == gm.getHerobrine())) { // Evals to true if either a) the attacker isnt a survivor b) the damaged isnt herobrine
                 event.setCancelled(true);
             } else {
-                event.setDamage(4.5);
-                animateHbHit(player.getLocation());
+                event.setCancelled(true);
+                event.getDamager().remove();
+                player.damage(4.5, attacker);
             }
             return;
         }
@@ -235,7 +236,8 @@ public class GMListener implements Listener {
 
             animateHbHit(player.getLocation());
 
-            player.setVelocity(new Vector(0, 0, 0));
+            // Delay the veolicty change by a tick so it actually works
+            Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> player.setVelocity(new Vector(0, 0, 0)), 1);
         } else if (attacker == gm.getHerobrine()) {
             PlayerUtil.playSoundAt(attacker.getLocation(), Sound.ENTITY_GHAST_AMBIENT, 1f, 0f);
             double damage = gm.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType());
@@ -320,7 +322,17 @@ public class GMListener implements Listener {
             if (e instanceof Player) {
                 Player player = (Player) e;
                 if (gm.getHerobrine() == player || !gm.getSurvivors().contains(player))
-                    event.setCancelled(true);
+                    Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> {
+                        event.getPotion().getEffects().forEach(effect -> {
+                            player.removePotionEffect(effect.getType());
+                        });
+
+                        if (gm.getHerobrine() == player) {
+                            PlayerUtil.addEffect(player, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
+                            PlayerUtil.addEffect(player, PotionEffectType.JUMP, Integer.MAX_VALUE, 1, false, false);
+                            PlayerUtil.addEffect(player, PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false);
+                        }
+                    }, 1);
             }
         }
     }

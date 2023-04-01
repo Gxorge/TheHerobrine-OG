@@ -22,8 +22,8 @@ public class SurvivorSetup extends BukkitRunnable {
             player.sendMessage(Message.format(ChatColor.GREEN + "You are a " + ChatColor.BOLD + "Survivor" + ChatColor.GREEN + "."));
             player.sendMessage(Message.format(ChatColor.GRAY + "Collect shards and return them to the alter to weaken Herobrine!"));
 
-            PlayerUtil.sendTitle(player, ChatColor.AQUA + "Welcome to the Herobrine!", ChatColor.YELLOW + "You are a " + ChatColor.GREEN + "SURVIVOR", 10, 60, 10);
-            TimeUnit.SECONDS.sleep(3);
+            PlayerUtil.sendTitle(player, ChatColor.AQUA + "Welcome to the Herobrine!", ChatColor.YELLOW + "You are a " + ChatColor.GREEN + "SURVIVOR", 10, 80, 10);
+            TimeUnit.SECONDS.sleep(4);
             PlayerUtil.sendTitle(player, ChatColor.AQUA + "Be careful of " + ChatColor.RED + "The Herobrine", ChatColor.YELLOW + "For now he is just a cloud of smoke", 10, 60, 10);
             TimeUnit.SECONDS.sleep(3);
             PlayerUtil.sendTitle(player, ChatColor.AQUA + "Your aim is to capture shards", ChatColor.YELLOW + "and make the " + ChatColor.RED + "Herobrine " + ChatColor.YELLOW + "weaker", 10, 60, 10);

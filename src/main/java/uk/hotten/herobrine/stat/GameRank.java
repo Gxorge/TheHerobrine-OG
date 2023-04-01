@@ -12,17 +12,19 @@ public enum GameRank {
     SOULSEEKER("Soul Seeker", ChatColor.GOLD, 2500, 3999),
     HAUNTER("Haunter", ChatColor.YELLOW, 4000, 4999),
     POSSESSED("Possessed", ChatColor.RED, 5000, 7499),
-    WRAITH("Wraith", ChatColor.YELLOW, 7500, 14999),
-    SKINWALKER("Skinwalker", null, 15000, 24999),
+    WRAITH("Wraith", ChatColor.AQUA, 7500, 14999),
+    SKINWALKER("Skinwalker", ChatColor.YELLOW, 15000, 24999),
     MYSTERIA("Mysteria", ChatColor.LIGHT_PURPLE, 25000, 34999),
     WIDOWER("Widower", ChatColor.DARK_AQUA, 35000, 44999),
-    PARANORMAL("Paranormal", null, 45000, 999999),
-    GHOSTBUSTER("Ghostbuster", null, 100000, 149999),
-    SPOOKY("Spooky", null, 150000, 199999),
-    ETHEREAL("Ethereal", null, 200000, 249000),
-    DEMONHUNTER("DemonHunter", null, 25000, (Integer.MAX_VALUE-1)),
-    DEATHBRINGER("Death Bringer", null, Integer.MAX_VALUE, Integer.MAX_VALUE), // reserved for top player
-    CHONKER("Chonker", ChatColor.DARK_GRAY, Integer.MAX_VALUE, Integer.MAX_VALUE); // meme
+    PARANORMAL("Paranormal", ChatColor.BLUE, 45000, 59999),
+    SPECTRAL("Spectral", ChatColor.DARK_GREEN, 60000, 79999),
+    MYTHICAL("Mythical", ChatColor.GOLD, 80000, 99999),
+    GHOSTBUSTER("GhostBuster", ChatColor.GRAY, 100000, 149999),
+    SPOOKY("Spooky", ChatColor.DARK_PURPLE, 150000, 199999),
+    ETHEREAL("Ethereal", ChatColor.RED, 200000, 249999),
+    DEMONHUNTER("DemonHunter", ChatColor.GRAY, 250000, 299999),
+    DIVINE("Divine", ChatColor.GRAY, 300000, (Integer.MAX_VALUE-1)),
+    DEATHBRINGER("Death Bringer", ChatColor.RED, Integer.MAX_VALUE, Integer.MAX_VALUE); // reserved for top player
 
     @Getter private String display;
     private ChatColor color;
@@ -41,7 +43,7 @@ public enum GameRank {
             if (points >= rank.getLowBound() && points <= rank.getHighBound())
                 return rank;
         }
-        return CHONKER;
+        return DEFENDER;
     }
 
     public ChatColor getColor() {

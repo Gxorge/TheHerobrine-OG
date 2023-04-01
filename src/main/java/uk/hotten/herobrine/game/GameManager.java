@@ -178,6 +178,8 @@ public class GameManager {
 
     public void setupHerobrine() {
         herobrine.teleport(worldManager.herobrineSpawn);
+        herobrine.setHealth(20);
+        herobrine.setFoodLevel(20);
 
         PlayerUtil.addEffect(herobrine, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
         PlayerUtil.addEffect(herobrine, PotionEffectType.JUMP, Integer.MAX_VALUE, 1, false, false);
@@ -268,6 +270,8 @@ public class GameManager {
         applyKits();
         for (Player p : survivors) {
             p.teleport(worldManager.survivorSpawn);
+            p.setHealth(20);
+            p.setFoodLevel(20);
             PlayerUtil.addEffect(p, PotionEffectType.BLINDNESS, 60, 1, false, false);
         }
     }
@@ -307,7 +311,7 @@ public class GameManager {
             for (Player p : survivors)
                 StatManager.get().pointsTracker.increment(p.getUniqueId(), 10);
         } else {
-            PlayerUtil.broadcastTitle(ChatColor.RED + "HEROBRINE " + ChatColor.GREEN + " WINS!", "", 20, 60, 20);
+            PlayerUtil.broadcastTitle(ChatColor.RED + "HEROBRINE" + ChatColor.GREEN + " WINS!", "", 20, 60, 20);
             Message.broadcast(Message.format("" + ChatColor.RED + ChatColor.BOLD + "The Herobrine " + ChatColor.YELLOW + "has defeated all the survivors"));
             Message.broadcast(Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(Sound.ENTITY_ENDER_DRAGON_HURT, 1f, 1f);
@@ -371,8 +375,9 @@ public class GameManager {
                 break;
         }
 
+        // Any non attacking weapon
         if (normal)
-            return -1;
+            return (strength ? 2 : 1);
 
         if (shardCount > 0)
             finalDamage += (shardModifier * shardCount);

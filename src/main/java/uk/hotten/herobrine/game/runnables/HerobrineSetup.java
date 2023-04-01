@@ -19,8 +19,8 @@ public class HerobrineSetup extends BukkitRunnable {
             player.sendMessage(Message.format(ChatColor.GREEN + "You are " + ChatColor.RED + ChatColor.BOLD + "THE HEROBRINE! " + ChatColor.MAGIC + "###" + ChatColor.RESET));
             player.sendMessage(Message.format(ChatColor.GRAY + "Destroy all survivors to take over the WORLD!"));
 
-            PlayerUtil.sendTitle(player, ChatColor.AQUA + "Welcome to the Herobrine", ChatColor.YELLOW + "You are " + ChatColor.RED + "THE HEROBRINE", 10, 60, 10);
-            TimeUnit.SECONDS.sleep(3);
+            PlayerUtil.sendTitle(player, ChatColor.AQUA + "Welcome to the Herobrine", ChatColor.YELLOW + "You are " + ChatColor.RED + "THE HEROBRINE", 10, 80, 10);
+            TimeUnit.SECONDS.sleep(4);
             PlayerUtil.sendTitle(player, ChatColor.AQUA + "Be careful of the Survivors!", ChatColor.YELLOW + "They want to take you down", 10, 60, 10);
             TimeUnit.SECONDS.sleep(3);
             PlayerUtil.sendTitle(player, ChatColor.AQUA + "Their aim is to capture shards", ChatColor.YELLOW + "and make the you weaker", 10, 60, 10);
