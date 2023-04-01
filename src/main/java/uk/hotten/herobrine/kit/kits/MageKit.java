@@ -36,13 +36,13 @@ public class MageKit extends Kit {
     @Override
     public void setupPlayer(Player player) {
         GUIItem sword = new GUIItem(Material.WOODEN_SWORD).displayName(ChatColor.GOLD + "Elder's Sword");
-        GUIItem bow = new GUIItem(Material.BOW).displayName(ChatColor.YELLOW + "Phoenix Bow");
-        GUIItem arrow = new GUIItem(Material.ARROW).displayName(ChatColor.GRAY + "Eagle Feather Quills").amount(32);
+        GUIItem bow = new GUIItem(Material.BOW).displayName(ChatColor.GREEN + "Water of " + ChatColor.BOLD + "Reckoning");
+        GUIItem arrow = new GUIItem(Material.ARROW).displayName(ChatColor.AQUA + "Mana " + ChatColor.BOLD + "Arrow").amount(32);
 
         ItemStack healing = new ItemStack(Material.POTION);
         PotionMeta pmHealing = (PotionMeta) healing.getItemMeta();
         pmHealing.setBasePotionData(new PotionData(PotionType.INSTANT_HEAL, false, true));
-        pmHealing.setDisplayName(ChatColor.LIGHT_PURPLE + "Elixir: Health II");
+        pmHealing.setDisplayName("" + ChatColor.YELLOW + ChatColor.BOLD + "Potion: " + ChatColor.AQUA + "Self Healing");
         healing.setItemMeta(pmHealing);
 
         player.getInventory().setItem(0, sword.build());

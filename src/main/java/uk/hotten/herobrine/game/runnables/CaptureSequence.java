@@ -32,6 +32,7 @@ public class CaptureSequence extends BukkitRunnable {
             Message.broadcast(Message.format(ChatColor.AQUA + "" + gm.getShardCount() + ChatColor.GRAY + "/3 Shards Captured!"));
         PlayerUtil.playSoundAt(l, Sound.BLOCK_PORTAL_TRAVEL, 1f, 1f);
         PlayerUtil.playSoundAt(l, Sound.ENTITY_WITHER_DEATH, 0.5f, 1f);
+        PlayerUtil.broadcastSound(Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1f, 0f);
 
         try { TimeUnit.SECONDS.sleep(4); } catch (Exception e) { e.printStackTrace(); }
 
