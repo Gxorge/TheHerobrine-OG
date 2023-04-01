@@ -18,6 +18,14 @@ public class Message {
         Bukkit.getServer().broadcastMessage(message);
     }
 
+    public static void broadcast(String message, String permission) {
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            if (p.hasPermission(permission)) {
+                p.sendMessage(message);
+            }
+        }
+    }
+
 
     public static String formatTime(int seconds) {
         if (seconds < 60)

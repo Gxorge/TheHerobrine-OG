@@ -1,8 +1,19 @@
 name: TheHerobrine-OG
 main: uk.hotten.herobrine.HerobrinePluginOG
-version: PRE-1.0-master
+version: PRE-1.0-commands
 api-version: 1.18
 author: Gxorge
 description: Remake of "The Herobrine!" v2 from HiveMC.
 depend:
   - ProtocolLib
+
+commands:
+  setherobrine:
+    description: Select a player to be Herobrine.
+    permission: theherobrine.command.setherobrine
+    usage: /<command> <player>
+
+  forcestart:
+    description: Force start the game.
+    permission: theherobrine.command.forcestart
+    usage: /<command> [time]

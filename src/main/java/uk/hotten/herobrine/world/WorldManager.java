@@ -136,46 +136,44 @@ public class WorldManager implements Listener {
         gameWorld.setTime(18000);
 
 
-        Bukkit.getServer().getScheduler().runTaskLater(plugin, () -> {
-            // Load data points
-            File file = new File(map + "/mapdata.yaml");
-            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        // Load data points
+        File file = new File(map + "/mapdata.yaml");
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-            try {
-                gameMapData = mapper.readValue(file, MapData.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Console.error("Error parsing mapdata.yaml! Is it correctly formatted?");
-                return;
-            }
+        try {
+            gameMapData = mapper.readValue(file, MapData.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Console.error("Error parsing mapdata.yaml! Is it correctly formatted?");
+            return;
+        }
 
-            for (Datapoint dp : gameMapData.getDatapoints()) {
-                Location dLoc = new Location(gameWorld, dp.getX(), dp.getY(), dp.getZ());
-                switch (dp.getType()) {
-                    case SURVIVOR_SPAWN:
-                        survivorSpawn = dLoc;
-                        dLoc.getChunk().load(true);
-                        //dLoc.getChunk().setForceLoaded(true);
-                        noUnload.add(dLoc.getChunk());
-                        break;
-                    case HEROBRINE_SPAWN:
-                        herobrineSpawn = dLoc;
-                        dLoc.getChunk().load(true);
-                        //dLoc.getChunk().setForceLoaded(true);
-                        noUnload.add(dLoc.getChunk());
-                        break;
-                    case ALTER:
-                        alter = dLoc;
-                        break;
-                    case SHARD_SPAWN:
-                        shardSpawns.add(dLoc);
-                        break;
-                    default:
-                        break;
-                }
+        for (Datapoint dp : gameMapData.getDatapoints()) {
+            Location dLoc = new Location(gameWorld, dp.getX(), dp.getY(), dp.getZ());
+            switch (dp.getType()) {
+                case SURVIVOR_SPAWN:
+                    survivorSpawn = dLoc;
+                    dLoc.getChunk().load(true);
+                    //dLoc.getChunk().setForceLoaded(true);
+                    noUnload.add(dLoc.getChunk());
+                    break;
+                case HEROBRINE_SPAWN:
+                    herobrineSpawn = dLoc;
+                    dLoc.getChunk().load(true);
+                    //dLoc.getChunk().setForceLoaded(true);
+                    noUnload.add(dLoc.getChunk());
+                    break;
+                case ALTER:
+                    alter = dLoc;
+                    break;
+                case SHARD_SPAWN:
+                    shardSpawns.add(dLoc);
+                    break;
+                default:
+                    break;
             }
-            Console.info("Finished parsing!");
-        }, 50);
+        }
+        Console.info("Finished parsing!");
     }
 
     @EventHandler
@@ -188,7 +186,9 @@ public class WorldManager implements Listener {
             }, 100);
     }
 
-    public void clean() {
+    public void clean() { clean(true); }
+
+    public void clean(boolean clearVotes) {
         if (gameWorld != null) {
             Console.info("Cleaning the map...");
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
@@ -207,12 +207,13 @@ public class WorldManager implements Listener {
 
             gameWorld = null;
             gameMapData = null;
-            votingMaps = new HashMap<>();
             survivorSpawn = null;
             herobrineSpawn = null;
             alter = null;
             shardSpawns = new ArrayList<>();
             noUnload = new ArrayList<>();
+            if (clearVotes)
+                votingMaps = new HashMap<>();
             Console.info("Cleaned!");
         }
     }
