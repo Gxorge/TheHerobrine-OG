@@ -349,10 +349,10 @@ public class GMListener implements Listener {
         String endMessage = ChatColor.BLUE + player.getDisplayName() + ChatColor.DARK_GRAY + " » " + ChatColor.RESET + event.getMessage();
 
         if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
-            Message.broadcast("" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▏ " + rank.getColor() + rank.getDisplay() + " " + endMessage);
+            Message.broadcast("" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▏ " + rank.getDisplay() + " " + endMessage);
         } else if (gm.getGameState() == GameState.LIVE || gm.getGameState() == GameState.ENDING) {
             if (player == gm.getHerobrine() || gm.getSurvivors().contains(player)) {
-                Message.broadcast(rank.getColor() + rank.getDisplay() + " " + endMessage);
+                Message.broadcast(rank.getDisplay() + " " + endMessage);
             } else {
                 Message.broadcast("" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▍ " + ChatColor.DARK_RED + "DEAD " + ChatColor.DARK_GRAY + "▏ " + endMessage);
             }

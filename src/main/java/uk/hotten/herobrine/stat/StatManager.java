@@ -29,6 +29,8 @@ public class StatManager {
     public HashMap<UUID, Integer> points;
     public HashMap<UUID, GameRank> gameRanks;
 
+    public String highestPlayerUUID;
+
     public StatManager(JavaPlugin plugin, GameManager gm) {
         Console.info("Loading Stat Manager...");
         this.plugin = plugin;
@@ -51,6 +53,13 @@ public class StatManager {
 
         points = new HashMap<>();
         gameRanks = new HashMap<>();
+
+        highestPlayerUUID = getHighestPlayer();
+        if (highestPlayerUUID == null)
+            Console.error("Failed to get UUID of highest player.");
+        else
+            Console.info("UUID of highest player is " + highestPlayerUUID);
+
         Console.info("Stat Manager is ready!");
     }
 
@@ -87,6 +96,29 @@ public class StatManager {
         }
 
         Console.info("Stats pushed!");
+    }
+
+    private String getHighestPlayer() {
+        try {
+            Connection connection = SqlManager.get().createConnection();
+
+            PreparedStatement statement = connection.prepareStatement("SELECT UUID FROM `hb_stat` ORDER BY points DESC LIMIT 1;\n");
+            ResultSet rs = statement.executeQuery();
+
+            String result;
+            if (rs.next()) {
+                result = rs.getString("uuid");
+            } else {
+                result = null;
+            }
+
+            connection.close();
+
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void setStat(UUID uuid, String name, int prev, int amount) {
@@ -170,7 +202,10 @@ public class StatManager {
 
         int p = getCurrentStat(uuid, pointsTracker);
         points.put(uuid, p);
-        gameRanks.put(uuid, GameRank.findRank(p));
+        if (uuid.toString().equals(highestPlayerUUID))
+            gameRanks.put(uuid, GameRank.DEATHBRINGER);
+        else
+            gameRanks.put(uuid, GameRank.findRank(p));
     }
 
     public GameRank getGameRank(UUID uuid) {
