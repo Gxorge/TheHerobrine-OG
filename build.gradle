@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "uk.hotten.herobrine"
-version = "1.0"
+version = "PRE-1.0"
 
 repositories {
     mavenLocal()
@@ -46,9 +46,31 @@ dependencies {
     implementation 'uk.hotten.gxui:GxUI:1.1'
 }
 
+tasks.register('updatePluginYmlVersion') {
+    doLast {
+        def file = file('src/main/resources/plugin.yml')
+        def lines = file.readLines()
+        lines[2] = "version: ${version}-" + getCurrentGitBranch()
+        file.write(lines.join("\n"))
+    }
+}
+
+def getCurrentGitBranch() {
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    } catch (ignored) {
+        return 'unknown'
+    }
+}
+
 shadowJar {
     minimize()
-    archiveClassifier.set("part")
+    archiveClassifier.set(getCurrentGitBranch())
 }
 
 jar.dependsOn shadowJar
@@ -58,3 +80,5 @@ compileJava {
     options.fork = true
     compileJava.options.encoding = 'UTF-8'
 }
+
+compileJava.dependsOn updatePluginYmlVersion
