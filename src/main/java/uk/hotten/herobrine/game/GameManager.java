@@ -56,6 +56,7 @@ public class GameManager {
     @Getter private boolean allowOverfill;
 
     @Getter private String networkName;
+    @Getter private String networkWeb;
 
     @Getter private Player herobrine;
     private BatBombAbility hbBatBomb;
@@ -97,6 +98,7 @@ public class GameManager {
         startTimer = plugin.getConfig().getInt("startTime");
         allowOverfill = plugin.getConfig().getBoolean("allowOverfill");
         networkName = plugin.getConfig().getString("networkName");
+        networkWeb = plugin.getConfig().getString("networkWeb");
 
         shardCount = 0;
         survivors = new ArrayList<>();
@@ -136,7 +138,7 @@ public class GameManager {
                         .next("" + survivors.size())
                         .blank()
                         .next("" + ChatColor.DARK_GRAY + "--------------")
-                        .next("" + ChatColor.AQUA + networkName)
+                        .next("" + ChatColor.AQUA + networkWeb)
                         .build();
             }
         };

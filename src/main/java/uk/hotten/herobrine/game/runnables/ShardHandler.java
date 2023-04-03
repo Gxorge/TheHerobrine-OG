@@ -73,7 +73,7 @@ public class ShardHandler extends BukkitRunnable {
         shard = loc.getWorld().dropItem(loc.add(0, 1, 0), createShard());
         loc.getWorld().strikeLightningEffect(loc.add(0, 1, 0));
         gm.setShardState(ShardState.SPAWNED);
-        PlayerUtil.broadcastTitle("", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "dropped!", 20, 60, 20);
+        PlayerUtil.broadcastTitle("", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "dropped!", 10, 60, 10);
     }
 
     private static ItemStack createShard() {

@@ -3,6 +3,7 @@ package uk.hotten.herobrine;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import me.tigerhix.lib.scoreboard.ScoreboardLib;
+import uk.hotten.herobrine.commands.DropShardCommand;
 import uk.hotten.herobrine.commands.ForceStartCommand;
 import uk.hotten.herobrine.commands.SetHerobrineCommand;
 import uk.hotten.herobrine.data.SqlManager;
@@ -32,6 +33,7 @@ public class HerobrinePluginOG extends JavaPlugin {
 
         getCommand("setherobrine").setExecutor(new SetHerobrineCommand());
         getCommand("forcestart").setExecutor(new ForceStartCommand());
+        getCommand("dropshard").setExecutor(new DropShardCommand());
 
         ScoreboardLib.setPluginInstance(this);
 

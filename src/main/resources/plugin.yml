@@ -1,6 +1,6 @@
 name: TheHerobrine-OG
 main: uk.hotten.herobrine.HerobrinePluginOG
-version: PRE-1.0-scoreboard
+version: PRE-1.0-master
 api-version: 1.18
 author: Gxorge
 description: Remake of "The Herobrine!" v2 from HiveMC.
@@ -17,3 +17,8 @@ commands:
     description: Force start the game.
     permission: theherobrine.command.forcestart
     usage: /<command> [time]
+
+  dropshard:
+    description: Drop the shard from the shard holder.
+    permission: theherobrine.command.dropshard
+    usage: /<command>
