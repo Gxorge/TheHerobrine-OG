@@ -39,6 +39,7 @@ dependencies {
     api 'mysql:mysql-connector-java:8.0.32'
     api 'redis.clients:jedis:3.4.1'
     api 'xyz.xenondevs:particle:1.8.3'
+    api 'me.tigerhix.lib:scoreboard:1.0.1-SNAPSHOT'
     compileOnly 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
     compileOnly 'com.comphenix.protocol:ProtocolLib:4.7.0'
     compileOnly 'org.projectlombok:lombok:1.18.22'

@@ -17,3 +17,8 @@ commands:
     description: Force start the game.
     permission: theherobrine.command.forcestart
     usage: /<command> [time]
+
+  dropshard:
+    description: Drop the shard from the shard holder.
+    permission: theherobrine.command.dropshard
+    usage: /<command>

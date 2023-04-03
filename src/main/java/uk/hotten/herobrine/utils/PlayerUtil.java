@@ -3,6 +3,7 @@ package uk.hotten.herobrine.utils;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -30,7 +31,7 @@ public class PlayerUtil {
 
     public static void broadcastTitle(String top, String bottom, int fadeIn, int stay, int fadeOut) {
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            p.sendTitle(top, bottom, fadeIn, stay, fadeOut);
+            p.sendTitle((top.equals("") ? ChatColor.RESET + "" : top), bottom, fadeIn, stay, fadeOut);
         }
     }
 

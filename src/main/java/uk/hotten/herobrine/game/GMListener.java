@@ -307,7 +307,7 @@ public class GMListener implements Listener {
             }
 
             if (player == gm.getShardCarrier()) {
-                ShardHandler.drop(player.getLocation());
+                ShardHandler.drop(player.getLocation().add(0, 1, 0));
             }
 
             gm.endCheck();

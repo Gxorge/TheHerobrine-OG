@@ -3,6 +3,11 @@ package uk.hotten.herobrine.game;
 import com.comphenix.protocol.ProtocolManager;
 import lombok.Getter;
 import lombok.Setter;
+import me.tigerhix.lib.scoreboard.ScoreboardLib;
+import me.tigerhix.lib.scoreboard.common.EntryBuilder;
+import me.tigerhix.lib.scoreboard.type.Entry;
+import me.tigerhix.lib.scoreboard.type.Scoreboard;
+import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
 import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.events.GameStateUpdateEvent;
 import uk.hotten.herobrine.events.ShardCaptureEvent;
@@ -32,6 +37,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class GameManager {
 
@@ -48,9 +54,9 @@ public class GameManager {
     @Getter private int requiredToStart;
     @Getter private int maxPlayers;
     @Getter private boolean allowOverfill;
-    @Getter private int startingDuration;
 
     @Getter private String networkName;
+    @Getter private String networkWeb;
 
     @Getter private Player herobrine;
     private BatBombAbility hbBatBomb;
@@ -73,6 +79,8 @@ public class GameManager {
 
     @Getter @Setter private StatTracker[] statTrackers;
 
+    private ScoreboardHandler gameScoreboardHandler;
+
     public GameManager(JavaPlugin plugin, WorldManager worldManager, RedisManager redis, ProtocolManager protocolManager) {
         Console.info("Loading Game Manager...");
         this.plugin = plugin;
@@ -90,6 +98,7 @@ public class GameManager {
         startTimer = plugin.getConfig().getInt("startTime");
         allowOverfill = plugin.getConfig().getBoolean("allowOverfill");
         networkName = plugin.getConfig().getString("networkName");
+        networkWeb = plugin.getConfig().getString("networkWeb");
 
         shardCount = 0;
         survivors = new ArrayList<>();
@@ -111,6 +120,28 @@ public class GameManager {
         }
 
         playerKits = new HashMap<>();
+
+        gameScoreboardHandler = new ScoreboardHandler() {
+            @Override
+            public String getTitle(Player player) {
+                return "" + ChatColor.RED + "The" + ChatColor.BOLD + "Herobrine!";
+            }
+
+            @Override
+            public List<Entry> getEntries(Player player) {
+                return new EntryBuilder()
+                        .blank()
+                        .next(ChatColor.GREEN + "✦ Shard Count")
+                        .next("" + shardCount + "/3")
+                        .blank()
+                        .next(ChatColor.GREEN + "❂ Survivors")
+                        .next("" + survivors.size())
+                        .blank()
+                        .next("" + ChatColor.DARK_GRAY + "--------------")
+                        .next("" + ChatColor.AQUA + networkWeb)
+                        .build();
+            }
+        };
 
         startWaiting();
         Console.info("Game Manager is ready!");
@@ -181,6 +212,11 @@ public class GameManager {
         new ShardHandler().runTaskTimer(plugin, 0, 20);
         new HerobrineItemHider().runTaskTimer(plugin, 0, 1);
         new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 10); //todo this needs working on, its very tps heavy
+
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            Scoreboard scoreboard = ScoreboardLib.createScoreboard(p).setHandler(gameScoreboardHandler).setUpdateInterval(1);
+            scoreboard.activate();
+        }
     }
 
     public void setupHerobrine() {
