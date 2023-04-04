@@ -17,11 +17,12 @@ import uk.hotten.herobrine.kit.abilities.LoveAbility;
 
 public class MageKit extends Kit {
 
-    public MageKit(GameManager gm) {
+    public MageKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "mage",
                 ChatColor.AQUA + "Mage",
-                null,
+                "theherobrine.kit.unlockable.mage",
+                requirePermission,
                 "",
                 new GUIItem(Material.WOODEN_SWORD).displayName(ChatColor.AQUA + "Mage")
         );

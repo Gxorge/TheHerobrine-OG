@@ -7,6 +7,7 @@ import uk.hotten.herobrine.game.GameManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import uk.hotten.herobrine.utils.Message;
 
 public class KitGui extends GUIBase {
 
@@ -23,8 +24,12 @@ public class KitGui extends GUIBase {
             item.button(new GUIButton() {
                 @Override
                 public boolean leftClick() {
-                    gm.setKit(getPlayer(), kit, true);
-                    getPlayer().closeInventory();
+                    if (kit.getPermission() == null || (!kit.isRequirePermission() || getPlayer().hasPermission(kit.getPermission())))
+                        applyKit(kit);
+                    else {
+                        getPlayer().sendMessage(Message.format(ChatColor.RED + "You haven't unlocked this kit yet!"));
+                        return false;
+                    }
                     return true;
                 }
 
@@ -36,6 +41,11 @@ public class KitGui extends GUIBase {
             curr = nextCurr(curr);
         }
 
+    }
+
+    private void applyKit(Kit kit) {
+        GameManager.get().setKit(getPlayer(), kit, true);
+        getPlayer().closeInventory();
     }
 
     private int nextCurr(int curr) {

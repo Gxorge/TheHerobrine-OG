@@ -30,14 +30,16 @@ public class GMListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         StatManager.get().check(event.getPlayer().getUniqueId());
 
+        Player player = event.getPlayer();
+
         if (gm.getGameState() == GameState.LIVE) {
-            gm.makeSpectator(event.getPlayer());
+            gm.makeSpectator(player);
             return;
         }
 
         event.setJoinMessage("");
-        Message.broadcast(Message.format("" + ChatColor.AQUA + event.getPlayer().getName() + " " + ChatColor.YELLOW + "has joined!"));
-        gm.getSurvivors().add(event.getPlayer());
+        Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has joined!"));
+        gm.getSurvivors().add(player);
         if (gm.getSurvivors().size() >= gm.getRequiredToStart()) {
             if (gm.getGameState() != GameState.STARTING) {
                 gm.setGameState(GameState.STARTING);
@@ -55,26 +57,32 @@ public class GMListener implements Listener {
             }
         }
 
-        gm.hubInventory(event.getPlayer());
-        gm.setKit(event.getPlayer(), gm.getSavedKit(event.getPlayer()), false);
+        gm.hubInventory(player);
+        gm.setKit(event.getPlayer(), gm.getSavedKit(player), true);
+        player.setHealth(20);
+        player.setFoodLevel(20);
+        player.setGameMode(GameMode.SURVIVAL);
     }
 
     @EventHandler
     public void onLeave(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+
         event.setQuitMessage("");
-        gm.getSurvivors().remove(event.getPlayer());
+        Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
+        gm.getSurvivors().remove(player);
         if (gm.getGameState() == GameState.LIVE) {
-            if (event.getPlayer() == gm.getShardCarrier()) {
-                ShardHandler.drop(event.getPlayer().getLocation());
+            if (player == gm.getShardCarrier()) {
+                ShardHandler.drop(player.getLocation());
             }
 
             gm.endCheck();
             return;
         }
 
-        if (gm.getPassUser() == event.getPlayer()) {
+        if (gm.getPassUser() == player) {
             gm.setPassUser(null);
-            Message.broadcast(Message.format(ChatColor.GOLD + event.getPlayer().getName() + " has left and will no-longer be Herobrine."), "theherobrine.command.setherobrine");
+            Message.broadcast(Message.format(ChatColor.GOLD + player.getName() + " has left and will no-longer be Herobrine."), "theherobrine.command.setherobrine");
         }
     }
 
@@ -86,6 +94,9 @@ public class GMListener implements Listener {
         }
 
         Player player = (Player) event.getEntity();
+
+        if (gm.getGameState() != LIVE)
+            return;
 
         event.getItem().getItemStack();
         if (event.getItem().getItemStack().getType() != Material.NETHER_STAR) {
@@ -269,8 +280,10 @@ public class GMListener implements Listener {
 
         Player player = (Player) event.getEntity();
 
-        if (gm.getGameState() != GameState.LIVE)
+        if (gm.getGameState() != GameState.LIVE) {
+            event.setCancelled(true);
             return;
+        }
 
         if (gm.getSpectators().contains(player)) {
             event.setCancelled(true);

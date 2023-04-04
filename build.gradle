@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "uk.hotten.herobrine"
-version = "PRE-1.0"
+version = "1.0-SNAPSHOT"
 
 repositories {
     mavenLocal()
@@ -56,6 +56,13 @@ tasks.register('updatePluginYmlVersion') {
     }
 }
 
+def revertPluginYmlVersion() {
+    def file = file('src/main/resources/plugin.yml')
+    def lines = file.readLines()
+    lines[2] = "version: ${version}"
+    file.write(lines.join("\n"))
+}
+
 def getCurrentGitBranch() {
     try {
         def stdout = new ByteArrayOutputStream()
@@ -72,6 +79,9 @@ def getCurrentGitBranch() {
 shadowJar {
     minimize()
     archiveClassifier.set(getCurrentGitBranch())
+    doLast {
+        revertPluginYmlVersion()
+    }
 }
 
 jar.dependsOn shadowJar

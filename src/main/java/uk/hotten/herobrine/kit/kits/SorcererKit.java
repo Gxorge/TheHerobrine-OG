@@ -16,11 +16,12 @@ import uk.hotten.herobrine.kit.abilities.WooflessAbility;
 
 public class SorcererKit extends Kit {
 
-    public SorcererKit(GameManager gm) {
+    public SorcererKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "sorcerer",
                 ChatColor.RED + "Sorcerer",
-                null,
+                "theherobrine.kit.unlockable.sorcerer",
+                requirePermission,
                 "",
                 new GUIItem(Material.GOLDEN_BOOTS).displayName(ChatColor.RED + "Sorcerer")
         );

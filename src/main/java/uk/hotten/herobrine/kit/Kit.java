@@ -20,16 +20,18 @@ public abstract class Kit implements Listener {
     @Getter private String internalName; // don't change this later, it will break things
     @Getter private String displayName;
     @Getter private String permission;
+    @Getter private boolean requirePermission;
     @Getter private String desc;
     @Getter private GUIItem displayItem;
     public HashMap<Player, ArrayList<KitAbility>> abilities;
 
-    public Kit(GameManager gm, String internalName, String displayName, String permission, String desc, GUIItem displayItem) {
+    public Kit(GameManager gm, String internalName, String displayName, String permission, boolean requirePermission, String desc, GUIItem displayItem) {
         this.gm = gm;
 
         this.internalName = internalName;
         this.displayName = displayName;
         this.permission = permission;
+        this.requirePermission = requirePermission;
         this.desc = desc;
         this.displayItem = displayItem;
         this.abilities = new HashMap<>();

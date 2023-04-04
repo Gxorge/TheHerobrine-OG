@@ -24,7 +24,7 @@ public class DropShardCommand implements CommandExecutor {
             return true;
         }
 
-        PlayerUtil.removeAmountOfItem(gm.getShardCarrier(), new ItemStack(Material.NETHER_STAR), 1);
+        gm.getShardCarrier().getInventory().remove(Material.NETHER_STAR);
         ShardHandler.drop(gm.getShardCarrier().getLocation().add(10, 0, 0));
         sender.sendMessage(Message.format("The shard has been forcefully dropped."));
         return true;

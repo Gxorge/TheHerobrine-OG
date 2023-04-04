@@ -17,11 +17,12 @@ import org.bukkit.potion.PotionType;
 
 public class WizardKit extends Kit {
 
-    public WizardKit(GameManager gm) {
+    public WizardKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "wizard",
                 ChatColor.DARK_PURPLE + "Wizard",
-                null,
+                "theherobrine.kit.classic.wizzard",
+                requirePermission,
                 "",
                 new GUIItem(Material.SPLASH_POTION).displayName(ChatColor.DARK_PURPLE + "Wizard"));
     }

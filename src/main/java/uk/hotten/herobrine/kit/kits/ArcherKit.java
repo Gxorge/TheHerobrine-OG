@@ -14,11 +14,12 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public class ArcherKit extends Kit {
 
-    public ArcherKit(GameManager gm) {
+    public ArcherKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "archer",
                 ChatColor.GREEN + "Archer",
-                null,
+                "theherobrine.kit.classic.archer",
+                requirePermission,
                 "",
                 new GUIItem(Material.BOW).displayName(ChatColor.GREEN + "Archer")
         );

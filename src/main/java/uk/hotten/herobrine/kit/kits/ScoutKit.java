@@ -15,11 +15,12 @@ import org.bukkit.potion.PotionEffectType;
 
 public class ScoutKit extends Kit {
 
-    public ScoutKit(GameManager gm) {
+    public ScoutKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "scout",
                 ChatColor.YELLOW + "Scout",
-                null,
+                "theherobrine.kit.classic.scout",
+                requirePermission,
                 "",
                 new GUIItem(Material.FEATHER).displayName(ChatColor.YELLOW + "Scout")
         );

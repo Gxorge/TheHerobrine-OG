@@ -15,11 +15,12 @@ import uk.hotten.herobrine.kit.abilities.WisdomAbility;
 
 public class PaladinKit extends Kit {
 
-    public PaladinKit(GameManager gm) {
+    public PaladinKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "paladin",
                 ChatColor.GOLD + "Paladin",
-                null,
+                "theherobrine.kit.unlockable.paladin",
+                requirePermission,
                 "",
                 new GUIItem(Material.ENDER_PEARL).displayName(ChatColor.GOLD + "Paladin")
         );

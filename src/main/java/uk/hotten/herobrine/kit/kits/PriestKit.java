@@ -17,11 +17,12 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public class PriestKit extends Kit {
 
-    public PriestKit(GameManager gm) {
+    public PriestKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "priest",
                 ChatColor.WHITE + "Priest",
-                null,
+                "theherobrine.kit.classic.priest",
+                requirePermission,
                 "",
                 new GUIItem(Material.BONE).displayName(ChatColor.WHITE + "Priest")
         );

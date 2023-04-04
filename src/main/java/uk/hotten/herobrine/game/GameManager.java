@@ -99,19 +99,21 @@ public class GameManager {
         allowOverfill = plugin.getConfig().getBoolean("allowOverfill");
         networkName = plugin.getConfig().getString("networkName");
         networkWeb = plugin.getConfig().getString("networkWeb");
+        boolean lockClassicKits = plugin.getConfig().getBoolean("lockClassicKits");
+        boolean lockUnlockableKits = plugin.getConfig().getBoolean("lockUnlockableKits");
 
         shardCount = 0;
         survivors = new ArrayList<>();
         spectators = new ArrayList<>();
 
         kits = new Kit[] {
-                new ArcherKit(this),
-                new PriestKit(this),
-                new ScoutKit(this),
-                new WizardKit(this),
-                new MageKit(this),
-                new PaladinKit(this),
-                new SorcererKit(this)
+                new ArcherKit(this, lockClassicKits),
+                new PriestKit(this, lockClassicKits),
+                new ScoutKit(this, lockClassicKits),
+                new WizardKit(this, lockClassicKits),
+                new MageKit(this, lockUnlockableKits),
+                new PaladinKit(this, lockUnlockableKits),
+                new SorcererKit(this, lockUnlockableKits)
         };
 
         for (Kit k : kits) {
@@ -211,11 +213,14 @@ public class GameManager {
         }
         new ShardHandler().runTaskTimer(plugin, 0, 20);
         new HerobrineItemHider().runTaskTimer(plugin, 0, 1);
-        new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 10); //todo this needs working on, its very tps heavy
+        new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 10);
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             Scoreboard scoreboard = ScoreboardLib.createScoreboard(p).setHandler(gameScoreboardHandler).setUpdateInterval(1);
             scoreboard.activate();
+            p.setHealth(20);
+            p.setFoodLevel(20);
+            p.setGameMode(GameMode.SURVIVAL);
         }
     }
 

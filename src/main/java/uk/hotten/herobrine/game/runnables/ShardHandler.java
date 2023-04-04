@@ -58,12 +58,12 @@ public class ShardHandler extends BukkitRunnable {
         Location spawn = WorldManager.getInstance().shardSpawns.get(rand.nextInt(WorldManager.getInstance().shardSpawns.size()));
 
         shard = spawn.getWorld().dropItem(spawn.add(0, 1, 0), createShard());
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(shard.getLocation());
 
         spawn.getWorld().strikeLightningEffect(spawn.add(0, 1, 0));
         gm.setShardState(ShardState.SPAWNED);
         timer = random.nextInt(16) + 30; // random number between 30 and 45 for the next shard spawn
         Console.debug("Next shard time to be " + timer);
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(spawn);
 
         PlayerUtil.broadcastTitle("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "A Shard has spawned!", ChatColor.AQUA + "Use your compass to find it!", 10, 60, 10);
         Message.broadcast(Message.format(ChatColor.LIGHT_PURPLE  + "A new shard has " + ChatColor.AQUA + ChatColor.BOLD + "been SUMMONED!"));
@@ -72,7 +72,10 @@ public class ShardHandler extends BukkitRunnable {
     public static void drop(Location loc) {
         shard = loc.getWorld().dropItem(loc.add(0, 1, 0), createShard());
         loc.getWorld().strikeLightningEffect(loc.add(0, 1, 0));
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(shard.getLocation());
+
         gm.setShardState(ShardState.SPAWNED);
+        gm.setShardCarrier(null);
         PlayerUtil.broadcastTitle("", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "dropped!", 10, 60, 10);
     }
 
