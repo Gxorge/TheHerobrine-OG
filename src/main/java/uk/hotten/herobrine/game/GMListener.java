@@ -1,5 +1,6 @@
 package uk.hotten.herobrine.game;
 
+import me.tigerhix.lib.scoreboard.ScoreboardLib;
 import org.bukkit.entity.*;
 import uk.hotten.herobrine.game.runnables.ShardHandler;
 import uk.hotten.herobrine.game.runnables.StartingRunnable;
@@ -31,6 +32,10 @@ public class GMListener implements Listener {
         StatManager.get().check(event.getPlayer().getUniqueId());
 
         Player player = event.getPlayer();
+
+        gm.getScoreboards().put(player, ScoreboardLib.createScoreboard(player));
+        gm.updateTags(GameManager.ScoreboardUpdateAction.CREATE);
+        gm.setTags(player, null, null, GameManager.ScoreboardUpdateAction.CREATE);
 
         if (gm.getGameState() == GameState.LIVE) {
             gm.makeSpectator(player);
@@ -71,6 +76,13 @@ public class GMListener implements Listener {
         event.setQuitMessage("");
         Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
         gm.getSurvivors().remove(player);
+
+        gm.getScoreboards().get(player).deactivate();
+        gm.getScoreboards().remove(player);
+        gm.getTeamPrefixes().remove(player);
+        gm.getTeamColours().remove(player);
+
+
         if (gm.getGameState() == GameState.LIVE) {
             if (player == gm.getShardCarrier()) {
                 ShardHandler.drop(player.getLocation());
@@ -116,6 +128,7 @@ public class GMListener implements Listener {
         PlayerUtil.sendTitle(gm.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
         gm.setShardState(ShardState.CARRYING);
         gm.setShardCarrier(player);
+        gm.setTags(player, "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Shard: ", ChatColor.LIGHT_PURPLE, GameManager.ScoreboardUpdateAction.UPDATE);
         PlayerUtil.broadcastSound(Sound.ENTITY_BAT_DEATH, 1f, 0f);
         PlayerUtil.addEffect(player, PotionEffectType.BLINDNESS, 100, 1, false, false);
         PlayerUtil.addEffect(player, PotionEffectType.SLOW, 600, 2, false, false);

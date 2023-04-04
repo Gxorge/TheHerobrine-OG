@@ -3,11 +3,12 @@ package uk.hotten.herobrine.game;
 import com.comphenix.protocol.ProtocolManager;
 import lombok.Getter;
 import lombok.Setter;
-import me.tigerhix.lib.scoreboard.ScoreboardLib;
 import me.tigerhix.lib.scoreboard.common.EntryBuilder;
 import me.tigerhix.lib.scoreboard.type.Entry;
 import me.tigerhix.lib.scoreboard.type.Scoreboard;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
+import org.bukkit.scoreboard.NameTagVisibility;
+import org.bukkit.scoreboard.Team;
 import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.events.GameStateUpdateEvent;
 import uk.hotten.herobrine.events.ShardCaptureEvent;
@@ -79,6 +80,9 @@ public class GameManager {
 
     @Getter @Setter private StatTracker[] statTrackers;
 
+    @Getter private HashMap<Player, Scoreboard> scoreboards;
+    @Getter private HashMap<Player, String> teamPrefixes = new HashMap<>();
+    @Getter private HashMap<Player, ChatColor> teamColours = new HashMap<>();
     private ScoreboardHandler gameScoreboardHandler;
 
     public GameManager(JavaPlugin plugin, WorldManager worldManager, RedisManager redis, ProtocolManager protocolManager) {
@@ -123,6 +127,7 @@ public class GameManager {
 
         playerKits = new HashMap<>();
 
+        scoreboards = new HashMap<>();
         gameScoreboardHandler = new ScoreboardHandler() {
             @Override
             public String getTitle(Player player) {
@@ -208,7 +213,9 @@ public class GameManager {
         setupHerobrine();
         setupSurvivors();
         new HerobrineSetup().runTaskAsynchronously(plugin);
+        setTags(herobrine, "" + ChatColor.RED + ChatColor.BOLD + "HEROBRINE ", ChatColor.RED, ScoreboardUpdateAction.UPDATE);
         for (Player p : survivors) {
+            setTags(p, null, ChatColor.DARK_GREEN, ScoreboardUpdateAction.UPDATE);
             new SurvivorSetup(p).runTaskAsynchronously(plugin);
         }
         new ShardHandler().runTaskTimer(plugin, 0, 20);
@@ -216,12 +223,13 @@ public class GameManager {
         new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 10);
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            Scoreboard scoreboard = ScoreboardLib.createScoreboard(p).setHandler(gameScoreboardHandler).setUpdateInterval(1);
-            scoreboard.activate();
+            scoreboards.get(p).setHandler(gameScoreboardHandler).setUpdateInterval(1).activate();
             p.setHealth(20);
             p.setFoodLevel(20);
             p.setGameMode(GameMode.SURVIVAL);
         }
+
+        updateTags(ScoreboardUpdateAction.UPDATE);
     }
 
     public void setupHerobrine() {
@@ -354,6 +362,8 @@ public class GameManager {
         player.setHealth(20);
         player.setFoodLevel(20);
         player.teleport(worldManager.survivorSpawn);
+
+        setTags(player, null, ChatColor.GRAY, ScoreboardUpdateAction.UPDATE);
     }
 
     public void end(WinType type) {
@@ -388,6 +398,7 @@ public class GameManager {
 
     public void capture(Player player) {
         player.getInventory().remove(Material.NETHER_STAR);
+        setTags(player, null, ChatColor.DARK_GREEN, ScoreboardUpdateAction.UPDATE);
         shardCarrier = null;
         shardCount++;
         if (shardCount == 3) {
@@ -520,6 +531,63 @@ public class GameManager {
             return defaultKit;
         } else {
             return playerKits.get(player);
+        }
+    }
+
+    // Scoreboards
+    public enum ScoreboardUpdateAction {
+        CREATE, UPDATE, BEGONETHOT
+    }
+
+
+    public void updateTags(ScoreboardUpdateAction action) {
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            setTags(p, getTeamPrefixes().get(p), getTeamColours().get(p), action);
+        }
+    }
+
+    public void setTags(Player player, String prefix, ChatColor color, ScoreboardUpdateAction action) {
+        if (prefix == null)
+            prefix = "";
+        if (color == null)
+            color = ChatColor.WHITE;
+
+        for (Scoreboard s : getScoreboards().values()) {
+            org.bukkit.scoreboard.Scoreboard sc = s.getHolder().getScoreboard();
+
+            String teamName = "APL" /*stands for  A PLAYER. e.g. npcs will be BNPC (gabi lied, she never made this a thing)*/ + player.getEntityId();
+            if (sc.getTeam(teamName) == null) {
+                sc.registerNewTeam(teamName);
+            }
+
+            Team team = sc.getTeam(teamName);
+            team.setPrefix(prefix);
+            team.setColor(color);
+            team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+
+            switch (action) {
+                case CREATE:
+                    team.addEntry(player.getName());
+                    break;
+                case UPDATE:
+                    team.unregister();
+                    sc.registerNewTeam(teamName);
+                    team = sc.getTeam(teamName);
+                    team.setPrefix(prefix);
+                    team.setColor(color);
+                    team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+                    team.addEntry(player.getName());
+                    break;
+                case BEGONETHOT:
+                    team.unregister();
+                    break;
+            }
+
+            getTeamPrefixes().remove(player);
+            getTeamColours().remove(player);
+
+            getTeamPrefixes().put(player, prefix);
+            getTeamColours().put(player, color);
         }
     }
 

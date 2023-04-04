@@ -73,6 +73,7 @@ public class ShardHandler extends BukkitRunnable {
         shard = loc.getWorld().dropItem(loc.add(0, 1, 0), createShard());
         loc.getWorld().strikeLightningEffect(loc.add(0, 1, 0));
         for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(shard.getLocation());
+        gm.setTags(gm.getShardCarrier(), null, ChatColor.DARK_GREEN, GameManager.ScoreboardUpdateAction.UPDATE);
 
         gm.setShardState(ShardState.SPAWNED);
         gm.setShardCarrier(null);
