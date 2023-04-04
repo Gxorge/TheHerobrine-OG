@@ -95,7 +95,7 @@ public class GMListener implements Listener {
 
         Player player = (Player) event.getEntity();
 
-        if (gm.getGameState() != LIVE)
+        if (gm.getGameState() != GameState.LIVE)
             return;
 
         event.getItem().getItemStack();
