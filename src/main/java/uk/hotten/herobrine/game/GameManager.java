@@ -65,6 +65,7 @@ public class GameManager {
     private BlindingAbility hbBlinding;
     @Getter private ArrayList<Player> survivors;
     @Getter private ArrayList<Player> spectators;
+    @Getter private ArrayList<Player> hbLastHit;
     @Getter @Setter private Player passUser;
 
     @Getter public int shardCount;
@@ -109,6 +110,7 @@ public class GameManager {
         shardCount = 0;
         survivors = new ArrayList<>();
         spectators = new ArrayList<>();
+        hbLastHit = new ArrayList<>();
 
         kits = new Kit[] {
                 new ArcherKit(this, lockClassicKits),
@@ -384,8 +386,8 @@ public class GameManager {
             PlayerUtil.broadcastSound(Sound.ENTITY_ENDER_DRAGON_HURT, 1f, 1f);
             StatManager.get().pointsTracker.increment(herobrine.getUniqueId(), 10);
         }
-        StatManager.get().push();
         StatManager.get().stopTracking();
+        StatManager.get().push();
     }
 
     public void endCheck() {

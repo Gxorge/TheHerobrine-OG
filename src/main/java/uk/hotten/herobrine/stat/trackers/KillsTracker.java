@@ -3,6 +3,7 @@ package uk.hotten.herobrine.stat.trackers;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.stat.StatManager;
 import uk.hotten.herobrine.stat.StatTracker;
+import uk.hotten.herobrine.utils.Console;
 import uk.hotten.herobrine.utils.GameState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,8 +24,12 @@ public class KillsTracker extends StatTracker {
         if (gm.getGameState() != GameState.LIVE)
             return;
 
-        if (player.getKiller() == null)
+        if (player.getKiller() == null) {
+            if (gm.getSurvivors().contains(player) && gm.getHbLastHit().contains(player)) {
+                increment(gm.getHerobrine().getUniqueId(), 1);
+            }
             return;
+        }
 
         Player killer = player.getKiller();
 

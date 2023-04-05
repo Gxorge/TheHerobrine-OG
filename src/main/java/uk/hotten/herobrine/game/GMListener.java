@@ -303,8 +303,17 @@ public class GMListener implements Listener {
             return;
         }
 
-        if (player == gm.getHerobrine() && event.getCause() == EntityDamageEvent.DamageCause.FALL)
+        if (player == gm.getHerobrine() && event.getCause() == EntityDamageEvent.DamageCause.FALL) {
             event.setCancelled(true);
+            return;
+        }
+
+        if (gm.getSurvivors().contains(player)) {
+            if (event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) {
+                gm.getHbLastHit().add(player);
+                Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> gm.getHbLastHit().remove(player), 120);
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -327,7 +336,7 @@ public class GMListener implements Listener {
             gm.end(WinType.SURVIVORS);
         } else {
             gm.getSurvivors().remove(player);
-            if (player.getKiller() != null && player.getKiller() == gm.getHerobrine()) {
+            if ((player.getKiller() != null && player.getKiller() == gm.getHerobrine()) || gm.getHbLastHit().contains(player)) {
                 Message.broadcast(Message.format(ChatColor.AQUA + player.getName() + ChatColor.YELLOW + " was killed by " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
                 StatManager.get().pointsTracker.increment(gm.getHerobrine().getUniqueId(), 5);
             }

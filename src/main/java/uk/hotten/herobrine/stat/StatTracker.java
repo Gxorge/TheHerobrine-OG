@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import uk.hotten.herobrine.utils.Console;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -37,6 +38,7 @@ public class StatTracker implements Listener {
     public void increment(UUID uuid, int by) {
         if (!stat.containsKey(uuid)) {
             stat.put(uuid, by);
+            Console.debug("Stat " + displayName + " for " + uuid.toString() + " has been incremented by " + by);
             return;
         }
 
@@ -44,6 +46,7 @@ public class StatTracker implements Listener {
         int updated = old + by;
 
         stat.put(uuid, updated);
+        Console.debug("Stat " + displayName + " for " + uuid.toString() + " has been incremented by " + by);
     }
 
 }
