@@ -166,7 +166,7 @@ public class GameManager {
                 if (old == null) old = GameState.UNKNOWN;
 
                 gameState = newState;
-                Console.info("Game state updated to " + newState.toString() + "(from " + old.toString() + ")!");
+                Console.debug("Game state updated to " + newState.toString() + "(from " + old.toString() + ")!");
                 plugin.getServer().getPluginManager().callEvent(new GameStateUpdateEvent(old, newState));
             }
         }.runTask(plugin);
@@ -181,7 +181,7 @@ public class GameManager {
                 if (old == null) old = ShardState.UNKNOWN;
 
                 shardState = newState;
-                Console.info("Shard state updated to " + newState.toString() + "(from " + old.toString() + ")!");
+                Console.debug("Shard state updated to " + newState.toString() + "(from " + old.toString() + ")!");
                 plugin.getServer().getPluginManager().callEvent(new ShardStateUpdateEvent(old, newState));
                 if (gameState == GameState.LIVE)
                     NarrationRunnable.timer = 0;

@@ -62,6 +62,8 @@ public class GMListener implements Listener {
             }
         }
 
+        WorldManager.getInstance().getPlayerVotes().put(player, 0);
+        WorldManager.getInstance().sendVotingMessage(player);
         gm.hubInventory(player);
         gm.setKit(event.getPlayer(), gm.getSavedKit(player), true);
         player.setHealth(20);
@@ -81,6 +83,11 @@ public class GMListener implements Listener {
         gm.getScoreboards().remove(player);
         gm.getTeamPrefixes().remove(player);
         gm.getTeamColours().remove(player);
+
+        WorldManager wm = WorldManager.getInstance();
+        if (wm.getPlayerVotes().get(player) != 0)
+            wm.getVotingMaps().get(wm.getPlayerVotes().get(player)).decrementVotes();
+        wm.getPlayerVotes().remove(player);
 
 
         if (gm.getGameState() == GameState.LIVE) {

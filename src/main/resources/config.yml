@@ -1,13 +1,19 @@
 networkName: TrueOG # Name of your network
 networkWeb: trueog.net # Website of your network
+
 minPlayers: 2 # Minimum players needed to start a game
 maxPlayers: 16 # Maximum players in a game
 startTime: 15 # How many seconds till the game will start when the minimum is reached
 allowOverflow: false # Allow more than the max players to join
+
 mapBase: "maps" # Folder where the map base and maps folder is.
 votingMaps: 3 # How many maps should be chosen for players to vote on. Don't go over the amount of maps you have
+endVotingAt: 10 # Stops the vote at the set remaining seconds until the game starts
+
 lockClassicKits: false # Do you want to lock classic kits such as Archer and Scout behind their permission?
 lockUnlockableKits: true # Do you want to lock unlockable kits such as Mage and Sorcerer behind their permission?
+
+showDebugMessages: false # Show debug messages?
 
 ## Redis Configuration
 redisHost: "localhost"

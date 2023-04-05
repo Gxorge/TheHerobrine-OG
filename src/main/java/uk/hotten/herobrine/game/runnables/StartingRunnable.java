@@ -35,7 +35,7 @@ public class StartingRunnable extends BukkitRunnable {
 
         gm.startTimer--;
 
-        if (gm.startTimer == 10)
+        if (gm.startTimer == WorldManager.getInstance().getEndVotingAt())
             Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), () -> WorldManager.getInstance().selectAndLoadMapFromVote());
 
         if (gm.startTimer == 0) {

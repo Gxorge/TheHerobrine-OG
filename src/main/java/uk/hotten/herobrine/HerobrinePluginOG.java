@@ -6,6 +6,7 @@ import me.tigerhix.lib.scoreboard.ScoreboardLib;
 import uk.hotten.herobrine.commands.DropShardCommand;
 import uk.hotten.herobrine.commands.ForceStartCommand;
 import uk.hotten.herobrine.commands.SetHerobrineCommand;
+import uk.hotten.herobrine.commands.VoteCommand;
 import uk.hotten.herobrine.data.SqlManager;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.data.RedisManager;
@@ -22,6 +23,8 @@ public class HerobrinePluginOG extends JavaPlugin {
 
         this.saveDefaultConfig();
 
+        Console.showDebug = getConfig().getBoolean("showDebugMessages");
+
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 
         SqlManager sqlManager = new SqlManager(this);
@@ -34,6 +37,7 @@ public class HerobrinePluginOG extends JavaPlugin {
         getCommand("setherobrine").setExecutor(new SetHerobrineCommand());
         getCommand("forcestart").setExecutor(new ForceStartCommand());
         getCommand("dropshard").setExecutor(new DropShardCommand());
+        getCommand("vote").setExecutor(new VoteCommand());
 
         ScoreboardLib.setPluginInstance(this);
 

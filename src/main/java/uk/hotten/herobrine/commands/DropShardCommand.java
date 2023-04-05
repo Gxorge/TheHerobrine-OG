@@ -5,12 +5,10 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.game.runnables.ShardHandler;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
-import uk.hotten.herobrine.utils.PlayerUtil;
 import uk.hotten.herobrine.utils.ShardState;
 
 public class DropShardCommand implements CommandExecutor {
