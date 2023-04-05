@@ -218,7 +218,7 @@ public class WorldManager implements Listener {
                     break;
             }
         }
-        Console.info("Finished parsing!");
+        Console.info("Finished loading!");
     }
 
     @EventHandler

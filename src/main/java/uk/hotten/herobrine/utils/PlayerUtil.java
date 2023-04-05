@@ -2,12 +2,12 @@ package uk.hotten.herobrine.utils;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -89,6 +89,17 @@ public class PlayerUtil {
     public static void increaseHealth(Player player, double hearts) {
         double newHealth = player.getHealth() + hearts;
         player.setHealth((newHealth > 20 ? 20 : newHealth));
+    }
+
+    public static void spawnFirework(Location location, Color colour) {
+        Firework fw = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);
+        FireworkMeta fwm = fw.getFireworkMeta();
+
+        fwm.setPower(2);
+        fwm.addEffect(FireworkEffect.builder().withColor(colour).flicker(true).build());
+
+        fw.setFireworkMeta(fwm);
+        //fw.detonate();
     }
 
 }

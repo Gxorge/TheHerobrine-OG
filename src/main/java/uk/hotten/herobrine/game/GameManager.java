@@ -9,6 +9,7 @@ import me.tigerhix.lib.scoreboard.type.Scoreboard;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Vector;
 import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.events.GameStateUpdateEvent;
 import uk.hotten.herobrine.events.ShardCaptureEvent;
@@ -39,6 +40,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class GameManager {
 
@@ -379,6 +381,19 @@ public class GameManager {
             PlayerUtil.broadcastSound(Sound.ENTITY_WITHER_DEATH, 1f, 1f);
             for (Player p : survivors)
                 StatManager.get().pointsTracker.increment(p.getUniqueId(), 10);
+
+            herobrine.getWorld().strikeLightningEffect(herobrine.getLocation().add(0, 0.5, 0));
+            Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+                Location loc = herobrine.getLocation();
+                for (int i = 0; i < 50; i++) {
+                    try {
+                        Bukkit.getServer().getScheduler().runTask(plugin, () -> PlayerUtil.spawnFirework(loc.clone().add(new Vector(Math.random()-0.5, 0, Math.random()-0.5).multiply(20)), Color.LIME));
+                        TimeUnit.MILLISECONDS.sleep(100);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         } else {
             PlayerUtil.broadcastTitle(ChatColor.RED + "HEROBRINE" + ChatColor.GREEN + " WINS!", "", 20, 60, 20);
             Message.broadcast(Message.format("" + ChatColor.RED + ChatColor.BOLD + "The Herobrine " + ChatColor.YELLOW + "has defeated all the survivors"));

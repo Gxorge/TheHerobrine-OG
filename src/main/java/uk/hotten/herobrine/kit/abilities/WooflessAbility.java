@@ -45,11 +45,16 @@ public class WooflessAbility extends KitAbility {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
             if (player.getInventory().getItemInMainHand().getType() == Material.BONE) {
+
+                if (isOnCooldown(player))
+                    return;
+
                 Wolf wolf = (Wolf) player.getWorld().spawnEntity(player.getLocation(), EntityType.WOLF);
                 wolf.setTamed(true);
                 wolf.setOwner(player);
                 PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_WOLF_HOWL, 1f, 1f);
                 player.getInventory().remove(Material.BONE);
+                startCooldown(player);
             }
         }
     }

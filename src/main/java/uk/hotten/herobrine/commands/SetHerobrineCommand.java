@@ -25,7 +25,7 @@ public class SetHerobrineCommand implements CommandExecutor {
             if (gm.getPassUser() == null)
                 sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /setherobrine <player>"));
             else {
-                sender.sendMessage(Message.format(ChatColor.GOLD + gm.getPassUser().getName() + " will no-longer be Herobrine."));
+                sender.sendMessage(Message.format(ChatColor.YELLOW + gm.getPassUser().getName() + ChatColor.RESET + " will no-longer be Herobrine."));
                 gm.setPassUser(null);
             }
             return true;
@@ -39,7 +39,7 @@ public class SetHerobrineCommand implements CommandExecutor {
         }
 
         gm.setPassUser(player);
-        sender.sendMessage(Message.format(ChatColor.YELLOW + player.getName() + " will be Herobrine."));
+        sender.sendMessage(Message.format(ChatColor.YELLOW + player.getName() + ChatColor.RESET + " will be Herobrine."));
         return true;
     }
 }

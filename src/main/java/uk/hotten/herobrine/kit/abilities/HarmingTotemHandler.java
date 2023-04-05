@@ -35,7 +35,7 @@ public class HarmingTotemHandler extends BukkitRunnable {
             p.spawnParticle(Particle.VILLAGER_ANGRY, block.getLocation().add(0, 1, 0), 1);
         }
 
-        if (PlayerUtil.getDistance(herobrine, block.getLocation()) <= 6) {
+        if (PlayerUtil.getDistance(herobrine, block.getLocation()) <= 5) {
             Bukkit.getServer().getScheduler().runTask(GameManager.get().getPlugin(), () -> herobrine.damage(2, placer));
             PlayerUtil.playSound(herobrine, Sound.ENTITY_ENDERMITE_HURT, 1f, 1f);
         }

@@ -29,7 +29,7 @@ public class VoteCommand implements CommandExecutor {
         }
 
         if (args == null || args.length == 0) {
-            player.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /vote <map number>"));
+            wm.sendVotingMessage(player);
             return true;
         }
 
@@ -38,6 +38,7 @@ public class VoteCommand implements CommandExecutor {
             map = Integer.parseInt(args[0]);
         } catch (Exception e) {
             player.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /vote <map number>"));
+            wm.sendVotingMessage(player);
             return true;
         }
 
@@ -56,7 +57,7 @@ public class VoteCommand implements CommandExecutor {
             wm.getPlayerVotes().remove(player);
             wm.getPlayerVotes().put(player, map);
             wm.getVotingMaps().get(map).incrementVotes();
-            player.sendMessage(Message.format(ChatColor.GOLD + "Vote received. Your map now has " + ChatColor.AQUA + wm.getVotingMaps().get(map).getVotes() + ChatColor.GOLD + " votes."));
+            player.sendMessage(Message.format(ChatColor.GOLD + "Vote for received. " + ChatColor.AQUA + wm.getVotingMaps().get(map).getMapData().getName() + ChatColor.GOLD + " now has " + ChatColor.AQUA + wm.getVotingMaps().get(map).getVotes() + ChatColor.GOLD + " votes."));
         }
 
         return true;

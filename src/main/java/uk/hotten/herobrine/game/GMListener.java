@@ -69,6 +69,7 @@ public class GMListener implements Listener {
         player.setHealth(20);
         player.setFoodLevel(20);
         player.setGameMode(GameMode.SURVIVAL);
+        player.teleport(Bukkit.getServer().getWorld("world").getSpawnLocation());
     }
 
     @EventHandler
@@ -333,6 +334,8 @@ public class GMListener implements Listener {
             player.setHealth(20);
             return;
         }
+
+        Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> player.spigot().respawn(), 40);
 
         if (player == gm.getHerobrine()) {
             if (player.getKiller() != null) {
