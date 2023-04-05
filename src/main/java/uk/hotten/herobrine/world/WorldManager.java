@@ -3,11 +3,18 @@ package uk.hotten.herobrine.world;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.Getter;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import uk.hotten.herobrine.events.GameStateUpdateEvent;
+import uk.hotten.herobrine.game.GameManager;
+import uk.hotten.herobrine.game.runnables.MapVotingRunnable;
 import uk.hotten.herobrine.utils.Console;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.world.data.Datapoint;
+import uk.hotten.herobrine.world.data.VotingMap;
 import uk.hotten.herobrine.world.data.MapBase;
 import uk.hotten.herobrine.world.data.MapData;
 import org.apache.commons.io.FileUtils;
@@ -30,8 +37,11 @@ public class WorldManager implements Listener {
     @Getter private MapData gameMapData;
     @Getter private World gameWorld;
 
-    public HashMap<String, Integer> votingMaps;
+    @Getter private HashMap<Integer, VotingMap> votingMaps;
+    @Getter private HashMap<Player, Integer> playerVotes;
     private int maxVotingMaps;
+    @Getter private int endVotingAt;
+    @Getter private boolean votingRunning = false;
 
     public Location herobrineSpawn;
     public Location survivorSpawn;
@@ -50,8 +60,10 @@ public class WorldManager implements Listener {
 
         fileBase = plugin.getConfig().getString("mapBase");
         maxVotingMaps = plugin.getConfig().getInt("votingMaps");
+        endVotingAt = plugin.getConfig().getInt("endVotingAt");
 
         votingMaps = new HashMap<>();
+        playerVotes = new HashMap<>();
 
         shardSpawns = new ArrayList<>();
 
@@ -88,36 +100,78 @@ public class WorldManager implements Listener {
             Random rand = new Random();
             String map = maps.get(rand.nextInt(maps.size()));
             Console.debug("Map -> " + map);
-            votingMaps.put(map, 0);
+
+            // Parse the map
+            File file = new File(fileBase + "/" + map + "/mapdata.yaml");
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+
+            MapData mapData;
+            try {
+                mapData = mapper.readValue(file, MapData.class);
+                Console.debug("Parsed map data id " + reps+1);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Console.error("Error parsing mapdata.yaml! Is it correctly formatted?");
+                return;
+            }
+
+            votingMaps.put(reps+1, new VotingMap(reps+1, mapData, map));
             maps.remove(map);
+
             reps++;
         }
+        votingRunning = true;
+        new MapVotingRunnable().runTaskTimerAsynchronously(plugin, 0, 20);
         Console.info("Picked voting maps!");
     }
 
+    public void sendVotingMessage(Player player) {
+        ArrayList<Player> toSend = new ArrayList<>();
+        if (player == null)
+            toSend.addAll(Bukkit.getServer().getOnlinePlayers());
+        else
+            toSend.add(player);
+
+        for (Player p : toSend) {
+            p.sendMessage(Message.format(ChatColor.GOLD + "Vote for a map with /vote #."));
+            p.sendMessage(Message.format(ChatColor.GOLD + "Map choices up for voting:"));
+            int current = 1;
+            for (Map.Entry<Integer, VotingMap> e : votingMaps.entrySet()) {
+                TextComponent textComponent = new TextComponent(Message.format("" + ChatColor.GOLD + ChatColor.BOLD + current + ". "
+                        + ChatColor.GOLD + e.getValue().getMapData().getName() + " (" + ChatColor.AQUA + e.getValue().getVotes() + ChatColor.GOLD + " votes)"));
+                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.GOLD + "Click to vote for " + ChatColor.AQUA + e.getValue().getMapData().getName()).create()));
+                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote " + current));
+                p.spigot().sendMessage(textComponent);
+                current++;
+            }
+            p.sendMessage(" ");
+        }
+    }
+
     public void selectAndLoadMapFromVote() {
-        String highest = "";
+        VotingMap highest = null;
         int highestInt = -1;
-        for (Map.Entry<String, Integer> e : votingMaps.entrySet()) {
-            if (e.getValue() > highestInt) {
-                highest = e.getKey();
-                highestInt = e.getValue();
+        for (Map.Entry<Integer, VotingMap> e : votingMaps.entrySet()) {
+            if (e.getValue().getVotes() > highestInt) {
+                highest = e.getValue();
+                highestInt = e.getValue().getVotes();
             }
         }
 
-        Console.info("Selected highest voted map -> " + highest);
-        Message.broadcast(Message.format(ChatColor.GOLD + "Voting has ended! The map " + ChatColor.AQUA + highest + ChatColor.GOLD + " has won!"));
+        Console.debug("Selected highest voted map -> " + highest.getMapData().getName());
+        Message.broadcast(Message.format(ChatColor.GOLD + "Voting has ended! The map " + ChatColor.AQUA + highest.getMapData().getName() + ChatColor.GOLD + " has won!"));
+        votingRunning = false;
 
         loadMap(highest);
     }
 
-    public void loadMap(String map) {
-        Console.info("Loading map " + map);
+    public void loadMap(VotingMap map) {
+        Console.info("Loading map " + map.getMapData().getName());
         File currentDir;
         File toCopy;
 
-        toCopy = new File(fileBase + "/" + map);
-        currentDir = new File(map);
+        toCopy = new File(fileBase + "/" + map.getInternalName());
+        currentDir = new File(map.getInternalName());
         currentDir.mkdir();
         try {
             FileUtils.copyDirectory(toCopy, currentDir);
@@ -126,7 +180,7 @@ public class WorldManager implements Listener {
             Console.error("Error copying directory!");
         }
 
-        gameWorld = Bukkit.getServer().createWorld(new WorldCreator(map));
+        gameWorld = Bukkit.getServer().createWorld(new WorldCreator(map.getInternalName()));
 
         gameWorld.setGameRule(GameRule.DO_FIRE_TICK, false);
         gameWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
@@ -137,16 +191,7 @@ public class WorldManager implements Listener {
 
 
         // Load data points
-        File file = new File(map + "/mapdata.yaml");
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-
-        try {
-            gameMapData = mapper.readValue(file, MapData.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Console.error("Error parsing mapdata.yaml! Is it correctly formatted?");
-            return;
-        }
+        gameMapData = map.getMapData();
 
         for (Datapoint dp : gameMapData.getDatapoints()) {
             Location dLoc = new Location(gameWorld, dp.getX(), dp.getY(), dp.getZ());
@@ -212,8 +257,15 @@ public class WorldManager implements Listener {
             alter = null;
             shardSpawns = new ArrayList<>();
             noUnload = new ArrayList<>();
-            if (clearVotes)
+            if (clearVotes) {
                 votingMaps = new HashMap<>();
+                playerVotes = new HashMap<>();
+            } else {
+                if (GameManager.get().getGameState() == GameState.WAITING) {
+                    votingRunning = true;
+                    new MapVotingRunnable().runTaskTimerAsynchronously(plugin, 0, 20);
+                }
+            }
             Console.info("Cleaned!");
         }
     }

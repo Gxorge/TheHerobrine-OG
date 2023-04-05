@@ -22,3 +22,7 @@ commands:
     description: Drop the shard from the shard holder.
     permission: theherobrine.command.dropshard
     usage: /<command>
+
+  vote:
+    description: Vote for a map.
+    usage: /<command> <map number>
