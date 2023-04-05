@@ -108,14 +108,14 @@ public class WorldManager implements Listener {
             MapData mapData;
             try {
                 mapData = mapper.readValue(file, MapData.class);
-                Console.debug("Parsed map data id " + reps+1);
+                Console.debug("Parsed map data id " + (reps+1));
             } catch (Exception e) {
                 e.printStackTrace();
                 Console.error("Error parsing mapdata.yaml! Is it correctly formatted?");
                 return;
             }
 
-            votingMaps.put(reps+1, new VotingMap(reps+1, mapData, map));
+            votingMaps.put(reps+1, new VotingMap((reps+1), mapData, map));
             maps.remove(map);
 
             reps++;

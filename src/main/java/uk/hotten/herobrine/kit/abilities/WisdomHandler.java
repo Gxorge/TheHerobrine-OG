@@ -26,10 +26,8 @@ public class WisdomHandler extends BukkitRunnable {
 
         for (Player p : GameManager.get().getSurvivors()) {
             if (PlayerUtil.getDistance(p, location) <= 2.5) {
-                if (p.getHealth() < 20) {
-                    p.setHealth(p.getHealth() + 2);
-                    PlayerUtil.playSound(p, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-                }
+                PlayerUtil.increaseHealth(p, 2);
+                PlayerUtil.playSound(p, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
             }
         }
 
