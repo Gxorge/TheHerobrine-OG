@@ -3,9 +3,7 @@
 This is my in-progress remake of HiveMC's "The Herobrine!" v2 game-mode that was removed in Java 2. This project is now being maintained for TrueOG's network.
 
 ## Map Setup
-This is how to setup maps for The Herobrine.
-
-Your base server directory should include a folder called `maps`. Within this folder, there should be a file called `maps.yaml`. This is how a demo `maps.yaml` should look:
+Your base server directory should include a folder called `maps` (or whatever set in the config.yml). Within this folder, there should be a file called `maps.yaml`. This is how a demo `maps.yaml` should look:
 ```yaml
 maps:
   - map1
