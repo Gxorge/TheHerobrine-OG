@@ -86,9 +86,30 @@ public class PlayerUtil {
         else item.setAmount(item.getAmount() - amount);
     }
 
-    public static void increaseHealth(Player player, double hearts) {
-        double newHealth = player.getHealth() + hearts;
+    public static void increaseHealth(Player player, double hp) {
+        double newHealth = player.getHealth() + hp;
         player.setHealth((newHealth > 20 ? 20 : newHealth));
+    }
+
+    public static void decreaseHealth(Player player, double hp, Player damager) {
+        double newHealth = player.getHealth() - hp;
+        if (newHealth <= 0) {
+            if (damager != null)
+                player.damage(Integer.MAX_VALUE, damager);
+            else
+                player.damage(Integer.MAX_VALUE);
+        } else {
+            player.setHealth(newHealth);
+        }
+    }
+
+    public static void animateHbHit(Location loc) {
+        PlayerUtil.playSoundAt(loc, Sound.ENTITY_BLAZE_HURT, 1f, 1f);
+        PlayerUtil.playSoundAt(loc, Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
+
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            p.spawnParticle(Particle.BLOCK_DUST, loc.add(0, 0.75, 0), 25, Material.ORANGE_WOOL.createBlockData());
+        }
     }
 
     public static void spawnFirework(Location location, Color colour) {

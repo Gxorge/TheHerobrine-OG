@@ -272,7 +272,7 @@ public class GMListener implements Listener {
             double damage = gm.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType(), attacker.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE));
             if (damage != -1) event.setDamage(damage);
 
-            animateHbHit(player.getLocation());
+            PlayerUtil.animateHbHit(player.getLocation());
 
             // Delay the velocity change by a tick so it actually works
             Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> player.setVelocity(new Vector(0, 0, 0)), 1);
@@ -282,15 +282,6 @@ public class GMListener implements Listener {
             if (damage != -1) event.setDamage(damage);
         } else {
             event.setCancelled(true);
-        }
-    }
-
-    private void animateHbHit(Location loc) {
-        PlayerUtil.playSoundAt(loc, Sound.ENTITY_BLAZE_HURT, 1f, 1f);
-        PlayerUtil.playSoundAt(loc, Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
-
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            p.spawnParticle(Particle.BLOCK_DUST, loc.add(0, 0.75, 0), 25, Material.ORANGE_WOOL.createBlockData());
         }
     }
 

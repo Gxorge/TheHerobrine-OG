@@ -34,7 +34,7 @@ public class HealingTotemHandler extends BukkitRunnable {
         PlayerUtil.playSoundAt(block.getLocation(), Sound.ENTITY_CAT_PURREOW, 1f, 1f);
 
         for (Player p : GameManager.get().getSurvivors()) {
-            if (PlayerUtil.getDistance(p, block.getLocation()) <= 5) {
+            if (PlayerUtil.getDistance(p, block.getLocation()) <= 6) {
                 PlayerUtil.increaseHealth(p, 2);
                 PlayerUtil.playSound(p, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
             }
