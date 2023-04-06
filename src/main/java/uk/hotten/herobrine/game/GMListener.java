@@ -21,9 +21,12 @@ import org.bukkit.event.player.*;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
+
 public class GMListener implements Listener {
 
     private GameManager gm;
+    private ArrayList<Player> kitCooldown = new ArrayList<>();
 
     public GMListener(GameManager gm) { this.gm = gm; }
 
@@ -134,6 +137,7 @@ public class GMListener implements Listener {
             PlayerUtil.sendTitle(p, "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Help them return it!", 5, 60, 5);
         }
         PlayerUtil.sendTitle(gm.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
+        ShardHandler.shardTitle.remove();
         gm.setShardState(ShardState.CARRYING);
         gm.setShardCarrier(player);
         gm.setTags(player, "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Shard: ", ChatColor.LIGHT_PURPLE, GameManager.ScoreboardUpdateAction.UPDATE);
@@ -173,8 +177,14 @@ public class GMListener implements Listener {
             }
         } else if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS)
+                if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
+                    if (kitCooldown.contains(player))
+                        return;
+
                     new KitGui(gm.getPlugin(), player).open(false);
+                    kitCooldown.add(player);
+                    Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> kitCooldown.remove(player), 20);
+                }
             }
         }
     }
@@ -240,7 +250,7 @@ public class GMListener implements Listener {
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Wolf) {
             Player player = (Player) event.getEntity();
             if (player == gm.getHerobrine())
-                event.setDamage(2);
+                event.setDamage(6);
             else
                 event.setCancelled(true);
             return;
@@ -305,6 +315,12 @@ public class GMListener implements Listener {
         if (player == gm.getHerobrine() && event.getCause() == EntityDamageEvent.DamageCause.FALL) {
             event.setCancelled(true);
             return;
+        }
+
+        if (player == gm.getHerobrine() && (event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK) && gm.getShardCount() != 3) {
+            event.setCancelled(true);
+            gm.getHerobrine().setFireTicks(1);
+            gm.getHerobrine().setVisualFire(false);
         }
 
         if (gm.getSurvivors().contains(player)) {

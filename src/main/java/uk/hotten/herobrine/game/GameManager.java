@@ -7,7 +7,6 @@ import me.tigerhix.lib.scoreboard.common.EntryBuilder;
 import me.tigerhix.lib.scoreboard.type.Entry;
 import me.tigerhix.lib.scoreboard.type.Scoreboard;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
-import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 import uk.hotten.gxui.GUIItem;
@@ -466,13 +465,13 @@ public class GameManager {
         double finalDamage = 0;
         switch (item) {
             case STONE_AXE:
-                finalDamage = 4; // 0 shards, 2 hearts
+                finalDamage = 3; // 0 shards, 2 hearts
                 break;
             case IRON_AXE:
-                finalDamage = 5; // 1 shard, 2.5 hearts
+                finalDamage = 4; // 1 shard, 2.5 hearts
                 break;
             case IRON_SWORD:
-                finalDamage = (shardCount == 2 ? 6 : 7); // 2 shards, 3 hearts. 3 shards, 3.5 hearts
+                finalDamage = (shardCount == 2 ? 5 : 6); // 2 shards, 3 hearts. 3 shards, 3.5 hearts
                 break;
             default:
                 return -1;
