@@ -1,6 +1,6 @@
 # The Herobrine!
 
-This is my in-progress remake of HiveMC's "The Herobrine!" v2 game-mode that was removed in Java 2. This project is now being maintained for TrueOG's network.
+This is my in-progress remake of HiveMC's "The Herobrine!" v2 game-mode that was removed in Java 2. This is the core version of the game, without any edits for True OG.
 
 ## Commands and Permissions
 - /vote [map id] - allows players to vote for a map - no permission
