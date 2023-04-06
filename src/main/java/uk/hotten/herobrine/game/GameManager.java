@@ -402,6 +402,8 @@ public class GameManager {
         }
         StatManager.get().stopTracking();
         StatManager.get().push();
+        Message.broadcast(Message.format(ChatColor.GRAY + "The lobby will restart in 15 seconds."));
+        Bukkit.getServer().getScheduler().runTaskLater(plugin, Bukkit.getServer().spigot()::restart, 300);
     }
 
     public void endCheck() {

@@ -22,19 +22,36 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class GMListener implements Listener {
 
     private GameManager gm;
     private ArrayList<Player> kitCooldown = new ArrayList<>();
+    private ArrayList<UUID> silentLeave = new ArrayList<>();
 
     public GMListener(GameManager gm) { this.gm = gm; }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        StatManager.get().check(event.getPlayer().getUniqueId());
-
         Player player = event.getPlayer();
+        event.setJoinMessage("");
+
+        if (gm.getSurvivors().size() >= gm.getMaxPlayers()) {
+            if (gm.isAllowOverfill()) {
+                if (!player.hasPermission("theherobrine.overfill")) {
+                    silentLeave.add(player.getUniqueId());
+                    player.kickPlayer(Message.format(ChatColor.RED + "This lobby is full."));
+                    return;
+                }
+            } else {
+                silentLeave.add(player.getUniqueId());
+                player.kickPlayer(Message.format(ChatColor.RED + "This lobby is full."));
+                return;
+            }
+        }
+
+        StatManager.get().check(player.getUniqueId());
 
         gm.getScoreboards().put(player, ScoreboardLib.createScoreboard(player));
         gm.updateTags(GameManager.ScoreboardUpdateAction.CREATE);
@@ -45,7 +62,6 @@ public class GMListener implements Listener {
             return;
         }
 
-        event.setJoinMessage("");
         Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has joined!"));
         gm.getSurvivors().add(player);
         if (gm.getSurvivors().size() >= gm.getRequiredToStart()) {
@@ -80,16 +96,20 @@ public class GMListener implements Listener {
         Player player = event.getPlayer();
 
         event.setQuitMessage("");
-        Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
+        if (!silentLeave.contains(player.getUniqueId())) {
+            Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
+        }
+        silentLeave.remove(player.getUniqueId());
         gm.getSurvivors().remove(player);
 
-        gm.getScoreboards().get(player).deactivate();
+        if (gm.getScoreboards().containsKey(player))
+            gm.getScoreboards().get(player).deactivate();
         gm.getScoreboards().remove(player);
         gm.getTeamPrefixes().remove(player);
         gm.getTeamColours().remove(player);
 
         WorldManager wm = WorldManager.getInstance();
-        if (wm.getPlayerVotes().get(player) != 0)
+        if (wm.getPlayerVotes().getOrDefault(player, 0) != 0)
             wm.getVotingMaps().get(wm.getPlayerVotes().get(player)).decrementVotes();
         wm.getPlayerVotes().remove(player);
 
@@ -393,6 +413,15 @@ public class GMListener implements Listener {
                     }, 1);
             }
         }
+    }
+
+    @EventHandler
+    public void onProjectile(ProjectileLaunchEvent event) {
+        if (!(event.getEntity() instanceof Arrow))
+            return;
+
+        Arrow arrow = (Arrow) event.getEntity();
+        arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
     }
 
     @EventHandler

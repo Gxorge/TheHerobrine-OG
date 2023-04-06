@@ -2,6 +2,27 @@
 
 This is my in-progress remake of HiveMC's "The Herobrine!" v2 game-mode that was removed in Java 2. This project is now being maintained for TrueOG's network.
 
+## Commands and Permissions
+- /vote [map id] - allows players to vote for a map - no permission
+- /setherobrone <player> - set the player to be herobrine - theherobrine.command.setherobrine
+- /forcestart [time] - force the game to start at a specified time - theherobrine.command.forcestart
+- /dropshard - force the shard carrier to drop the shard +10 blocks on the x-axis - theherobrine.command.dropshard
+
+### Kit Permissions
+Requiring permissions for classic and unlockable kits can be set in the config.yml.
+
+- Archer - theherobrine.kit.classic.archer
+- Priest - theherobrine.kit.classic.priest
+- Scout - theherobrine.kit.classic.scout
+- Wizard - theherobrine.kit.classic.wizard
+
+- Mage - theherobrine.kit.unlockable.mage
+- Paladin - theherobrine.kit.unlockable.paladin
+- Sorcerer - theherobrine.kit.unlockable.sorcerer
+
+### Other Permissions
+- theherobrine.overfill - allow players to join above the limit 
+
 ## Map Setup
 Your base server directory should include a folder called `maps` (or whatever set in the config.yml). Within this folder, there should be a file called `maps.yaml`. This is how a demo `maps.yaml` should look:
 ```yaml
