@@ -1,5 +1,5 @@
-networkName: TrueOG # Name of your network
-networkWeb: trueog.net # Website of your network
+networkName: Your Network # Name of your network
+networkWeb: yournetwork.org # Website of your network
 
 minPlayers: 2 # Minimum players needed to start a game
 maxPlayers: 16 # Maximum players in a game
