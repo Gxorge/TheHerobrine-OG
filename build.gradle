@@ -44,7 +44,7 @@ dependencies {
     compileOnly 'com.comphenix.protocol:ProtocolLib:4.7.0'
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    implementation 'uk.hotten.gxui:GxUI:1.1'
+    implementation 'uk.hotten.gxui:GxUI:1.2'
 }
 
 tasks.register('updatePluginYmlVersion') {
