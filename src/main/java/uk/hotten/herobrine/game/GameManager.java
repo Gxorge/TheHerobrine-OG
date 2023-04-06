@@ -7,8 +7,8 @@ import me.tigerhix.lib.scoreboard.common.EntryBuilder;
 import me.tigerhix.lib.scoreboard.type.Entry;
 import me.tigerhix.lib.scoreboard.type.Scoreboard;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
-import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Vector;
 import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.events.GameStateUpdateEvent;
 import uk.hotten.herobrine.events.ShardCaptureEvent;
@@ -39,6 +39,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class GameManager {
 
@@ -379,6 +380,19 @@ public class GameManager {
             PlayerUtil.broadcastSound(Sound.ENTITY_WITHER_DEATH, 1f, 1f);
             for (Player p : survivors)
                 StatManager.get().pointsTracker.increment(p.getUniqueId(), 10);
+
+            herobrine.getWorld().strikeLightningEffect(herobrine.getLocation().add(0, 0.5, 0));
+            Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+                Location loc = herobrine.getLocation();
+                for (int i = 0; i < 50; i++) {
+                    try {
+                        Bukkit.getServer().getScheduler().runTask(plugin, () -> PlayerUtil.spawnFirework(loc.clone().add(new Vector(Math.random()-0.5, 0, Math.random()-0.5).multiply(20)), Color.LIME));
+                        TimeUnit.MILLISECONDS.sleep(100);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         } else {
             PlayerUtil.broadcastTitle(ChatColor.RED + "HEROBRINE" + ChatColor.GREEN + " WINS!", "", 20, 60, 20);
             Message.broadcast(Message.format("" + ChatColor.RED + ChatColor.BOLD + "The Herobrine " + ChatColor.YELLOW + "has defeated all the survivors"));
@@ -388,6 +402,8 @@ public class GameManager {
         }
         StatManager.get().stopTracking();
         StatManager.get().push();
+        Message.broadcast(Message.format(ChatColor.GRAY + "The lobby will restart in 15 seconds."));
+        Bukkit.getServer().getScheduler().runTaskLater(plugin, Bukkit.getServer().spigot()::restart, 300);
     }
 
     public void endCheck() {
@@ -451,13 +467,13 @@ public class GameManager {
         double finalDamage = 0;
         switch (item) {
             case STONE_AXE:
-                finalDamage = 4; // 0 shards, 2 hearts
+                finalDamage = 3; // 0 shards, 2 hearts
                 break;
             case IRON_AXE:
-                finalDamage = 5; // 1 shard, 2.5 hearts
+                finalDamage = 4; // 1 shard, 2.5 hearts
                 break;
             case IRON_SWORD:
-                finalDamage = (shardCount == 2 ? 6 : 7); // 2 shards, 3 hearts. 3 shards, 3.5 hearts
+                finalDamage = (shardCount == 2 ? 5 : 6); // 2 shards, 3 hearts. 3 shards, 3.5 hearts
                 break;
             default:
                 return -1;

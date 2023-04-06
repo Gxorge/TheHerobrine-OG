@@ -46,11 +46,16 @@ public class LoveAbility extends KitAbility {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
             if (player.getInventory().getItemInMainHand().getType() == Material.FEATHER) {
+
+                if (isOnCooldown(player))
+                    return;
+
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
                 for (Player p : gm.getSurvivors()) {
                     PlayerUtil.increaseHealth(p, 6); // increase by 3 hearts
                     PlayerUtil.playSoundAt(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
                 }
+                startCooldown(player);
             }
         }
     }

@@ -21,17 +21,37 @@ import org.bukkit.event.player.*;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
+import java.util.UUID;
+
 public class GMListener implements Listener {
 
     private GameManager gm;
+    private ArrayList<Player> kitCooldown = new ArrayList<>();
+    private ArrayList<UUID> silentLeave = new ArrayList<>();
 
     public GMListener(GameManager gm) { this.gm = gm; }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        StatManager.get().check(event.getPlayer().getUniqueId());
-
         Player player = event.getPlayer();
+        event.setJoinMessage("");
+
+        if (gm.getSurvivors().size() >= gm.getMaxPlayers()) {
+            if (gm.isAllowOverfill()) {
+                if (!player.hasPermission("theherobrine.overfill")) {
+                    silentLeave.add(player.getUniqueId());
+                    player.kickPlayer(Message.format(ChatColor.RED + "This lobby is full."));
+                    return;
+                }
+            } else {
+                silentLeave.add(player.getUniqueId());
+                player.kickPlayer(Message.format(ChatColor.RED + "This lobby is full."));
+                return;
+            }
+        }
+
+        StatManager.get().check(player.getUniqueId());
 
         gm.getScoreboards().put(player, ScoreboardLib.createScoreboard(player));
         gm.updateTags(GameManager.ScoreboardUpdateAction.CREATE);
@@ -42,7 +62,6 @@ public class GMListener implements Listener {
             return;
         }
 
-        event.setJoinMessage("");
         Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has joined!"));
         gm.getSurvivors().add(player);
         if (gm.getSurvivors().size() >= gm.getRequiredToStart()) {
@@ -69,6 +88,7 @@ public class GMListener implements Listener {
         player.setHealth(20);
         player.setFoodLevel(20);
         player.setGameMode(GameMode.SURVIVAL);
+        player.teleport(Bukkit.getServer().getWorld("world").getSpawnLocation());
     }
 
     @EventHandler
@@ -76,16 +96,20 @@ public class GMListener implements Listener {
         Player player = event.getPlayer();
 
         event.setQuitMessage("");
-        Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
+        if (!silentLeave.contains(player.getUniqueId())) {
+            Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
+        }
+        silentLeave.remove(player.getUniqueId());
         gm.getSurvivors().remove(player);
 
-        gm.getScoreboards().get(player).deactivate();
+        if (gm.getScoreboards().containsKey(player))
+            gm.getScoreboards().get(player).deactivate();
         gm.getScoreboards().remove(player);
         gm.getTeamPrefixes().remove(player);
         gm.getTeamColours().remove(player);
 
         WorldManager wm = WorldManager.getInstance();
-        if (wm.getPlayerVotes().get(player) != 0)
+        if (wm.getPlayerVotes().getOrDefault(player, 0) != 0)
             wm.getVotingMaps().get(wm.getPlayerVotes().get(player)).decrementVotes();
         wm.getPlayerVotes().remove(player);
 
@@ -133,6 +157,7 @@ public class GMListener implements Listener {
             PlayerUtil.sendTitle(p, "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Help them return it!", 5, 60, 5);
         }
         PlayerUtil.sendTitle(gm.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
+        ShardHandler.shardTitle.remove();
         gm.setShardState(ShardState.CARRYING);
         gm.setShardCarrier(player);
         gm.setTags(player, "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Shard: ", ChatColor.LIGHT_PURPLE, GameManager.ScoreboardUpdateAction.UPDATE);
@@ -172,8 +197,14 @@ public class GMListener implements Listener {
             }
         } else if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS)
+                if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
+                    if (kitCooldown.contains(player))
+                        return;
+
                     new KitGui(gm.getPlugin(), player).open(false);
+                    kitCooldown.add(player);
+                    Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> kitCooldown.remove(player), 20);
+                }
             }
         }
     }
@@ -239,7 +270,7 @@ public class GMListener implements Listener {
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Wolf) {
             Player player = (Player) event.getEntity();
             if (player == gm.getHerobrine())
-                event.setDamage(2);
+                event.setDamage(6);
             else
                 event.setCancelled(true);
             return;
@@ -271,7 +302,7 @@ public class GMListener implements Listener {
             double damage = gm.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType(), attacker.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE));
             if (damage != -1) event.setDamage(damage);
 
-            animateHbHit(player.getLocation());
+            PlayerUtil.animateHbHit(player.getLocation());
 
             // Delay the velocity change by a tick so it actually works
             Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> player.setVelocity(new Vector(0, 0, 0)), 1);
@@ -281,15 +312,6 @@ public class GMListener implements Listener {
             if (damage != -1) event.setDamage(damage);
         } else {
             event.setCancelled(true);
-        }
-    }
-
-    private void animateHbHit(Location loc) {
-        PlayerUtil.playSoundAt(loc, Sound.ENTITY_BLAZE_HURT, 1f, 1f);
-        PlayerUtil.playSoundAt(loc, Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
-
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            p.spawnParticle(Particle.BLOCK_DUST, loc.add(0, 0.75, 0), 25, Material.ORANGE_WOOL.createBlockData());
         }
     }
 
@@ -315,6 +337,12 @@ public class GMListener implements Listener {
             return;
         }
 
+        if (player == gm.getHerobrine() && (event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK) && gm.getShardCount() != 3) {
+            event.setCancelled(true);
+            gm.getHerobrine().setFireTicks(1);
+            gm.getHerobrine().setVisualFire(false);
+        }
+
         if (gm.getSurvivors().contains(player)) {
             if (event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) {
                 gm.getHbLastHit().add(player);
@@ -333,6 +361,8 @@ public class GMListener implements Listener {
             player.setHealth(20);
             return;
         }
+
+        Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> player.spigot().respawn(), 40);
 
         if (player == gm.getHerobrine()) {
             if (player.getKiller() != null) {
@@ -383,6 +413,15 @@ public class GMListener implements Listener {
                     }, 1);
             }
         }
+    }
+
+    @EventHandler
+    public void onProjectile(ProjectileLaunchEvent event) {
+        if (!(event.getEntity() instanceof Arrow))
+            return;
+
+        Arrow arrow = (Arrow) event.getEntity();
+        arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
     }
 
     @EventHandler

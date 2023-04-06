@@ -1,6 +1,8 @@
 package uk.hotten.herobrine.game.runnables;
 
 import org.bukkit.*;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityType;
 import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.*;
@@ -18,6 +20,7 @@ public class ShardHandler extends BukkitRunnable {
     int despawnTimer = 300; // 5 minutes
     Random random = new Random();
     static Item shard;
+    public static ArmorStand shardTitle;
     static GameManager gm = GameManager.get();
 
     @Override
@@ -42,8 +45,10 @@ public class ShardHandler extends BukkitRunnable {
                 int n = r.nextInt(10 - 1 + 1) + 1;
                 if (n < 3) shard.getLocation().getWorld().strikeLightningEffect(shard.getLocation().clone().add(0, 1, 0));
                 if (despawnTimer % 2 == 0) PlayerUtil.playSoundAt(shard.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 2f);
+                shardTitle.teleport(shard.getLocation().subtract(0, 1.5, 0));
                 if (despawnTimer == 0) {
                     shard.remove();
+                    shardTitle.remove();
                     gm.setShardState(ShardState.WAITING);
                     Message.broadcast(Message.format(ChatColor.GRAY + "The shard has been DESTROYED! Work faster next time..."));
                 }
@@ -58,6 +63,8 @@ public class ShardHandler extends BukkitRunnable {
         Location spawn = WorldManager.getInstance().shardSpawns.get(rand.nextInt(WorldManager.getInstance().shardSpawns.size()));
 
         shard = spawn.getWorld().dropItem(spawn.add(0, 1, 0), createShard());
+        spawnShardTitle();
+
         for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(shard.getLocation());
 
         spawn.getWorld().strikeLightningEffect(spawn.add(0, 1, 0));
@@ -71,6 +78,7 @@ public class ShardHandler extends BukkitRunnable {
 
     public static void drop(Location loc) {
         shard = loc.getWorld().dropItem(loc.add(0, 1, 0), createShard());
+        spawnShardTitle();
         loc.getWorld().strikeLightningEffect(loc.add(0, 1, 0));
         for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(shard.getLocation());
         gm.setTags(gm.getShardCarrier(), null, ChatColor.DARK_GREEN, GameManager.ScoreboardUpdateAction.UPDATE);
@@ -84,5 +92,13 @@ public class ShardHandler extends BukkitRunnable {
         GUIItem shardItem = new GUIItem(Material.NETHER_STAR);
         shardItem.displayName(ChatColor.RED + "Shard of " + ShardName.getRandom().getName());
         return shardItem.build();
+    }
+
+    private static void spawnShardTitle() {
+        shardTitle = (ArmorStand) shard.getWorld().spawnEntity(shard.getLocation().subtract(0, 1.5, 0), EntityType.ARMOR_STAND);
+        shardTitle.setVisible(false);
+        shardTitle.setCustomName(ChatColor.AQUA + "The Shard");
+        shardTitle.setCustomNameVisible(true);
+        shardTitle.setGravity(false);
     }
 }

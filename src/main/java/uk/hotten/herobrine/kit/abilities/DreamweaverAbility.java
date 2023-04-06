@@ -48,9 +48,14 @@ public class DreamweaverAbility extends KitAbility {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
             if (player.getInventory().getItemInMainHand().getType() == Material.MAGMA_CREAM) {
+
+                if (isOnCooldown(player))
+                    return;
+
                 player.setHealth(20);
                 PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
+                startCooldown(player);
             }
         }
     }

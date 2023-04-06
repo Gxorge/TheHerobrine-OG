@@ -45,8 +45,13 @@ public class WisdomAbility extends KitAbility {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
             if (player.getInventory().getItemInMainHand().getType() == Material.BLAZE_POWDER) {
+
+                if (isOnCooldown(player))
+                    return;
+
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
                 new WisdomHandler(player.getLocation()).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
+                startCooldown(player);
             }
         }
     }

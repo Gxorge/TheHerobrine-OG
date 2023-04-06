@@ -43,10 +43,15 @@ public class ProtSpiritAbility extends KitAbility {
             return;
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
-            event.setCancelled(true);
             if (player.getInventory().getItemInMainHand().getType() == Material.ENDER_PEARL) {
+                event.setCancelled(true);
+
+                if (isOnCooldown(player))
+                    return;
+
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
                 new ProtSpiritHandler(player).runTaskTimerAsynchronously(gm.getPlugin(), 0, 10);
+                startCooldown(player);
             }
         }
     }

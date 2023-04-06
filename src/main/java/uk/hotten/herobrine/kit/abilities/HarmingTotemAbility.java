@@ -41,7 +41,12 @@ public class HarmingTotemAbility extends KitAbility {
             return;
 
         if (event.getBlock().getType() == Material.NETHER_BRICK_FENCE) {
+
+            if (isOnCooldown(player))
+                return;
+
             new HarmingTotemHandler(event.getBlock(), player).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
+            startCooldown(player);
         }
     }
 

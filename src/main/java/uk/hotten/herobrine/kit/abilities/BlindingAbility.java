@@ -51,10 +51,15 @@ public class BlindingAbility extends KitAbility {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
             if (player.getInventory().getItemInMainHand().getType() == Material.GOLD_NUGGET) {
+
+                if (isOnCooldown(player))
+                    return;
+
                 Item nugget = player.getWorld().dropItem(l, new ItemStack(Material.GOLD_NUGGET));
                 nugget.setVelocity(l.getDirection().normalize().multiply(2f));
                 new BlindingHandler(nugget).runTaskAsynchronously(gm.getPlugin());
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
+                startCooldown(player);
             }
         }
     }

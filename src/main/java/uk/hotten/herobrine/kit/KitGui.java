@@ -11,8 +11,11 @@ import uk.hotten.herobrine.utils.Message;
 
 public class KitGui extends GUIBase {
 
+    private Player assignedPlayer;
+
     public KitGui(JavaPlugin plugin, Player player) {
         super(plugin, player, ChatColor.GRAY + "Pick your class", 9, false);
+        assignedPlayer = player;
     }
 
     @Override
@@ -20,14 +23,17 @@ public class KitGui extends GUIBase {
         GameManager gm = GameManager.get();
         int curr = 0;
         for (Kit kit : gm.getKits()) {
-            GUIItem item = kit.getDisplayItem();
+            GUIItem item = kit.getDisplayItem().duplicateByConstructor();
             item.button(new GUIButton() {
                 @Override
                 public boolean leftClick() {
-                    if (kit.getPermission() == null || (!kit.isRequirePermission() || getPlayer().hasPermission(kit.getPermission())))
-                        applyKit(kit);
+                    System.out.println("Player is " + assignedPlayer);
+                    if (kit.getPermission() == null || (!kit.isRequirePermission() || assignedPlayer.hasPermission(kit.getPermission()))) {
+                        GameManager.get().setKit(assignedPlayer, kit, true);
+                        assignedPlayer.closeInventory();
+                    }
                     else {
-                        getPlayer().sendMessage(Message.format(ChatColor.RED + "You haven't unlocked this kit yet!"));
+                        assignedPlayer.sendMessage(Message.format(ChatColor.RED + "You haven't unlocked this kit yet!"));
                         return false;
                     }
                     return true;
@@ -41,11 +47,6 @@ public class KitGui extends GUIBase {
             curr = nextCurr(curr);
         }
 
-    }
-
-    private void applyKit(Kit kit) {
-        GameManager.get().setKit(getPlayer(), kit, true);
-        getPlayer().closeInventory();
     }
 
     private int nextCurr(int curr) {

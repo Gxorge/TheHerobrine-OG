@@ -1,8 +1,12 @@
 package uk.hotten.herobrine;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 import me.tigerhix.lib.scoreboard.ScoreboardLib;
+import org.bukkit.Sound;
 import uk.hotten.herobrine.commands.DropShardCommand;
 import uk.hotten.herobrine.commands.ForceStartCommand;
 import uk.hotten.herobrine.commands.SetHerobrineCommand;
@@ -38,6 +42,22 @@ public class HerobrinePluginOG extends JavaPlugin {
         getCommand("forcestart").setExecutor(new ForceStartCommand());
         getCommand("dropshard").setExecutor(new DropShardCommand());
         getCommand("vote").setExecutor(new VoteCommand());
+
+        // Stops the eye of ender break SFX from the Notch's Wisdom and Totem of Healing abilities
+        protocolManager.addPacketListener(
+                new PacketAdapter(this, PacketType.Play.Server.NAMED_SOUND_EFFECT) {
+                    @Override
+                    public void onPacketSending(PacketEvent event) {
+                        if (!gameManager.getSurvivors().contains(event.getPlayer()) && gameManager.getHerobrine() != event.getPlayer())
+                            return;
+
+                        Sound effectId = event.getPacket().getSoundEffects().read(0);
+                        if (effectId == Sound.ENTITY_ENDER_EYE_DEATH) {
+                            event.setCancelled(true);
+                        }
+                    }
+                }
+        );
 
         ScoreboardLib.setPluginInstance(this);
 

@@ -41,7 +41,12 @@ public class HealingTotemAbility extends KitAbility {
             return;
 
         if (event.getBlock().getType() == Material.OAK_FENCE) {
+
+            if (isOnCooldown(player))
+                return;
+
             new HealingTotemHandler(event.getBlock()).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
+            startCooldown(player);
         }
     }
 
