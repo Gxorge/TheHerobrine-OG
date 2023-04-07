@@ -10,7 +10,6 @@ import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.utils.GameState;
-import uk.hotten.herobrine.utils.PlayerUtil;
 
 public class HealingTotemAbility extends KitAbility {
 

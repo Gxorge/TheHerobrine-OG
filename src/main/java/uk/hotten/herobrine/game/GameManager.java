@@ -69,6 +69,7 @@ public class GameManager {
     @Getter private ArrayList<Player> hbLastHit;
     @Getter @Setter private Player passUser;
 
+    @Getter @Setter private boolean shardPreviousDestroyed;
     @Getter public int shardCount;
     @Getter @Setter private Player shardCarrier;
 
@@ -109,6 +110,8 @@ public class GameManager {
         boolean lockUnlockableKits = plugin.getConfig().getBoolean("lockUnlockableKits");
 
         shardCount = 0;
+        shardPreviousDestroyed = false;
+
         survivors = new ArrayList<>();
         spectators = new ArrayList<>();
         hbLastHit = new ArrayList<>();
@@ -226,7 +229,7 @@ public class GameManager {
         new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 10);
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            scoreboards.get(p).setHandler(gameScoreboardHandler).setUpdateInterval(1).activate();
+            scoreboards.get(p).setHandler(gameScoreboardHandler);
             p.setHealth(20);
             p.setFoodLevel(20);
             p.setGameMode(GameMode.SURVIVAL);
@@ -379,7 +382,7 @@ public class GameManager {
             Message.broadcast(Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(Sound.ENTITY_WITHER_DEATH, 1f, 1f);
             for (Player p : survivors)
-                StatManager.get().pointsTracker.increment(p.getUniqueId(), 10);
+                StatManager.get().getPointsTracker().increment(p.getUniqueId(), 10);
 
             herobrine.getWorld().strikeLightningEffect(herobrine.getLocation().add(0, 0.5, 0));
             Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -398,7 +401,7 @@ public class GameManager {
             Message.broadcast(Message.format("" + ChatColor.RED + ChatColor.BOLD + "The Herobrine " + ChatColor.YELLOW + "has defeated all the survivors"));
             Message.broadcast(Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(Sound.ENTITY_ENDER_DRAGON_HURT, 1f, 1f);
-            StatManager.get().pointsTracker.increment(herobrine.getUniqueId(), 10);
+            StatManager.get().getPointsTracker().increment(herobrine.getUniqueId(), 10);
         }
         StatManager.get().stopTracking();
         StatManager.get().push();
@@ -467,13 +470,13 @@ public class GameManager {
         double finalDamage = 0;
         switch (item) {
             case STONE_AXE:
-                finalDamage = 3; // 0 shards, 2 hearts
+                finalDamage = 3; // 0 shards, 1.5 hearts
                 break;
             case IRON_AXE:
-                finalDamage = 4; // 1 shard, 2.5 hearts
+                finalDamage = 4; // 1 shard, 2 hearts
                 break;
             case IRON_SWORD:
-                finalDamage = (shardCount == 2 ? 5 : 6); // 2 shards, 3 hearts. 3 shards, 3.5 hearts
+                finalDamage = (shardCount == 2 ? 5 : 6); // 2 shards, 2.5 hearts. 3 shards, 3 hearts
                 break;
             default:
                 return -1;

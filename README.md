@@ -2,6 +2,19 @@
 
 This is my in-progress remake of HiveMC's "The Herobrine!" v2 game-mode that was removed in Java 2. This is the core version of the game, without any edits for True OG.
 
+## Database Requirements
+The Herobrine requires 2 databases: a MySQL DB and a Redis DB. Redis is used for storing player kit selections, as it is fast. Player statistics are stored in a MySQL database.
+
+### MySQL Setup
+Within the configured database, you should have a table called `hb_stat`. Within this table should be 4 columns:
+- `uuid`, type varchar(255) and unique 
+- `points`, type int
+- `captures`, type int
+- `kills`, type int
+- `deaths`, type int
+
+The plugin currently does not generate this automatically and therefore it must be done manually.
+
 ## Commands and Permissions
 - /vote [map id] - allows players to vote for a map - no permission
 - /setherobrone <player> - set the player to be herobrine - theherobrine.command.setherobrine

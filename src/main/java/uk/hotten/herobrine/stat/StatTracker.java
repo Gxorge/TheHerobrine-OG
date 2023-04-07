@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.Console;
 
 import java.util.HashMap;
@@ -28,7 +29,7 @@ public class StatTracker implements Listener {
         stat = new HashMap<>();
     }
 
-    public void start() { Bukkit.getServer().getPluginManager().registerEvents(this, sm.gm.getPlugin()); }
+    public void start() { Bukkit.getServer().getPluginManager().registerEvents(this, GameManager.get().getPlugin()); }
 
     public void reset() {
         HandlerList.unregisterAll(this);

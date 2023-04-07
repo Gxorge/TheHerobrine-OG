@@ -3,7 +3,6 @@ package uk.hotten.herobrine.kit.kits;
 import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.kit.Kit;
-import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.kit.abilities.DreamweaverAbility;
 import uk.hotten.herobrine.kit.abilities.LocatorAbility;
 import uk.hotten.herobrine.kit.abilities.WisdomAbility;

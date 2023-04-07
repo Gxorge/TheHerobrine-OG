@@ -1,7 +1,6 @@
 package uk.hotten.herobrine.world.data;
 
 import lombok.Getter;
-import org.bukkit.ChatColor;
 
 public class Datapoint {
 
