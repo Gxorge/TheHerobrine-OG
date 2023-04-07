@@ -1,6 +1,6 @@
 # The Herobrine!
 
-This is my in-progress remake of HiveMC's "The Herobrine!" v2 game-mode that was removed in Java 2. This branch contains changes required for the TrueOG network, who this project is now being maintained for. The unedited version can be found in the `core` branch and downloads can be found for any release tags that end in `-core`.
+This is my in-progress remake of HiveMC's "The Herobrine!" v2 game-mode that was removed in Java 2. This is the core version of The Herobrine. For changes required by the TrueOG network, please see the `trueog` branch.
 
 ## Database Requirements
 The Herobrine requires 2 databases: a MySQL DB and a Redis DB. Redis is used for storing player kit selections, as it is fast. Player statistics are stored in a MySQL database.
