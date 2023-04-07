@@ -1,5 +1,6 @@
 package uk.hotten.herobrine.stat;
 
+import lombok.Getter;
 import uk.hotten.herobrine.data.SqlManager;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.stat.trackers.CaptureTracker;
@@ -21,13 +22,16 @@ public class StatManager {
     private boolean nullBool;
 
     private JavaPlugin plugin;
-    public GameManager gm;
+    private GameManager gm;
     private static StatManager instance;
 
-    public StatTracker pointsTracker;
+    @Getter private StatTracker pointsTracker;
 
-    public HashMap<UUID, Integer> points;
-    public HashMap<UUID, GameRank> gameRanks;
+    @Getter private HashMap<UUID, Integer> points;
+    @Getter private HashMap<UUID, Integer> captures;
+    @Getter private HashMap<UUID, Integer> kills;
+    @Getter private HashMap<UUID, Integer> deaths;
+    @Getter  HashMap<UUID, GameRank> gameRanks;
 
     public String highestPlayerUUID;
 
@@ -52,6 +56,9 @@ public class StatManager {
         }
 
         points = new HashMap<>();
+        captures = new HashMap<>();
+        kills = new HashMap<>();
+        deaths = new HashMap<>();
         gameRanks = new HashMap<>();
 
         highestPlayerUUID = getHighestPlayer();
@@ -102,7 +109,7 @@ public class StatManager {
         try {
             Connection connection = SqlManager.get().createConnection();
 
-            PreparedStatement statement = connection.prepareStatement("SELECT UUID FROM `hb_stat` ORDER BY points DESC LIMIT 1;\n");
+            PreparedStatement statement = connection.prepareStatement("SELECT UUID FROM `hb_stat` ORDER BY points DESC LIMIT 1;");
             ResultSet rs = statement.executeQuery();
 
             String result;
@@ -140,16 +147,20 @@ public class StatManager {
     }
 
     private int getCurrentStat(UUID uuid, StatTracker stat) {
+        return getCurrentStat(uuid, stat.getInternalName());
+    }
+
+    private int getCurrentStat(UUID uuid, String stat) {
         try {
             Connection connection = SqlManager.get().createConnection();
 
-            PreparedStatement statement = connection.prepareStatement("SELECT `" + stat.getInternalName() + "` FROM `hb_stat` WHERE uuid=?");
+            PreparedStatement statement = connection.prepareStatement("SELECT `" + stat + "` FROM `hb_stat` WHERE uuid=?");
             statement.setString(1, uuid.toString());
             ResultSet rs = statement.executeQuery();
 
             int result;
             if (rs.next()) {
-                result = rs.getInt(stat.getInternalName());
+                result = rs.getInt(stat);
             } else {
                 result = -1;
             }
@@ -200,12 +211,15 @@ public class StatManager {
         if (!exists(uuid))
             create(uuid);
 
-        int p = getCurrentStat(uuid, pointsTracker);
-        points.put(uuid, p);
+        points.put(uuid, getCurrentStat(uuid, pointsTracker));
+        captures.put(uuid, getCurrentStat(uuid, "captures"));
+        kills.put(uuid, getCurrentStat(uuid, "kills"));
+        deaths.put(uuid, getCurrentStat(uuid, "deaths"));
+
         if (uuid.toString().equals(highestPlayerUUID))
             gameRanks.put(uuid, GameRank.DEATHBRINGER);
         else
-            gameRanks.put(uuid, GameRank.findRank(p));
+            gameRanks.put(uuid, GameRank.findRank(points.get(uuid)));
     }
 
     public GameRank getGameRank(UUID uuid) {

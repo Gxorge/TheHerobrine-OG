@@ -1,7 +1,6 @@
 package uk.hotten.herobrine.game.runnables;
 
 import uk.hotten.herobrine.game.GameManager;
-import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
 import uk.hotten.herobrine.world.WorldManager;

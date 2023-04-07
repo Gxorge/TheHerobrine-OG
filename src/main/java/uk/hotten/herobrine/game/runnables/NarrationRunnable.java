@@ -20,7 +20,7 @@ public class NarrationRunnable extends BukkitRunnable {
             return;
         }
 
-        if (gm.getShardCount() == 0 && gm.getShardState() == ShardState.WAITING) // I dunno i think it looks better without this at the start, and i think this was a bug on the hive too
+        if (gm.getShardCount() == 0 && gm.getShardState() == ShardState.WAITING && !gm.isShardPreviousDestroyed()) // I dunno i think it looks better without this at the start, and i think this was a bug on the hive too
             return;
 
         if (timer > 10)

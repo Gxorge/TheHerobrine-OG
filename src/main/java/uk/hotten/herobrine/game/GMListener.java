@@ -1,6 +1,9 @@
 package uk.hotten.herobrine.game;
 
 import me.tigerhix.lib.scoreboard.ScoreboardLib;
+import me.tigerhix.lib.scoreboard.common.EntryBuilder;
+import me.tigerhix.lib.scoreboard.type.Entry;
+import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
 import org.bukkit.entity.*;
 import uk.hotten.herobrine.game.runnables.ShardHandler;
 import uk.hotten.herobrine.game.runnables.StartingRunnable;
@@ -22,6 +25,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class GMListener implements Listener {
@@ -53,7 +57,25 @@ public class GMListener implements Listener {
 
         StatManager.get().check(player.getUniqueId());
 
-        gm.getScoreboards().put(player, ScoreboardLib.createScoreboard(player));
+        gm.getScoreboards().put(player, ScoreboardLib.createScoreboard(player).setHandler(new ScoreboardHandler() {
+            @Override
+            public String getTitle(Player player) {
+                return "" + ChatColor.YELLOW + ChatColor.BOLD + "Your Stats";
+            }
+
+            @Override
+            public List<Entry> getEntries(Player player) {
+                return new EntryBuilder()
+                        .next(ChatColor.AQUA + "Points: " + ChatColor.RESET + StatManager.get().getPoints().get(player.getUniqueId()))
+                        .next(ChatColor.AQUA + "Captures: " + ChatColor.RESET + StatManager.get().getCaptures().get(player.getUniqueId()))
+                        .next(ChatColor.AQUA + "Kills: " + ChatColor.RESET + StatManager.get().getKills().get(player.getUniqueId()))
+                        .next(ChatColor.AQUA + "Deaths: " + ChatColor.RESET + StatManager.get().getDeaths().get(player.getUniqueId()))
+                        .build();
+            }
+        }).setUpdateInterval(1));
+        gm.getScoreboards().get(player).activate();
+
+
         gm.updateTags(GameManager.ScoreboardUpdateAction.CREATE);
         gm.setTags(player, null, null, GameManager.ScoreboardUpdateAction.CREATE);
 
@@ -367,7 +389,7 @@ public class GMListener implements Listener {
         if (player == gm.getHerobrine()) {
             if (player.getKiller() != null) {
                 Message.broadcast(Message.format(ChatColor.AQUA + player.getKiller().getName() + ChatColor.GREEN + " has defeated " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
-                StatManager.get().pointsTracker.increment(player.getKiller().getUniqueId(), 30);
+                StatManager.get().getPointsTracker().increment(player.getKiller().getUniqueId(), 30);
             }
             PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_WITHER_HURT, 1f, 1f);
             gm.end(WinType.SURVIVORS);
@@ -375,11 +397,15 @@ public class GMListener implements Listener {
             gm.getSurvivors().remove(player);
             if ((player.getKiller() != null && player.getKiller() == gm.getHerobrine()) || gm.getHbLastHit().contains(player)) {
                 Message.broadcast(Message.format(ChatColor.AQUA + player.getName() + ChatColor.YELLOW + " was killed by " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
-                StatManager.get().pointsTracker.increment(gm.getHerobrine().getUniqueId(), 5);
+                StatManager.get().getPointsTracker().increment(gm.getHerobrine().getUniqueId(), 5);
             }
 
             if (player == gm.getShardCarrier()) {
-                ShardHandler.drop(player.getLocation().add(0, 1, 0));
+                if (player.getLastDamageCause() != null && player.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.VOID) {
+                    ShardHandler.destroy();
+                } else {
+                    ShardHandler.drop(player.getLocation().add(0, 1, 0));
+                }
             }
 
             gm.endCheck();
@@ -431,7 +457,7 @@ public class GMListener implements Listener {
         StatManager sm = StatManager.get();
         Player player = event.getPlayer();
         GameRank rank = sm.getGameRank(player.getUniqueId());
-        int points = sm.points.get(player.getUniqueId());
+        int points = sm.getPoints().get(player.getUniqueId());
 
         String endMessage = ChatColor.BLUE + player.getDisplayName() + ChatColor.DARK_GRAY + " » " + ChatColor.RESET + event.getMessage();
 

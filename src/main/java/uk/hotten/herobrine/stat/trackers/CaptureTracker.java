@@ -14,6 +14,6 @@ public class CaptureTracker extends StatTracker {
     @EventHandler
     public void capture(ShardCaptureEvent event) {
         increment(event.getPlayer().getUniqueId(), 1);
-        sm.pointsTracker.increment(event.getPlayer().getUniqueId(), 10);
+        sm.getPointsTracker().increment(event.getPlayer().getUniqueId(), 10);
     }
 }

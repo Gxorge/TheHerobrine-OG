@@ -25,7 +25,7 @@ public class WaitingRunnable extends BukkitRunnable {
         } else if (time == 5 || time == 6 || time == 6.5) {
             PlayerUtil.broadcastActionbar(ChatColor.AQUA + "Playing " + ChatColor.GRAY + "» " + ChatColor.YELLOW + "TheHerobrine");
         } else if (time == 7 || time == 8 || time == 8.5) {
-            PlayerUtil.broadcastActionbar(ChatColor.LIGHT_PURPLE + GameManager.get().getNetworkName());
+            PlayerUtil.broadcastActionbar(ChatColor.LIGHT_PURPLE + GameManager.get().getNetworkWeb());
         } else if (time >= 9){
             time = 0;
         }
