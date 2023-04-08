@@ -29,12 +29,9 @@ public class StatTracker implements Listener {
         stat = new HashMap<>();
     }
 
-    public void start() { Bukkit.getServer().getPluginManager().registerEvents(this, GameManager.get().getPlugin()); }
-
-    public void reset() {
-        HandlerList.unregisterAll(this);
-        stat.clear();
-    }
+    public void start() { Console.debug(displayName + " tracking STARTED."); Bukkit.getServer().getPluginManager().registerEvents(this, GameManager.get().getPlugin()); }
+    public void stop() { Console.debug(displayName + " tracking STOPPED."); HandlerList.unregisterAll(this); }
+    public void reset() { Console.debug(displayName + " tracking RESET."); stat.clear(); }
 
     public void increment(UUID uuid, int by) {
         if (!stat.containsKey(uuid)) {

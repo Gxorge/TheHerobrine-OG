@@ -398,11 +398,12 @@ public class GameManager {
             });
         } else {
             PlayerUtil.broadcastTitle(ChatColor.RED + "HEROBRINE" + ChatColor.GREEN + " WINS!", "", 20, 60, 20);
-            Message.broadcast(Message.format("" + ChatColor.RED + ChatColor.BOLD + "The Herobrine " + ChatColor.YELLOW + "has defeated all the survivors"));
+            Message.broadcast(Message.format("" + ChatColor.RED + ChatColor.BOLD + "The Herobrine " + ChatColor.YELLOW + "has defeated all the survivors."));
             Message.broadcast(Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(Sound.ENTITY_ENDER_DRAGON_HURT, 1f, 1f);
             StatManager.get().getPointsTracker().increment(herobrine.getUniqueId(), 10);
         }
+
         StatManager.get().stopTracking();
         StatManager.get().push();
         Message.broadcast(Message.format(ChatColor.GRAY + "The lobby will restart in 15 seconds."));
@@ -410,6 +411,11 @@ public class GameManager {
     }
 
     public void endCheck() {
+        Console.debug("=== END CHECK ===");
+        Console.debug("Survivors: " + getSurvivors().size());
+        Console.debug("Herobrine: " + (getHerobrine().isOnline() ? "Online" : "Offline"));
+        Console.debug("======");
+
         if (getSurvivors().size() == 0) {
             end(WinType.HEROBRINE);
         } else if (!getHerobrine().isOnline()) {
@@ -425,6 +431,7 @@ public class GameManager {
         if (shardCount == 3) {
             setShardState(ShardState.INACTIVE);
             herobrine.removePotionEffect(PotionEffectType.INVISIBILITY);
+            updateTags(ScoreboardUpdateAction.UPDATE);
         }
         else
             setShardState(ShardState.WAITING);
@@ -576,7 +583,7 @@ public class GameManager {
         for (Scoreboard s : getScoreboards().values()) {
             org.bukkit.scoreboard.Scoreboard sc = s.getHolder().getScoreboard();
 
-            String teamName = "APL" /*stands for  A PLAYER. e.g. npcs will be BNPC (gabi lied, she never made this a thing)*/ + player.getEntityId();
+            String teamName = "APL" + player.getEntityId();
             if (sc.getTeam(teamName) == null) {
                 sc.registerNewTeam(teamName);
             }
@@ -584,7 +591,12 @@ public class GameManager {
             Team team = sc.getTeam(teamName);
             team.setPrefix(prefix);
             team.setColor(color);
-            team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+            if (player == herobrine && shardCount == 3)
+                team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+            else if (player == herobrine)
+                team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+            else
+                team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
 
             switch (action) {
                 case CREATE:
@@ -596,7 +608,12 @@ public class GameManager {
                     team = sc.getTeam(teamName);
                     team.setPrefix(prefix);
                     team.setColor(color);
-                    team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+                    if (player == herobrine && shardCount == 3)
+                        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+                    else if (player == herobrine)
+                        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+                    else
+                        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
                     team.addEntry(player.getName());
                     break;
                 case BEGONETHOT:

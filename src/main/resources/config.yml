@@ -12,6 +12,7 @@ endVotingAt: 10 # Stops the vote at the set remaining seconds until the game sta
 
 lockClassicKits: false # Do you want to lock classic kits such as Archer and Scout behind their permission?
 lockUnlockableKits: true # Do you want to lock unlockable kits such as Mage and Sorcerer behind their permission?
+showDeathBringerAt: 100000 # How many points must the top player surpass for the Death Bringer rank to show?
 
 showDebugMessages: false # Show debug messages?
 

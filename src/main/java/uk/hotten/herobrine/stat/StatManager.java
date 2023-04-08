@@ -31,9 +31,10 @@ public class StatManager {
     @Getter private HashMap<UUID, Integer> captures;
     @Getter private HashMap<UUID, Integer> kills;
     @Getter private HashMap<UUID, Integer> deaths;
-    @Getter  HashMap<UUID, GameRank> gameRanks;
+    @Getter HashMap<UUID, GameRank> gameRanks;
 
-    public String highestPlayerUUID;
+    private String highestPlayerUUID;
+    private int showDeathBringerAt;
 
     public StatManager(JavaPlugin plugin, GameManager gm) {
         Console.info("Loading Stat Manager...");
@@ -61,6 +62,7 @@ public class StatManager {
         deaths = new HashMap<>();
         gameRanks = new HashMap<>();
 
+        showDeathBringerAt = plugin.getConfig().getInt("showDeathBringerAt");
         highestPlayerUUID = getHighestPlayer();
         if (highestPlayerUUID == null)
             Console.error("Failed to get UUID of highest player.");
@@ -80,7 +82,7 @@ public class StatManager {
 
     public void stopTracking() {
         for (StatTracker tracker : gm.getStatTrackers()) {
-            tracker.reset();
+            tracker.stop();
         }
     }
 
@@ -100,6 +102,8 @@ public class StatManager {
 
                 setStat(uuid, tracker.getInternalName(), curr, stat);
             }
+
+            tracker.reset();
         }
 
         Console.info("Stats pushed!");
@@ -109,7 +113,7 @@ public class StatManager {
         try {
             Connection connection = SqlManager.get().createConnection();
 
-            PreparedStatement statement = connection.prepareStatement("SELECT UUID FROM `hb_stat` ORDER BY points DESC LIMIT 1;");
+            PreparedStatement statement = connection.prepareStatement("SELECT UUID FROM hb_stat ORDER BY points DESC LIMIT 1;");
             ResultSet rs = statement.executeQuery();
 
             String result;
@@ -132,7 +136,7 @@ public class StatManager {
         try {
             Connection connection = SqlManager.get().createConnection();
 
-            PreparedStatement statement = connection.prepareStatement("UPDATE `hb_stat` SET " + name + "=? WHERE uuid=?");
+            PreparedStatement statement = connection.prepareStatement("UPDATE hb_stat SET " + name + "=? WHERE `uuid`=?");
             int next = prev + amount;
 
             statement.setInt(1, next);
@@ -154,7 +158,7 @@ public class StatManager {
         try {
             Connection connection = SqlManager.get().createConnection();
 
-            PreparedStatement statement = connection.prepareStatement("SELECT `" + stat + "` FROM `hb_stat` WHERE uuid=?");
+            PreparedStatement statement = connection.prepareStatement("SELECT " + stat + " FROM hb_stat WHERE uuid=?");
             statement.setString(1, uuid.toString());
             ResultSet rs = statement.executeQuery();
 
@@ -168,7 +172,6 @@ public class StatManager {
             connection.close();
 
             return result;
-
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
@@ -179,7 +182,7 @@ public class StatManager {
         try {
             Connection connection = SqlManager.get().createConnection();
 
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `hb_stat` WHERE uuid=?");
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM hb_stat WHERE uuid=?");
             statement.setString(1, uuid.toString());
             ResultSet rs = statement.executeQuery();
 
@@ -197,7 +200,7 @@ public class StatManager {
         try {
             Connection connection = SqlManager.get().createConnection();
 
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO `hb_stat` (uuid) VALUE (?)");
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO hb_stat (uuid) VALUE (?)");
             statement.setString(1, uuid.toString());
             statement.executeUpdate();
 
@@ -216,7 +219,7 @@ public class StatManager {
         kills.put(uuid, getCurrentStat(uuid, "kills"));
         deaths.put(uuid, getCurrentStat(uuid, "deaths"));
 
-        if (uuid.toString().equals(highestPlayerUUID))
+        if (uuid.toString().equals(highestPlayerUUID) && points.get(uuid) >= showDeathBringerAt)
             gameRanks.put(uuid, GameRank.DEATHBRINGER);
         else
             gameRanks.put(uuid, GameRank.findRank(points.get(uuid)));

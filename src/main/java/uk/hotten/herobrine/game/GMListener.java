@@ -141,7 +141,8 @@ public class GMListener implements Listener {
                 ShardHandler.drop(player.getLocation());
             }
 
-            gm.endCheck();
+            // If ran straight away, it still thinks THB is online if they were the quitter
+            Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), gm::endCheck, 1);
             return;
         }
 
