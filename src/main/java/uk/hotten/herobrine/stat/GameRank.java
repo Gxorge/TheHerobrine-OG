@@ -20,7 +20,7 @@ public enum GameRank {
     PARANORMAL(ChatColor.BLUE + "Paranormal", 45000, 59999),
     SPECTRAL(ChatColor.DARK_GREEN + "Spectral", 60000, 79999),
     MYTHICAL(ChatColor.GOLD + "Mythical", 80000, 99999),
-    GHOSTBUSTER(ChatColor.GRAY + "GhostBuster", 100000, 149999),
+    GHOSTBUSTER(ChatColor.WHITE + "GhostBuster", 100000, 149999),
     SPOOKY("" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Spooky", 150000, 199999),
     ETHEREAL("" + ChatColor.RED + ChatColor.BOLD + "Ethereal", 200000, 249999),
     DEMONHUNTER("" + ChatColor.GRAY + ChatColor.BOLD + "DemonHunter", 250000, 299999),
