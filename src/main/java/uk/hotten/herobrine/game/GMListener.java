@@ -203,16 +203,23 @@ public class GMListener implements Listener {
                 } else if (m == Material.ITEM_FRAME)
                     event.setCancelled(true);
             }
-        } else if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
-            if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
-                    if (kitCooldown.contains(player))
-                        return;
+        }
 
+        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
+                if (kitCooldown.contains(player))
+                    return;
+
+                if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
                     new KitGui(gm.getPlugin(), player).open(false);
-                    kitCooldown.add(player);
-                    Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> kitCooldown.remove(player), 20);
+                } else if (gm.getGameState() == GameState.LIVE && gm.getSpectators().contains(player)) {
+                        new SpectatorGui(gm.getPlugin(), player).open(true);
+                } else {
+                    return;
                 }
+
+                kitCooldown.add(player);
+                Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> kitCooldown.remove(player), 20);
             }
         }
     }
