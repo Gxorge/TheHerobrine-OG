@@ -7,6 +7,7 @@ import me.tigerhix.lib.scoreboard.common.EntryBuilder;
 import me.tigerhix.lib.scoreboard.type.Entry;
 import me.tigerhix.lib.scoreboard.type.Scoreboard;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 import uk.hotten.gxui.GUIItem;
@@ -76,6 +77,8 @@ public class GameManager {
     public int startTimer;
     public boolean stAlmost = false;
     public boolean stFull = false;
+    public boolean timerPaused = false;
+    private BukkitTask waitingRunnable;
 
     @Getter private Kit[] kits;
     @Getter private Kit defaultKit;
@@ -195,13 +198,32 @@ public class GameManager {
 
     public void startWaiting() {
         setGameState(GameState.WAITING);
+        if (waitingRunnable != null) waitingRunnable.cancel();
 
         // In case the timer decreased from players leaving and a world was loaded
         Bukkit.getServer().getScheduler().runTask(plugin, () -> WorldManager.getInstance().clean(false));
         startTimer = plugin.getConfig().getInt("startTime");
 
+        waitingRunnable = new WaitingRunnable().runTaskTimerAsynchronously(plugin, 0, 10);
+    }
 
-        new WaitingRunnable().runTaskTimerAsynchronously(plugin, 0, 10);
+    public void startCheck() {
+        if (getSurvivors().size() >= getRequiredToStart() && !timerPaused) {
+            if (getGameState() != GameState.STARTING) {
+                setGameState(GameState.STARTING);
+                new StartingRunnable().runTaskTimerAsynchronously(getPlugin(), 0, 20);
+            } else {
+                if (getSurvivors().size() >= getMaxPlayers()-3 && !stAlmost && startTimer > 30) {
+                    Message.broadcast(Message.format("" + ChatColor.GREEN + "We almost have a full server! Shortening timer to 30 seconds!"));
+                    stAlmost = true;
+                    startTimer = 30;
+                } else if (getSurvivors().size() >= getMaxPlayers() && !stFull && startTimer > 10) {
+                    Message.broadcast(Message.format("" + ChatColor.GREEN + "We have a full server! Starting in 10 seconds!"));
+                    stFull = true;
+                    startTimer = 10;
+                }
+            }
+        }
     }
 
     public void start() {
@@ -253,7 +275,7 @@ public class GameManager {
     public void updateHerobrine() {
         switch (shardCount) {
             case 0: {
-                GUIItem item = new GUIItem(Material.STONE_AXE).displayName(ChatColor.GRAY + "The Thorbringer");
+                GUIItem item = new GUIItem(Material.STONE_AXE).displayName(ChatColor.GRAY + "The Thorbringer").unbreakable(true);
                 herobrine.getInventory().setItem(0, item.build());
 
                 hbBatBomb = new BatBombAbility(this, 1, 4);
@@ -276,7 +298,7 @@ public class GameManager {
             }
             case 1: {
                 herobrine.getInventory().remove(Material.STONE_AXE);
-                GUIItem item = new GUIItem(Material.IRON_AXE).displayName(ChatColor.GRAY + "Axe of " + ChatColor.BOLD + "Deceit!");
+                GUIItem item = new GUIItem(Material.IRON_AXE).displayName(ChatColor.GRAY + "Axe of " + ChatColor.BOLD + "Deceit!").unbreakable(true);
                 herobrine.getInventory().addItem(item.build());
 
                 hbBlinding.apply(herobrine);
@@ -289,7 +311,7 @@ public class GameManager {
             }
             case 2: {
                 herobrine.getInventory().remove(Material.IRON_AXE);
-                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.GRAY + "Sword of " + ChatColor.BOLD + "HELLBRINGING!");
+                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.GRAY + "Sword of " + ChatColor.BOLD + "HELLBRINGING!").unbreakable(true);
                 herobrine.getInventory().addItem(item.build());
 
                 hbBatBomb.slot = -1;
@@ -311,7 +333,7 @@ public class GameManager {
 
                 giveVials(-1, 2);
 
-                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.AQUA + "Sword of " + ChatColor.BOLD + "Chances!");
+                GUIItem item = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.AQUA + "Sword of " + ChatColor.BOLD + "Chances!").unbreakable(true);
                 herobrine.getInventory().addItem(item.build());
 
                 herobrine.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
@@ -370,6 +392,7 @@ public class GameManager {
         player.teleport(worldManager.survivorSpawn);
 
         setTags(player, null, ChatColor.GRAY, ScoreboardUpdateAction.UPDATE);
+        updateTags(ScoreboardUpdateAction.UPDATE);
     }
 
     public void end(WinType type) {
@@ -411,6 +434,9 @@ public class GameManager {
     }
 
     public void endCheck() {
+        if (gameState != GameState.LIVE)
+            return;
+        
         Console.debug("=== END CHECK ===");
         Console.debug("Survivors: " + getSurvivors().size());
         Console.debug("Herobrine: " + (getHerobrine().isOnline() ? "Online" : "Offline"));

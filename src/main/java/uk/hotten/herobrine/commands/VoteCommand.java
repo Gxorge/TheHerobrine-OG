@@ -57,7 +57,7 @@ public class VoteCommand implements CommandExecutor {
             wm.getPlayerVotes().remove(player);
             wm.getPlayerVotes().put(player, map);
             wm.getVotingMaps().get(map).incrementVotes();
-            player.sendMessage(Message.format(ChatColor.GOLD + "Vote for received. " + ChatColor.AQUA + wm.getVotingMaps().get(map).getMapData().getName() + ChatColor.GOLD + " now has " + ChatColor.AQUA + wm.getVotingMaps().get(map).getVotes() + ChatColor.GOLD + " votes."));
+            player.sendMessage(Message.format(ChatColor.GOLD + "Vote received. " + ChatColor.AQUA + wm.getVotingMaps().get(map).getMapData().getName() + ChatColor.GOLD + " now has " + ChatColor.AQUA + wm.getVotingMaps().get(map).getVotes() + ChatColor.GOLD + " votes."));
         }
 
         return true;

@@ -86,22 +86,7 @@ public class GMListener implements Listener {
 
         Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has joined!"));
         gm.getSurvivors().add(player);
-        if (gm.getSurvivors().size() >= gm.getRequiredToStart()) {
-            if (gm.getGameState() != GameState.STARTING) {
-                gm.setGameState(GameState.STARTING);
-                new StartingRunnable().runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
-            } else {
-                if (gm.getSurvivors().size() >= gm.getMaxPlayers()-3 && !gm.stAlmost && gm.startTimer > 30) {
-                    Message.broadcast(Message.format("" + ChatColor.GREEN + "We almost have a full server! Shortening timer to 30 seconds!"));
-                    gm.stAlmost = true;
-                    gm.startTimer = 30;
-                } else if (gm.getSurvivors().size() >= gm.getMaxPlayers() && !gm.stFull && gm.startTimer > 10) {
-                    Message.broadcast(Message.format("" + ChatColor.GREEN + "We have a full server! Starting in 10 seconds!"));
-                    gm.stFull = true;
-                    gm.startTimer = 10;
-                }
-            }
-        }
+        gm.startCheck();
 
         WorldManager.getInstance().getPlayerVotes().put(player, 0);
         WorldManager.getInstance().sendVotingMessage(player);

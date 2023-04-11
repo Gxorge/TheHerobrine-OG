@@ -10,6 +10,7 @@ import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.utils.GameState;
+import uk.hotten.herobrine.utils.Message;
 
 public class HealingTotemAbility extends KitAbility {
 
@@ -25,6 +26,7 @@ public class HealingTotemAbility extends KitAbility {
     public void apply(Player player) {
         this.player = player;
         GUIItem item = new GUIItem(Material.OAK_FENCE).displayName("" + ChatColor.YELLOW + ChatColor.BOLD + "Totem: " + ChatColor.GREEN + "Healing");
+        item.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "Creates an aura of health to heal survivors for 60 seconds", "" + ChatColor.GRAY + ChatColor.ITALIC));
 
         player.getInventory().setItem(slot, item.build());
     }

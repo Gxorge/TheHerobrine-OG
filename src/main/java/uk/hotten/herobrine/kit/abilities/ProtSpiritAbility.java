@@ -10,6 +10,7 @@ import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.utils.GameState;
+import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
 
 public class ProtSpiritAbility extends KitAbility {
@@ -28,6 +29,7 @@ public class ProtSpiritAbility extends KitAbility {
     public void apply(Player player) {
         this.player = player;
         GUIItem item = new GUIItem(Material.ENDER_PEARL).displayName(ChatColor.AQUA + "Protection " + ChatColor.BOLD + "Spirit!").amount(amount);
+        item.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "Protect yourself with a spirit of rapid healing for 12 seconds", "" + ChatColor.GRAY + ChatColor.ITALIC));
 
         player.getInventory().setItem(slot, item.build());
     }

@@ -21,7 +21,10 @@ public class WaitingRunnable extends BukkitRunnable {
 
         if (time <= 4.5) {
             int required = GameManager.get().getRequiredToStart() - GameManager.get().getSurvivors().size();
-            PlayerUtil.broadcastActionbar("" + ChatColor.YELLOW + "Waiting for " + ChatColor.AQUA + required + ChatColor.YELLOW + " player" + (required == 1 ? "" : "s"));
+            if (!GameManager.get().timerPaused)
+                PlayerUtil.broadcastActionbar("" + ChatColor.YELLOW + "Waiting for " + ChatColor.AQUA + required + ChatColor.YELLOW + " player" + (required == 1 ? "" : "s"));
+            else
+                PlayerUtil.broadcastActionbar(ChatColor.RED + "Waiting for server operator");
         } else if (time == 5 || time == 6 || time == 6.5) {
             PlayerUtil.broadcastActionbar(ChatColor.AQUA + "Playing " + ChatColor.GRAY + "» " + ChatColor.YELLOW + "TheHerobrine");
         } else if (time == 7 || time == 8 || time == 8.5) {

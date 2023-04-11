@@ -13,6 +13,7 @@ import uk.hotten.herobrine.kit.abilities.HarmingTotemAbility;
 import uk.hotten.herobrine.kit.abilities.HealingTotemAbility;
 import uk.hotten.herobrine.kit.abilities.LocatorAbility;
 import uk.hotten.herobrine.kit.abilities.WooflessAbility;
+import uk.hotten.herobrine.utils.Message;
 
 public class SorcererKit extends Kit {
 
@@ -22,7 +23,20 @@ public class SorcererKit extends Kit {
                 ChatColor.RED + "Sorcerer",
                 "theherobrine.kit.unlockable.sorcerer",
                 requirePermission,
-                "",
+                Message.createArray(
+                        ChatColor.DARK_GRAY + "- " + ChatColor.GREEN + "Axe of Death" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (weapon)",
+                        "",
+                        ChatColor.DARK_GRAY + "- " + ChatColor.AQUA + "Summon Woofless" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x1)",
+                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "It's dangerous to go alone, take a friend!",
+                        "",
+                        ChatColor.DARK_GRAY + "- " + ChatColor.YELLOW + ChatColor.BOLD + "Totem: " + ChatColor.GREEN + "Healing" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x1)",
+                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "Creates an aura of health to heal",
+                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "survivors for 60 seconds",
+                        "",
+                        ChatColor.DARK_GRAY + "- " + ChatColor.YELLOW + ChatColor.BOLD + "Totem: " + ChatColor.RED + "Pain" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x1)",
+                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "Creates an aura of pain to damage",
+                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "The Herobrine for 60 seconds"
+                ),
                 new GUIItem(Material.GOLDEN_BOOTS).displayName(ChatColor.RED + "Sorcerer")
         );
     }
@@ -37,7 +51,7 @@ public class SorcererKit extends Kit {
 
     @Override
     public void setupPlayer(Player player) {
-        GUIItem axe = new GUIItem(Material.IRON_AXE).displayName(ChatColor.GREEN + "Axe of Death");
+        GUIItem axe = new GUIItem(Material.IRON_AXE).displayName(ChatColor.GREEN + "Axe of Death").unbreakable(true);
 
         player.getInventory().setItem(0, axe.build());
 
@@ -45,11 +59,12 @@ public class SorcererKit extends Kit {
         ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
         LeatherArmorMeta helMeta = (LeatherArmorMeta) helmet.getItemMeta();
         helMeta.setColor(Color.RED);
+        helMeta.setUnbreakable(true);
         helmet.setItemMeta(helMeta);
         player.getInventory().setHelmet(helmet);
 
-        player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-        player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-        player.getInventory().setBoots(new ItemStack(Material.GOLDEN_BOOTS));
+        player.getInventory().setChestplate(new GUIItem(Material.LEATHER_CHESTPLATE).unbreakable(true).build());
+        player.getInventory().setLeggings(new GUIItem(Material.LEATHER_LEGGINGS).unbreakable(true).build());
+        player.getInventory().setBoots(new GUIItem(Material.GOLDEN_BOOTS).unbreakable(true).build());
     }
 }
