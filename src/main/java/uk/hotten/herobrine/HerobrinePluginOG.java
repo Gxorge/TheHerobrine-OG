@@ -7,10 +7,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import me.tigerhix.lib.scoreboard.ScoreboardLib;
 import org.bukkit.Sound;
-import uk.hotten.herobrine.commands.DropShardCommand;
-import uk.hotten.herobrine.commands.ForceStartCommand;
-import uk.hotten.herobrine.commands.SetHerobrineCommand;
-import uk.hotten.herobrine.commands.VoteCommand;
+import uk.hotten.herobrine.commands.*;
 import uk.hotten.herobrine.data.SqlManager;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.data.RedisManager;
@@ -41,6 +38,7 @@ public class HerobrinePluginOG extends JavaPlugin {
         getCommand("setherobrine").setExecutor(new SetHerobrineCommand());
         getCommand("forcestart").setExecutor(new ForceStartCommand());
         getCommand("dropshard").setExecutor(new DropShardCommand());
+        getCommand("pausetimer").setExecutor(new PauseTimerCommand());
         getCommand("vote").setExecutor(new VoteCommand());
 
         // Stops the eye of ender break SFX from the Notch's Wisdom and Totem of Healing abilities

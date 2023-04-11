@@ -14,6 +14,7 @@ import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.kit.Kit;
 import uk.hotten.herobrine.kit.abilities.LocatorAbility;
 import uk.hotten.herobrine.kit.abilities.LoveAbility;
+import uk.hotten.herobrine.utils.Message;
 
 public class MageKit extends Kit {
 
@@ -23,7 +24,15 @@ public class MageKit extends Kit {
                 ChatColor.AQUA + "Mage",
                 "theherobrine.kit.unlockable.mage",
                 requirePermission,
-                "",
+                Message.createArray(
+                        ChatColor.DARK_GRAY + "- " + ChatColor.GOLD + "Elder's Sword" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (weapon)",
+                        "",
+                        ChatColor.DARK_GRAY + "- " + ChatColor.GREEN + "Water of " + ChatColor.BOLD + "Reckoning" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (bow)",
+                        ChatColor.DARK_GRAY + "- " + ChatColor.AQUA + "Mana " + ChatColor.BOLD + "Arrow" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x32)",
+                        "",
+                        ChatColor.DARK_GRAY + "- " + ChatColor.RED + "Overwhelming " + ChatColor.BOLD + "Love" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x1)",
+                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "Heal all your survivors 3 hearts"
+                ),
                 new GUIItem(Material.WOODEN_SWORD).displayName(ChatColor.AQUA + "Mage")
         );
     }
@@ -36,8 +45,8 @@ public class MageKit extends Kit {
 
     @Override
     public void setupPlayer(Player player) {
-        GUIItem sword = new GUIItem(Material.WOODEN_SWORD).displayName(ChatColor.GOLD + "Elder's Sword");
-        GUIItem bow = new GUIItem(Material.BOW).displayName(ChatColor.GREEN + "Water of " + ChatColor.BOLD + "Reckoning");
+        GUIItem sword = new GUIItem(Material.WOODEN_SWORD).displayName(ChatColor.GOLD + "Elder's Sword").unbreakable(true);
+        GUIItem bow = new GUIItem(Material.BOW).displayName(ChatColor.GREEN + "Water of " + ChatColor.BOLD + "Reckoning").unbreakable(true);
         GUIItem arrow = new GUIItem(Material.ARROW).displayName(ChatColor.AQUA + "Mana " + ChatColor.BOLD + "Arrow").amount(32);
 
         ItemStack healing = new ItemStack(Material.POTION);
@@ -55,11 +64,12 @@ public class MageKit extends Kit {
         ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
         LeatherArmorMeta helMeta = (LeatherArmorMeta) helmet.getItemMeta();
         helMeta.setColor(Color.AQUA);
+        helMeta.setUnbreakable(true);
         helmet.setItemMeta(helMeta);
         player.getInventory().setHelmet(helmet);
 
-        player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-        player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-        player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+        player.getInventory().setChestplate(new GUIItem(Material.LEATHER_CHESTPLATE).unbreakable(true).build());
+        player.getInventory().setLeggings(new GUIItem(Material.LEATHER_LEGGINGS).unbreakable(true).build());
+        player.getInventory().setBoots(new GUIItem(Material.LEATHER_BOOTS).unbreakable(true).build());
     }
 }

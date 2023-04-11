@@ -10,6 +10,7 @@ import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.utils.GameState;
+import uk.hotten.herobrine.utils.Message;
 
 public class HarmingTotemAbility extends KitAbility {
 
@@ -24,7 +25,8 @@ public class HarmingTotemAbility extends KitAbility {
     @Override
     public void apply(Player player) {
         this.player = player;
-        GUIItem item = new GUIItem(Material.NETHER_BRICK_FENCE).displayName("" + ChatColor.YELLOW + ChatColor.BOLD + "Totem: " + ChatColor.GREEN + "Pain");
+        GUIItem item = new GUIItem(Material.NETHER_BRICK_FENCE).displayName("" + ChatColor.YELLOW + ChatColor.BOLD + "Totem: " + ChatColor.RED + "Pain");
+        item.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "Creates an aura of pain to damage The Herobrine for 60 seconds", "" + ChatColor.GRAY + ChatColor.ITALIC));
 
         player.getInventory().setItem(slot, item.build());
     }

@@ -1,5 +1,7 @@
 package uk.hotten.herobrine.game.runnables;
 
+import org.bukkit.Effect;
+import org.bukkit.block.BlockFace;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.GameState;
 import org.bukkit.Bukkit;
@@ -19,8 +21,7 @@ public class HerobrineSmokeRunnable extends BukkitRunnable {
             return;
         }
 
-        Location loc = gm.getHerobrine().getLocation().clone().add(0, 1, 0);
-        ParticleEffect.SMOKE_LARGE.display(loc, new Vector(0, 0, 0), 3f, 0, null, Bukkit.getServer().getOnlinePlayers());
-        ParticleEffect.SMOKE_LARGE.display(loc, new Vector(0, 0, 0), 3f, 0, null, Bukkit.getServer().getOnlinePlayers());
+        Location loc = gm.getHerobrine().getLocation().clone().add(0, 2, 0);
+        loc.getWorld().playEffect(loc, Effect.SMOKE, 0);
     }
 }

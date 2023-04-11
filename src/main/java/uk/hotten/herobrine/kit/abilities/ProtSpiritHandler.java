@@ -3,6 +3,7 @@ package uk.hotten.herobrine.kit.abilities;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.PlayerUtil;
 
 import java.util.Random;
@@ -19,6 +20,11 @@ public class ProtSpiritHandler extends BukkitRunnable {
 
     @Override
     public void run() {
+        if (!GameManager.get().getSurvivors().contains(player)) {
+            cancel();
+            return;
+        }
+
         if (time > 24) {
             cancel();
             return;

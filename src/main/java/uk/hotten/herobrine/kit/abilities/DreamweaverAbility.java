@@ -4,6 +4,7 @@ import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.utils.GameState;
+import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -29,6 +30,7 @@ public class DreamweaverAbility extends KitAbility {
     public void apply(Player player) {
         this.player = player;
         GUIItem item = new GUIItem(Material.MAGMA_CREAM).displayName(ChatColor.GREEN + "Dreamweaver Bandage").amount(amount);
+        item.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "Bandage yourself to full health", "" + ChatColor.GRAY + ChatColor.ITALIC));
 
         if (slot == -1)
             player.getInventory().addItem(item.build());

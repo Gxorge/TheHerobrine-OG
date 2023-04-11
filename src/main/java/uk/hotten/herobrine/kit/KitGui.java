@@ -14,7 +14,7 @@ public class KitGui extends GUIBase {
     private Player assignedPlayer;
 
     public KitGui(JavaPlugin plugin, Player player) {
-        super(plugin, player, ChatColor.GRAY + "Pick your class", 9, false);
+        super(plugin, player, ChatColor.DARK_GRAY + "Pick your class", 9, false);
         assignedPlayer = player;
     }
 
@@ -24,10 +24,10 @@ public class KitGui extends GUIBase {
         int curr = 0;
         for (Kit kit : gm.getKits()) {
             GUIItem item = kit.getDisplayItem().duplicateByConstructor();
+            item.lore(kit.getDesc());
             item.button(new GUIButton() {
                 @Override
                 public boolean leftClick() {
-                    System.out.println("Player is " + assignedPlayer);
                     if (kit.getPermission() == null || (!kit.isRequirePermission() || assignedPlayer.hasPermission(kit.getPermission()))) {
                         GameManager.get().setKit(assignedPlayer, kit, true);
                         assignedPlayer.closeInventory();
