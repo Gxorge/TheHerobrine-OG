@@ -6,7 +6,6 @@ import me.tigerhix.lib.scoreboard.type.Entry;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
 import org.bukkit.entity.*;
 import uk.hotten.herobrine.game.runnables.ShardHandler;
-import uk.hotten.herobrine.game.runnables.StartingRunnable;
 import uk.hotten.herobrine.kit.KitGui;
 import uk.hotten.herobrine.stat.GameRank;
 import uk.hotten.herobrine.stat.StatManager;
@@ -425,7 +424,8 @@ public class GMListener implements Listener {
                         });
 
                         if (gm.getHerobrine() == player) {
-                            PlayerUtil.addEffect(player, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
+                            if (gm.getShardCount() != 3)
+                                PlayerUtil.addEffect(player, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
                             PlayerUtil.addEffect(player, PotionEffectType.JUMP, Integer.MAX_VALUE, 1, false, false);
                             PlayerUtil.addEffect(player, PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false);
                         }

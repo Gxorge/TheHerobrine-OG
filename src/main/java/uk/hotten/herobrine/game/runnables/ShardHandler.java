@@ -21,6 +21,7 @@ public class ShardHandler extends BukkitRunnable {
     Random random = new Random();
     static Item shard;
     public static ArmorStand shardTitle;
+    private static Location spawnLoc;
     static GameManager gm = GameManager.get();
 
     @Override
@@ -45,7 +46,7 @@ public class ShardHandler extends BukkitRunnable {
                 int n = r.nextInt(10 - 1 + 1) + 1;
                 if (n < 3) shard.getLocation().getWorld().strikeLightningEffect(shard.getLocation().clone().add(0, 1, 0));
                 if (despawnTimer % 2 == 0) PlayerUtil.playSoundAt(shard.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 2f);
-                shardTitle.teleport(shard.getLocation().subtract(0, 1.5, 0));
+                checkShardLoc();
                 if (despawnTimer == 0) {
                     shard.remove();
                     shardTitle.remove();
@@ -60,15 +61,15 @@ public class ShardHandler extends BukkitRunnable {
 
     private void spawn() {
         Random rand = new Random();
-        Location spawn = WorldManager.getInstance().shardSpawns.get(rand.nextInt(WorldManager.getInstance().shardSpawns.size()));
+        spawnLoc = WorldManager.getInstance().shardSpawns.get(rand.nextInt(WorldManager.getInstance().shardSpawns.size()));
 
-        shard = spawn.getWorld().dropItem(spawn.add(0, 1, 0), createShard());
+        shard = spawnLoc.getWorld().dropItem(spawnLoc.add(0, 1, 0), createShard());
         shard.setInvulnerable(true);
         spawnShardTitle();
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(shard.getLocation());
 
-        spawn.getWorld().strikeLightningEffect(spawn.add(0, 1, 0));
+        spawnLoc.getWorld().strikeLightningEffect(spawnLoc.add(0, 1, 0));
         gm.setShardState(ShardState.SPAWNED);
         timer = random.nextInt(16) + 30; // random number between 30 and 45 for the next shard spawn
         Console.debug("Next shard time to be " + timer);
@@ -79,6 +80,7 @@ public class ShardHandler extends BukkitRunnable {
 
     public static void drop(Location loc) {
         shard = loc.getWorld().dropItem(loc.add(0, 1, 0), createShard());
+        spawnLoc = shard.getLocation();
         shard.setInvulnerable(true);
         spawnShardTitle();
         loc.getWorld().strikeLightningEffect(loc.add(0, 1, 0));
@@ -94,6 +96,13 @@ public class ShardHandler extends BukkitRunnable {
         gm.setShardPreviousDestroyed(true);
         gm.setShardState(ShardState.WAITING);
         gm.setShardCarrier(null);
+
+        if (shard != null)
+            shard.remove();
+
+        if (shardTitle != null)
+            shardTitle.remove();
+
         PlayerUtil.broadcastTitle("", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "destroyed!", 10, 60, 10);
         Message.broadcast(Message.format(ChatColor.GRAY + "The shard has been DESTROYED! A new one shall be summoned soon..."));
     }
@@ -110,5 +119,17 @@ public class ShardHandler extends BukkitRunnable {
         shardTitle.setCustomName(ChatColor.AQUA + "The Shard");
         shardTitle.setCustomNameVisible(true);
         shardTitle.setGravity(false);
+    }
+
+    private void checkShardLoc() {
+        if (shard.getLocation().getY() < WorldManager.getInstance().getGameMapData().getShardMin() || shard.getLocation().getY() > WorldManager.getInstance().getGameMapData().getShardMax()) {
+            destroy();
+            return;
+        }
+
+        if (shard.getLocation().getX() != spawnLoc.getX() || shard.getLocation().getZ() != spawnLoc.getZ()) {
+            shard.teleport(new Location(spawnLoc.getWorld(), spawnLoc.getX(), shard.getLocation().getY(), spawnLoc.getZ()));
+        }
+        shardTitle.teleport(shard.getLocation().subtract(0, 1.5, 0));
     }
 }
