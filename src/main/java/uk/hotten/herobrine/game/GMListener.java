@@ -6,7 +6,6 @@ import me.tigerhix.lib.scoreboard.type.Entry;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
 import org.bukkit.entity.*;
 import uk.hotten.herobrine.game.runnables.ShardHandler;
-import uk.hotten.herobrine.game.runnables.StartingRunnable;
 import uk.hotten.herobrine.kit.KitGui;
 import uk.hotten.herobrine.stat.GameRank;
 import uk.hotten.herobrine.stat.StatManager;
@@ -203,16 +202,23 @@ public class GMListener implements Listener {
                 } else if (m == Material.ITEM_FRAME)
                     event.setCancelled(true);
             }
-        } else if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
-            if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
-                    if (kitCooldown.contains(player))
-                        return;
+        }
 
+        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            if (player.getInventory().getItemInMainHand().getType() == Material.COMPASS) {
+                if (kitCooldown.contains(player))
+                    return;
+
+                if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
                     new KitGui(gm.getPlugin(), player).open(false);
-                    kitCooldown.add(player);
-                    Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> kitCooldown.remove(player), 20);
+                } else if (gm.getGameState() == GameState.LIVE && gm.getSpectators().contains(player)) {
+                        new SpectatorGui(gm.getPlugin(), player).open(true);
+                } else {
+                    return;
                 }
+
+                kitCooldown.add(player);
+                Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> kitCooldown.remove(player), 20);
             }
         }
     }
@@ -418,7 +424,8 @@ public class GMListener implements Listener {
                         });
 
                         if (gm.getHerobrine() == player) {
-                            PlayerUtil.addEffect(player, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
+                            if (gm.getShardCount() != 3)
+                                PlayerUtil.addEffect(player, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
                             PlayerUtil.addEffect(player, PotionEffectType.JUMP, Integer.MAX_VALUE, 1, false, false);
                             PlayerUtil.addEffect(player, PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false);
                         }

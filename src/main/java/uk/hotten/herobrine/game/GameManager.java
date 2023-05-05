@@ -390,6 +390,7 @@ public class GameManager {
         player.setHealth(20);
         player.setFoodLevel(20);
         player.teleport(worldManager.survivorSpawn);
+        player.getInventory().setItem(0, new GUIItem(Material.COMPASS).displayName(ChatColor.YELLOW + "Spectator Menu").build());
 
         setTags(player, null, ChatColor.GRAY, ScoreboardUpdateAction.UPDATE);
         updateTags(ScoreboardUpdateAction.UPDATE);
