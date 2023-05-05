@@ -1,6 +1,6 @@
 # The Herobrine!
 
-This is my in-progress remake of HiveMC's "The Herobrine!" v2 game-mode that was removed in Java 2. This is the core version of The Herobrine. For changes required by the TrueOG network, please see the `trueog` branch.
+This is my in-progress remake of HiveMC's "The Herobrine!" v2 game-mode that was removed in Java 2. The core version of the game can be found under the `core` branch. For changes required by the TrueOG network, please see the `trueog` branch.
 
 ## Database Requirements
 The Herobrine requires 2 databases: a MySQL DB and a Redis DB. Redis is used for storing player kit selections, as it is fast. Player statistics are stored in a MySQL database.
@@ -51,6 +51,8 @@ This is what an example file should look like:
 ```yaml
 name: Map 1
 builder: Good Builder
+shardMin: -100
+shardMax: 1000
 datapoints:
   - type: SURVIVOR_SPAWN
     x: -2
