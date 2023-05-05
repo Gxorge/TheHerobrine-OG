@@ -1,5 +1,7 @@
 name: Ancient
 builder: Pure Ambience
+shardMin: -100
+shardMax: 1000
 datapoints:
   - type: SURVIVOR_SPAWN
     x: -2
