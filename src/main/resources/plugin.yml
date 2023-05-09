@@ -6,6 +6,7 @@ author: Gxorge
 description: Remake of "The Herobrine!" v2 from HiveMC.
 depend:
   - ProtocolLib
+  - Multiverse-Core
 
 commands:
   setherobrine:

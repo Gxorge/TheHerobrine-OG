@@ -10,10 +10,12 @@ public class ShardStateUpdateEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     @Getter private ShardState prevState;
     @Getter private ShardState newState;
+    @Getter private String lobbyId;
 
-    public ShardStateUpdateEvent(ShardState prevState, ShardState newState) {
+    public ShardStateUpdateEvent(ShardState prevState, ShardState newState, String lobbyId) {
         this.prevState = prevState;
         this.newState = newState;
+        this.lobbyId = lobbyId;
     }
 
 

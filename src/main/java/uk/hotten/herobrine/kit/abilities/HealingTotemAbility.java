@@ -33,6 +33,9 @@ public class HealingTotemAbility extends KitAbility {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void use(BlockPlaceEvent event) {
+        if (!event.getPlayer().getWorld().getName().startsWith(gm.getGameLobby().getLobbyId()))
+            return;
+
         if (gm.getGameState() != GameState.LIVE)
             return;
 

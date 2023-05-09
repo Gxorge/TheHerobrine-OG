@@ -3,6 +3,8 @@ package uk.hotten.herobrine.utils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import uk.hotten.herobrine.lobby.GameLobby;
+import uk.hotten.herobrine.lobby.LobbyManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,18 +17,27 @@ public class Message {
         return "" + ChatColor.DARK_GRAY + "▍ " + ChatColor.DARK_AQUA + "TheHerobrine " + ChatColor.DARK_GRAY + "▏ " + ChatColor.RESET + body;
     }
 
-    public static void broadcast(String message) {
-        Bukkit.getServer().broadcastMessage(message);
+    public static void broadcast(GameLobby lobby, String message) {
+        for (Player p : lobby.getPlayers()) {
+            p.sendMessage(message);
+        }
     }
 
-    public static void broadcast(String message, String permission) {
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+    public static void broadcast(GameLobby lobby, String message, String permission) {
+        for (Player p : lobby.getPlayers()) {
             if (p.hasPermission(permission)) {
                 p.sendMessage(message);
             }
         }
     }
 
+    public static void broadcast(String lobbyId, String message) {
+        broadcast(LobbyManager.getInstance().getLobby(lobbyId), message);
+    }
+
+    public static void broadcast(String lobbyId, String message, String permission) {
+        broadcast(LobbyManager.getInstance().getLobby(lobbyId), message, permission);
+    }
 
     public static String formatTime(int seconds) {
         if (seconds < 60)

@@ -9,9 +9,11 @@ public class ShardCaptureEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
     @Getter private Player player;
+    @Getter private String lobbyId;
 
-    public ShardCaptureEvent(Player player) {
+    public ShardCaptureEvent(Player player, String lobbyId) {
         this.player = player;
+        this.lobbyId = lobbyId;
     }
 
 

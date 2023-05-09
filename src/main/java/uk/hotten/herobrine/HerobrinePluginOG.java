@@ -6,7 +6,6 @@ import uk.hotten.herobrine.data.SqlManager;
 import uk.hotten.herobrine.data.RedisManager;
 import uk.hotten.herobrine.lobby.LobbyManager;
 import uk.hotten.herobrine.utils.Console;
-import uk.hotten.herobrine.world.WorldManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class HerobrinePluginOG extends JavaPlugin {

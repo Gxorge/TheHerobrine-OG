@@ -1,5 +1,6 @@
 package uk.hotten.herobrine.game;
 
+import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import me.tigerhix.lib.scoreboard.ScoreboardLib;
 import me.tigerhix.lib.scoreboard.common.EntryBuilder;
 import me.tigerhix.lib.scoreboard.type.Entry;
@@ -7,6 +8,8 @@ import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
 import org.bukkit.entity.*;
 import uk.hotten.herobrine.game.runnables.ShardHandler;
 import uk.hotten.herobrine.kit.KitGui;
+import uk.hotten.herobrine.lobby.GameLobby;
+import uk.hotten.herobrine.lobby.LobbyManager;
 import uk.hotten.herobrine.stat.GameRank;
 import uk.hotten.herobrine.stat.StatManager;
 import uk.hotten.herobrine.utils.*;
@@ -29,34 +32,43 @@ import java.util.UUID;
 
 public class GMListener implements Listener {
 
-    private GameManager gm;
+    private GameManager gameManager;
+    private GameLobby gameLobby;
+    private MVWorldManager mvWorldManager;
     private ArrayList<Player> kitCooldown = new ArrayList<>();
-    private ArrayList<UUID> silentLeave = new ArrayList<>();
 
-    public GMListener(GameManager gm) { this.gm = gm; }
+    public GMListener(GameManager gm, GameLobby gl) {
+        this.gameManager = gm;
+        this.gameLobby = gl;
+        mvWorldManager = LobbyManager.getInstance().getMultiverseCore().getMVWorldManager();
+    }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
+    public void onJoin(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
-        event.setJoinMessage("");
 
-        if (gm.getSurvivors().size() >= gm.getMaxPlayers()) {
-            if (gm.isAllowOverfill()) {
+        if (!player.getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
+        if (gameManager.getSurvivors().size() >= gameManager.getMaxPlayers()) {
+            if (gameManager.isAllowOverfill()) {
                 if (!player.hasPermission("theherobrine.overfill")) {
-                    silentLeave.add(player.getUniqueId());
-                    player.kickPlayer(Message.format(ChatColor.RED + "This lobby is full."));
+                    player.teleport(mvWorldManager.getSpawnWorld().getSpawnLocation());
+                    player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
                     return;
                 }
             } else {
-                silentLeave.add(player.getUniqueId());
-                player.kickPlayer(Message.format(ChatColor.RED + "This lobby is full."));
+                player.teleport(mvWorldManager.getSpawnWorld().getSpawnLocation());
+                player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
                 return;
             }
         }
 
+        gameLobby.getPlayers().add(player);
+
         StatManager.get().check(player.getUniqueId());
 
-        gm.getScoreboards().put(player, ScoreboardLib.createScoreboard(player).setHandler(new ScoreboardHandler() {
+        gameManager.getScoreboards().put(player, ScoreboardLib.createScoreboard(player).setHandler(new ScoreboardHandler() {
             @Override
             public String getTitle(Player player) {
                 return "" + ChatColor.YELLOW + ChatColor.BOLD + "Your Stats";
@@ -72,47 +84,61 @@ public class GMListener implements Listener {
                         .build();
             }
         }).setUpdateInterval(1));
-        gm.getScoreboards().get(player).activate();
+        gameManager.getScoreboards().get(player).activate();
 
 
-        gm.updateTags(GameManager.ScoreboardUpdateAction.CREATE);
-        gm.setTags(player, null, null, GameManager.ScoreboardUpdateAction.CREATE);
+        gameManager.updateTags(GameManager.ScoreboardUpdateAction.CREATE);
+        gameManager.setTags(player, null, null, GameManager.ScoreboardUpdateAction.CREATE);
 
-        if (gm.getGameState() == GameState.LIVE) {
-            gm.makeSpectator(player);
+        if (gameManager.getGameState() == GameState.LIVE) {
+            gameManager.makeSpectator(player);
             return;
         }
 
-        Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has joined!"));
-        gm.getSurvivors().add(player);
-        gm.startCheck();
+        Message.broadcast(gameLobby, Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has joined!"));
+        gameManager.getSurvivors().add(player);
+        gameManager.startCheck();
 
         WorldManager.getInstance().getPlayerVotes().put(player, 0);
         WorldManager.getInstance().sendVotingMessage(player);
-        gm.hubInventory(player);
-        gm.setKit(event.getPlayer(), gm.getSavedKit(player), true);
+        gameManager.hubInventory(player);
+        gameManager.setKit(event.getPlayer(), gameManager.getSavedKit(player), true);
         player.setHealth(20);
         player.setFoodLevel(20);
         player.setGameMode(GameMode.SURVIVAL);
-        player.teleport(Bukkit.getServer().getWorld("world").getSpawnLocation());
+        player.teleport(player.getWorld().getSpawnLocation());
     }
 
     @EventHandler
-    public void onLeave(PlayerQuitEvent event) {
+    public void onLeaveViaQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        event.setQuitMessage("");
-        if (!silentLeave.contains(player.getUniqueId())) {
-            Message.broadcast(Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
-        }
-        silentLeave.remove(player.getUniqueId());
-        gm.getSurvivors().remove(player);
+        if (!gameLobby.getPlayers().contains(player))
+            return;
 
-        if (gm.getScoreboards().containsKey(player))
-            gm.getScoreboards().get(player).deactivate();
-        gm.getScoreboards().remove(player);
-        gm.getTeamPrefixes().remove(player);
-        gm.getTeamColours().remove(player);
+        onLeaveLogic(player);
+    }
+
+    @EventHandler
+    public void onLeaveViaWorld(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+
+        if (player.getWorld().getName().contains(gameLobby.getLobbyId()))
+            return;
+
+        onLeaveLogic(player);
+    }
+
+    private void onLeaveLogic(Player player) {
+        gameLobby.getPlayers().remove(player);
+        Message.broadcast(gameLobby, Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
+        gameManager.getSurvivors().remove(player);
+
+        if (gameManager.getScoreboards().containsKey(player))
+            gameManager.getScoreboards().get(player).deactivate();
+        gameManager.getScoreboards().remove(player);
+        gameManager.getTeamPrefixes().remove(player);
+        gameManager.getTeamColours().remove(player);
 
         WorldManager wm = WorldManager.getInstance();
         if (wm.getPlayerVotes().getOrDefault(player, 0) != 0)
@@ -120,24 +146,27 @@ public class GMListener implements Listener {
         wm.getPlayerVotes().remove(player);
 
 
-        if (gm.getGameState() == GameState.LIVE) {
-            if (player == gm.getShardCarrier()) {
+        if (gameManager.getGameState() == GameState.LIVE) {
+            if (player == gameManager.getShardCarrier()) {
                 ShardHandler.drop(player.getLocation());
             }
 
             // If ran straight away, it still thinks THB is online if they were the quitter
-            Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), gm::endCheck, 1);
+            Bukkit.getServer().getScheduler().runTaskLater(gameManager.getPlugin(), gameManager::endCheck, 1);
             return;
         }
 
-        if (gm.getPassUser() == player) {
-            gm.setPassUser(null);
+        if (gameManager.getPassUser() == player) {
+            gameManager.setPassUser(null);
             Message.broadcast(Message.format(ChatColor.GOLD + player.getName() + " has left and will no-longer be Herobrine."), "theherobrine.command.setherobrine");
         }
     }
 
     @EventHandler
     public void onPickup(EntityPickupItemEvent event) {
+        if (!event.getEntity().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         if (!(event.getEntity() instanceof Player)) {
             event.setCancelled(true);
             return;
@@ -145,7 +174,7 @@ public class GMListener implements Listener {
 
         Player player = (Player) event.getEntity();
 
-        if (gm.getGameState() != GameState.LIVE)
+        if (gameManager.getGameState() != GameState.LIVE)
             return;
 
         event.getItem().getItemStack();
@@ -154,20 +183,20 @@ public class GMListener implements Listener {
             return;
         }
 
-        if (!gm.getSurvivors().contains(player)) {
+        if (!gameManager.getSurvivors().contains(player)) {
             event.setCancelled(true);
             return;
         }
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            if (p == gm.getHerobrine()) continue;
+            if (p == gameManager.getHerobrine()) continue;
             PlayerUtil.sendTitle(p, "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Help them return it!", 5, 60, 5);
         }
-        PlayerUtil.sendTitle(gm.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
+        PlayerUtil.sendTitle(gameManager.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
         ShardHandler.shardTitle.remove();
-        gm.setShardState(ShardState.CARRYING);
-        gm.setShardCarrier(player);
-        gm.setTags(player, "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Shard: ", ChatColor.LIGHT_PURPLE, GameManager.ScoreboardUpdateAction.UPDATE);
+        gameManager.setShardState(ShardState.CARRYING);
+        gameManager.setShardCarrier(player);
+        gameManager.setTags(player, "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Shard: ", ChatColor.LIGHT_PURPLE, GameManager.ScoreboardUpdateAction.UPDATE);
         PlayerUtil.broadcastSound(Sound.ENTITY_BAT_DEATH, 1f, 0f);
         PlayerUtil.addEffect(player, PotionEffectType.BLINDNESS, 100, 1, false, false);
         PlayerUtil.addEffect(player, PotionEffectType.SLOW, 600, 2, false, false);
@@ -177,14 +206,20 @@ public class GMListener implements Listener {
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
+        if (!event.getPlayer().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         event.setCancelled(true);
     }
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
+        if (!event.getPlayer().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         Player player = event.getPlayer();
 
-        if (gm.getGameState() == GameState.LIVE) {
+        if (gameManager.getGameState() == GameState.LIVE) {
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 if (event.getClickedBlock() == null)
                     return;
@@ -193,11 +228,11 @@ public class GMListener implements Listener {
                 if (m == Material.ENCHANTING_TABLE)
                     event.setCancelled(true);
 
-                if (m == Material.ENCHANTING_TABLE && player == gm.getShardCarrier()) {
+                if (m == Material.ENCHANTING_TABLE && player == gameManager.getShardCarrier()) {
                     event.setCancelled(true);
                     player.getInventory().getItemInMainHand();
                     if (player.getInventory().getItemInMainHand().getType() == Material.NETHER_STAR) {
-                        gm.capture(player);
+                        gameManager.capture(player);
                     }
                 } else if (m == Material.ITEM_FRAME)
                     event.setCancelled(true);
@@ -209,23 +244,26 @@ public class GMListener implements Listener {
                 if (kitCooldown.contains(player))
                     return;
 
-                if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
-                    new KitGui(gm.getPlugin(), player).open(false);
-                } else if (gm.getGameState() == GameState.LIVE && gm.getSpectators().contains(player)) {
-                        new SpectatorGui(gm.getPlugin(), player).open(true);
+                if (gameManager.getGameState() == GameState.WAITING || gameManager.getGameState() == GameState.STARTING) {
+                    new KitGui(gameManager.getPlugin(), player).open(false);
+                } else if (gameManager.getGameState() == GameState.LIVE && gameManager.getSpectators().contains(player)) {
+                        new SpectatorGui(gameManager.getPlugin(), player).open(true);
                 } else {
                     return;
                 }
 
                 kitCooldown.add(player);
-                Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> kitCooldown.remove(player), 20);
+                Bukkit.getServer().getScheduler().runTaskLater(gameManager.getPlugin(), () -> kitCooldown.remove(player), 20);
             }
         }
     }
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (event.getPlayer() == gm.getShardCarrier()) {
+        if (!event.getPlayer().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
+        if (event.getPlayer() == gameManager.getShardCarrier()) {
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 if (p != event.getPlayer())
                     p.setCompassTarget(event.getPlayer().getLocation());
@@ -237,12 +275,18 @@ public class GMListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
+        if (!event.getPlayer().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         if (event.getPlayer().getGameMode() != GameMode.CREATIVE)
             event.setCancelled(true);
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
+        if (!event.getPlayer().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         if (event.getBlock().getType() == Material.OAK_FENCE || event.getBlock().getType() == Material.NETHER_BRICK_FENCE) {
             event.setCancelled(false);
             return;
@@ -254,13 +298,19 @@ public class GMListener implements Listener {
 
     @EventHandler
     public void onHunger(FoodLevelChangeEvent event) {
+        if (!event.getEntity().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         event.setFoodLevel(20);
         event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDamage(EntityDamageByEntityEvent event) {
-        if (gm.getGameState() != GameState.LIVE) {
+        if (!event.getEntity().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
+        if (gameManager.getGameState() != GameState.LIVE) {
             event.setCancelled(true);
             return;
         }
@@ -270,7 +320,7 @@ public class GMListener implements Listener {
             Player player = (Player) event.getEntity();
             Player attacker = (Player) ((Arrow) event.getDamager()).getShooter();
 
-            if (!(gm.getSurvivors().contains(attacker) && player == gm.getHerobrine())) { // Evals to true if either a) the attacker isnt a survivor b) the damaged isnt herobrine
+            if (!(gameManager.getSurvivors().contains(attacker) && player == gameManager.getHerobrine())) { // Evals to true if either a) the attacker isnt a survivor b) the damaged isnt herobrine
                 event.setCancelled(true);
             } else {
                 event.setCancelled(true);
@@ -283,7 +333,7 @@ public class GMListener implements Listener {
         // Hound attacks THB
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Wolf) {
             Player player = (Player) event.getEntity();
-            if (player == gm.getHerobrine())
+            if (player == gameManager.getHerobrine())
                 event.setDamage(6);
             else
                 event.setCancelled(true);
@@ -293,7 +343,7 @@ public class GMListener implements Listener {
         // TBH attacks hound
         if (event.getEntity() instanceof Wolf && event.getDamager() instanceof Player) {
             Player player = (Player) event.getDamager();
-            if (player != gm.getHerobrine())
+            if (player != gameManager.getHerobrine())
                 event.setCancelled(true);
             return;
         }
@@ -306,23 +356,23 @@ public class GMListener implements Listener {
         Player player = (Player) event.getEntity();
         Player attacker = (Player) event.getDamager();
 
-        if (gm.getSurvivors().contains(attacker)) { // If attacker is a survivor
-            if (gm.getSurvivors().contains(player)) { // If the person taking damage is also a survivor, cancel
+        if (gameManager.getSurvivors().contains(attacker)) { // If attacker is a survivor
+            if (gameManager.getSurvivors().contains(player)) { // If the person taking damage is also a survivor, cancel
                 event.setCancelled(true);
                 return;
             }
 
             // Attacking THB
-            double damage = gm.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType(), attacker.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE));
+            double damage = gameManager.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType(), attacker.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE));
             if (damage != -1) event.setDamage(damage);
 
             PlayerUtil.animateHbHit(player.getLocation());
 
             // Delay the velocity change by a tick so it actually works
-            Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> player.setVelocity(new Vector(0, 0, 0)), 1);
-        } else if (attacker == gm.getHerobrine()) {
+            Bukkit.getServer().getScheduler().runTaskLater(gameManager.getPlugin(), () -> player.setVelocity(new Vector(0, 0, 0)), 1);
+        } else if (attacker == gameManager.getHerobrine()) {
             PlayerUtil.playSoundAt(attacker.getLocation(), Sound.ENTITY_GHAST_AMBIENT, 1f, 0f);
-            double damage = gm.getSurvivorHitDamage(attacker.getInventory().getItemInMainHand().getType());
+            double damage = gameManager.getSurvivorHitDamage(attacker.getInventory().getItemInMainHand().getType());
             if (damage != -1) event.setDamage(damage);
         } else {
             event.setCancelled(true);
@@ -331,68 +381,74 @@ public class GMListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onDamage(EntityDamageEvent event) {
+        if (!event.getEntity().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         if (!(event.getEntity() instanceof Player))
             return;
 
         Player player = (Player) event.getEntity();
 
-        if (gm.getGameState() != GameState.LIVE) {
+        if (gameManager.getGameState() != GameState.LIVE) {
             event.setCancelled(true);
             return;
         }
 
-        if (gm.getSpectators().contains(player)) {
+        if (gameManager.getSpectators().contains(player)) {
             event.setCancelled(true);
             return;
         }
 
-        if (player == gm.getHerobrine() && event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+        if (player == gameManager.getHerobrine() && event.getCause() == EntityDamageEvent.DamageCause.FALL) {
             event.setCancelled(true);
             return;
         }
 
-        if (player == gm.getHerobrine() && (event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK) && gm.getShardCount() != 3) {
+        if (player == gameManager.getHerobrine() && (event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK) && gameManager.getShardCount() != 3) {
             event.setCancelled(true);
-            gm.getHerobrine().setFireTicks(1);
-            gm.getHerobrine().setVisualFire(false);
+            gameManager.getHerobrine().setFireTicks(1);
+            gameManager.getHerobrine().setVisualFire(false);
         }
 
-        if (gm.getSurvivors().contains(player)) {
+        if (gameManager.getSurvivors().contains(player)) {
             if (event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) {
-                gm.getHbLastHit().add(player);
-                Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> gm.getHbLastHit().remove(player), 120);
+                gameManager.getHbLastHit().add(player);
+                Bukkit.getServer().getScheduler().runTaskLater(gameManager.getPlugin(), () -> gameManager.getHbLastHit().remove(player), 120);
             }
         }
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onDeath(PlayerDeathEvent event) {
+        if (!event.getEntity().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         Player player = event.getEntity();
         event.setDeathMessage("");
         event.getDrops().clear();
 
-        if (gm.getGameState() != GameState.LIVE) {
+        if (gameManager.getGameState() != GameState.LIVE) {
             player.setHealth(20);
             return;
         }
 
-        Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> player.spigot().respawn(), 40);
+        Bukkit.getServer().getScheduler().runTaskLater(gameManager.getPlugin(), () -> player.spigot().respawn(), 40);
 
-        if (player == gm.getHerobrine()) {
+        if (player == gameManager.getHerobrine()) {
             if (player.getKiller() != null) {
-                Message.broadcast(Message.format(ChatColor.AQUA + player.getKiller().getName() + ChatColor.GREEN + " has defeated " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
+                Message.broadcast(gameLobby, Message.format(ChatColor.AQUA + player.getKiller().getName() + ChatColor.GREEN + " has defeated " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
                 StatManager.get().getPointsTracker().increment(player.getKiller().getUniqueId(), 30);
             }
             PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_WITHER_HURT, 1f, 1f);
-            gm.end(WinType.SURVIVORS);
+            gameManager.end(WinType.SURVIVORS);
         } else {
-            gm.getSurvivors().remove(player);
-            if ((player.getKiller() != null && player.getKiller() == gm.getHerobrine()) || gm.getHbLastHit().contains(player)) {
-                Message.broadcast(Message.format(ChatColor.AQUA + player.getName() + ChatColor.YELLOW + " was killed by " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
-                StatManager.get().getPointsTracker().increment(gm.getHerobrine().getUniqueId(), 5);
+            gameManager.getSurvivors().remove(player);
+            if ((player.getKiller() != null && player.getKiller() == gameManager.getHerobrine()) || gameManager.getHbLastHit().contains(player)) {
+                Message.broadcast(gameLobby, Message.format(ChatColor.AQUA + player.getName() + ChatColor.YELLOW + " was killed by " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
+                StatManager.get().getPointsTracker().increment(gameManager.getHerobrine().getUniqueId(), 5);
             }
 
-            if (player == gm.getShardCarrier()) {
+            if (player == gameManager.getShardCarrier()) {
                 if (player.getLastDamageCause() != null && player.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.VOID) {
                     ShardHandler.destroy();
                 } else {
@@ -400,31 +456,37 @@ public class GMListener implements Listener {
                 }
             }
 
-            gm.endCheck();
+            gameManager.endCheck();
         }
     }
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
-        if (gm.getGameState() == GameState.LIVE || gm.getGameState() == GameState.ENDING) {
+        if (!gameLobby.getPlayers().contains(event.getPlayer()))
+            return;
+
+        if (gameManager.getGameState() == GameState.LIVE || gameManager.getGameState() == GameState.ENDING) {
             event.setRespawnLocation(WorldManager.getInstance().survivorSpawn);
-            gm.makeSpectator(event.getPlayer());
+            gameManager.makeSpectator(event.getPlayer());
         }
     }
 
     @EventHandler
     public void onPotion(PotionSplashEvent event) {
+        if (!event.getEntity().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         for (LivingEntity e : event.getAffectedEntities()) {
             if (e instanceof Player) {
                 Player player = (Player) e;
-                if (gm.getHerobrine() == player || !gm.getSurvivors().contains(player))
-                    Bukkit.getServer().getScheduler().runTaskLater(gm.getPlugin(), () -> {
+                if (gameManager.getHerobrine() == player || !gameManager.getSurvivors().contains(player))
+                    Bukkit.getServer().getScheduler().runTaskLater(gameManager.getPlugin(), () -> {
                         event.getPotion().getEffects().forEach(effect -> {
                             player.removePotionEffect(effect.getType());
                         });
 
-                        if (gm.getHerobrine() == player) {
-                            if (gm.getShardCount() != 3)
+                        if (gameManager.getHerobrine() == player) {
+                            if (gameManager.getShardCount() != 3)
                                 PlayerUtil.addEffect(player, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
                             PlayerUtil.addEffect(player, PotionEffectType.JUMP, Integer.MAX_VALUE, 1, false, false);
                             PlayerUtil.addEffect(player, PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false);
@@ -436,6 +498,9 @@ public class GMListener implements Listener {
 
     @EventHandler
     public void onProjectile(ProjectileLaunchEvent event) {
+        if (!event.getEntity().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         if (!(event.getEntity() instanceof Arrow))
             return;
 
@@ -445,6 +510,9 @@ public class GMListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
+        if (!event.getPlayer().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         event.setCancelled(true);
 
         StatManager sm = StatManager.get();
@@ -454,13 +522,13 @@ public class GMListener implements Listener {
 
         String endMessage = ChatColor.BLUE + player.getDisplayName() + ChatColor.DARK_GRAY + " » " + ChatColor.RESET + event.getMessage();
 
-        if (gm.getGameState() == GameState.WAITING || gm.getGameState() == GameState.STARTING) {
-            Message.broadcast("" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▏ " + rank.getDisplay() + " " + endMessage);
-        } else if (gm.getGameState() == GameState.LIVE || gm.getGameState() == GameState.ENDING) {
-            if (player == gm.getHerobrine() || gm.getSurvivors().contains(player)) {
-                Message.broadcast(rank.getDisplay() + " " + endMessage);
+        if (gameManager.getGameState() == GameState.WAITING || gameManager.getGameState() == GameState.STARTING) {
+            Message.broadcast(gameLobby, "" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▏ " + rank.getDisplay() + " " + endMessage);
+        } else if (gameManager.getGameState() == GameState.LIVE || gameManager.getGameState() == GameState.ENDING) {
+            if (player == gameManager.getHerobrine() || gameManager.getSurvivors().contains(player)) {
+                Message.broadcast(gameLobby, rank.getDisplay() + " " + endMessage);
             } else {
-                Message.broadcast("" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▍ " + ChatColor.DARK_RED + "DEAD " + ChatColor.DARK_GRAY + "▏ " + endMessage);
+                Message.broadcast(gameLobby, "" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▍ " + ChatColor.DARK_RED + "DEAD " + ChatColor.DARK_GRAY + "▏ " + endMessage);
             }
         }
     }

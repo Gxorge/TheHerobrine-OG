@@ -1,10 +1,16 @@
 package uk.hotten.herobrine.lobby;
 
+import com.onarandombox.MultiverseCore.MultiverseCore;
 import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.Console;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class LobbyManager {
@@ -12,12 +18,16 @@ public class LobbyManager {
     private JavaPlugin plugin;
     @Getter private static LobbyManager instance;
 
+    @Getter private MultiverseCore multiverseCore;
+
     private String lobbyPrefix;
     private HashMap<String, GameLobby> gameLobbies;
 
     public LobbyManager(JavaPlugin plugin) {
         this.plugin = plugin;
         instance = this;
+
+        multiverseCore = (MultiverseCore) Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Core");
 
         lobbyPrefix = plugin.getConfig().getString("lobbyPrefix");
         gameLobbies = new HashMap<>();
@@ -47,9 +57,17 @@ public class LobbyManager {
         return null;
     }
 
+    public GameLobby getLobby(String lobbyId) {
+        return gameLobbies.get(lobbyId);
+    }
+
+    public void removeLobby(String lobbyId) {
+        gameLobbies.remove(lobbyId);
+    }
+
     public void shutdown() {
         for (Map.Entry<String, GameLobby> entry : gameLobbies.entrySet()) {
-            entry.getValue().getWorldManager().clean();
+            entry.getValue().shutdown();
         }
     }
 

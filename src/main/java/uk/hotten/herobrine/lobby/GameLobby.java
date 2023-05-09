@@ -7,12 +7,16 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import lombok.Getter;
 import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import uk.hotten.herobrine.data.RedisManager;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.stat.StatManager;
 import uk.hotten.herobrine.utils.Console;
 import uk.hotten.herobrine.world.WorldManager;
+
+import java.util.ArrayList;
 
 public class GameLobby {
 
@@ -27,6 +31,8 @@ public class GameLobby {
     private ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
     private PacketAdapter enderEyeSfxFix;
 
+    @Getter private ArrayList<Player> players;
+
     public GameLobby(JavaPlugin plugin, String lobbyId) {
         this.plugin = plugin;
         this.lobbyId = lobbyId;
@@ -34,9 +40,10 @@ public class GameLobby {
 
     public void initialize() {
         Console.info("Initializing lobby " + lobbyId);
-        worldManager = new WorldManager(plugin);
-        gameManager = new GameManager(plugin, worldManager, RedisManager.getInstance(), protocolManager);
+        worldManager = new WorldManager(plugin, this);
+        gameManager = new GameManager(plugin, this, worldManager, RedisManager.getInstance(), protocolManager);
         statManager = new StatManager(plugin, gameManager);
+        players = new ArrayList<>();
 
         // Stops the eye of ender break SFX from the Notch's Wisdom and Totem of Healing abilities
         enderEyeSfxFix = new PacketAdapter(plugin, PacketType.Play.Server.NAMED_SOUND_EFFECT) {
@@ -56,4 +63,14 @@ public class GameLobby {
         Console.info("Lobby " + lobbyId + " is ready.");
     }
 
+    public void shutdown() {
+        Console.info("Lobby " + lobbyId + " is shutting down...");
+        HandlerList.unregisterAll(gameManager.getGmListener());
+        HandlerList.unregisterAll(worldManager);
+        gameManager.voidKits();
+        statManager.stopTracking();
+        worldManager.clean();
+        LobbyManager.getInstance().removeLobby(lobbyId);
+        Console.info("Lobby " + lobbyId + " has shutdown.");
+    }
 }

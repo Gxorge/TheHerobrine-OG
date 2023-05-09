@@ -26,14 +26,14 @@ public class StartingRunnable extends BukkitRunnable {
         GameManager gm = GameManager.get();
 
         if ((gm.getRequiredToStart() > gm.getSurvivors().size() && !ignorePlayerCount) || (ignorePlayerCount && gm.getSurvivors().size() <= 1)) {
-            Message.broadcast(Message.format("" + ChatColor.RED + "Start cancelled! Waiting for players..."));
+            Message.broadcast(gm.getGameLobby(), Message.format("" + ChatColor.RED + "Start cancelled! Waiting for players..."));
             gm.startWaiting();
             cancel();
             return;
         }
 
         if (gm.timerPaused) {
-            Message.broadcast(Message.format("" + ChatColor.RED + "Start cancelled! Waiting for server operator..."));
+            Message.broadcast(gm.getGameLobby(), Message.format("" + ChatColor.RED + "Start cancelled! Waiting for server operator..."));
             gm.startWaiting();
             cancel();
             return;

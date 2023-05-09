@@ -10,6 +10,7 @@ import net.md_5.bungee.api.chat.hover.content.Text;
 import uk.hotten.herobrine.events.GameStateUpdateEvent;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.game.runnables.MapVotingRunnable;
+import uk.hotten.herobrine.lobby.GameLobby;
 import uk.hotten.herobrine.utils.Console;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
@@ -31,6 +32,7 @@ public class WorldManager implements Listener {
 
     private JavaPlugin plugin;
     @Getter private static WorldManager instance;
+    private GameLobby gameLobby;
 
     private String fileBase;
     @Getter private MapBase availableMaps;
@@ -51,10 +53,11 @@ public class WorldManager implements Listener {
     private ArrayList<Chunk> noUnload;
 
 
-    public WorldManager(JavaPlugin plugin) {
+    public WorldManager(JavaPlugin plugin, GameLobby gameLobby) {
         Console.info("Loading World Manager...");
         this.plugin = plugin;
         instance = this;
+        this.gameLobby = gameLobby;
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
@@ -128,7 +131,7 @@ public class WorldManager implements Listener {
     public void sendVotingMessage(Player player) {
         ArrayList<Player> toSend = new ArrayList<>();
         if (player == null)
-            toSend.addAll(Bukkit.getServer().getOnlinePlayers());
+            toSend.addAll(gameLobby.getPlayers());
         else
             toSend.add(player);
 
@@ -159,7 +162,7 @@ public class WorldManager implements Listener {
         }
 
         Console.debug("Selected highest voted map -> " + highest.getMapData().getName());
-        Message.broadcast(Message.format(ChatColor.GOLD + "Voting has ended! The map " + ChatColor.AQUA + highest.getMapData().getName() + ChatColor.GOLD + " has won!"));
+        Message.broadcast(gameLobby, Message.format(ChatColor.GOLD + "Voting has ended! The map " + ChatColor.AQUA + highest.getMapData().getName() + ChatColor.GOLD + " has won!"));
         votingRunning = false;
 
         loadMap(highest);
@@ -223,6 +226,9 @@ public class WorldManager implements Listener {
 
     @EventHandler
     public void gameStart(GameStateUpdateEvent event) {
+        if (!gameLobby.getLobbyId().equals(event.getLobbyId()))
+            return;
+
         if (event.getNewState() == GameState.LIVE)
             Bukkit.getServer().getScheduler().runTaskLater(plugin, () -> {
                 for (Chunk c : noUnload)

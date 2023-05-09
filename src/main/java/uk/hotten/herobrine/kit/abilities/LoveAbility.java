@@ -38,6 +38,9 @@ public class LoveAbility extends KitAbility {
 
     @EventHandler
     public void use(PlayerInteractEvent event) {
+        if (!event.getPlayer().getWorld().getName().startsWith(gm.getGameLobby().getLobbyId()))
+            return;
+
         if (gm.getGameState() != GameState.LIVE)
             return;
 

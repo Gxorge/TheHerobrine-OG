@@ -27,9 +27,9 @@ public class CaptureSequence extends BukkitRunnable {
 
         PlayerUtil.broadcastTitle("" + ChatColor.AQUA + ChatColor.BOLD + "Shard Captured", ChatColor.YELLOW + "by " + ChatColor.BOLD + player.getName(), 10, 60, 20);
         if (gm.getShardCount() == 3)
-            Message.broadcast(Message.format("" + ChatColor.RED + ChatColor.BOLD + "Herobrine " + ChatColor.YELLOW + "is now " + ChatColor.GREEN + "Visible!"));
+            Message.broadcast(gm.getGameLobby(), Message.format("" + ChatColor.RED + ChatColor.BOLD + "Herobrine " + ChatColor.YELLOW + "is now " + ChatColor.GREEN + "Visible!"));
         else
-            Message.broadcast(Message.format(ChatColor.AQUA + "" + gm.getShardCount() + ChatColor.GRAY + "/3 Shards Captured!"));
+            Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.AQUA + "" + gm.getShardCount() + ChatColor.GRAY + "/3 Shards Captured!"));
         PlayerUtil.playSoundAt(l, Sound.BLOCK_PORTAL_TRAVEL, 1f, 1f);
         PlayerUtil.playSoundAt(l, Sound.ENTITY_WITHER_DEATH, 0.5f, 1f);
         PlayerUtil.broadcastSound(Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1f, 0f);
