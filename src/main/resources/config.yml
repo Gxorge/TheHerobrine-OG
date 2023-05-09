@@ -16,6 +16,10 @@ showDeathBringerAt: 100000 # How many points must the top player surpass for the
 
 showDebugMessages: false # Show debug messages?
 
+## Lobbies
+lobbyPrefix: "HB" # Prefix of lobby IDs
+lobbyAutoStartAmount: 1 # How many lobbies will be started on server boot
+
 ## Redis Configuration
 redisHost: "localhost"
 redisPort: 6379
