@@ -49,7 +49,7 @@ public class HarmingTotemAbility extends KitAbility {
             if (isOnCooldown(player))
                 return;
 
-            new HarmingTotemHandler(event.getBlock(), player).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
+            new HarmingTotemHandler(event.getBlock(), player, gm).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
             startCooldown(player);
         }
     }

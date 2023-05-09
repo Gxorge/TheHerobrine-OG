@@ -12,20 +12,23 @@ import uk.hotten.herobrine.utils.PlayerUtil;
 
 public class HarmingTotemHandler extends BukkitRunnable {
 
-    Block block;
-    Player placer;
-    Player herobrine = GameManager.get().getHerobrine();
-    int time = 0;
+    private Block block;
+    private Player placer;
+    private Player herobrine;
+    private int time = 0;
+    private GameManager gm;
 
-    public HarmingTotemHandler(Block block, Player placer) {
+    public HarmingTotemHandler(Block block, Player placer, GameManager gm) {
         this.block = block;
         this.placer = placer;
+        this.gm = gm;
+        this.herobrine = gm.getHerobrine();
     }
 
     @Override
     public void run() {
         if (time > 30) {
-            Bukkit.getServer().getScheduler().runTask(GameManager.get().getPlugin(), () -> block.setType(Material.AIR));
+            Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), () -> block.setType(Material.AIR));
             cancel();
             return;
         }
@@ -36,7 +39,7 @@ public class HarmingTotemHandler extends BukkitRunnable {
         }
 
         if (PlayerUtil.getDistance(herobrine, block.getLocation()) <= 6) {
-            Bukkit.getServer().getScheduler().runTask(GameManager.get().getPlugin(), () -> {
+            Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), () -> {
                 PlayerUtil.decreaseHealth(herobrine, 2, placer);
                 PlayerUtil.animateHbHit(herobrine.getLocation());
             });

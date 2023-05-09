@@ -1,6 +1,5 @@
 package uk.hotten.herobrine.game.runnables;
 
-import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
 import org.bukkit.ChatColor;
@@ -11,7 +10,11 @@ import java.util.concurrent.TimeUnit;
 
 public class HerobrineSetup extends BukkitRunnable {
 
-    Player player = GameManager.get().getHerobrine();
+    private Player player;
+
+    public HerobrineSetup(Player player) {
+        this.player = player;
+    }
 
     @Override
     public void run() {

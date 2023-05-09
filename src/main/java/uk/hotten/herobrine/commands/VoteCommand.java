@@ -4,8 +4,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import uk.hotten.herobrine.game.GameManager;
+import uk.hotten.herobrine.lobby.GameLobby;
+import uk.hotten.herobrine.lobby.LobbyManager;
 import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.world.WorldManager;
 
@@ -13,13 +16,21 @@ public class VoteCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        GameManager gm = GameManager.get();
-        WorldManager wm = WorldManager.getInstance();
-
         if (!(sender instanceof Player)) {
-            sender.sendMessage(Message.format(ChatColor.RED + "You aren't allowed to vote."));
+            sender.sendMessage(Message.format(ChatColor.RED + "You are unable to use this command."));
             return true;
         }
+
+        GameManager gm;
+        WorldManager wm;
+        GameLobby gl = LobbyManager.getInstance().getLobby((Player) sender);
+        if (gl == null) {
+            sender.sendMessage(Message.format(ChatColor.RED + "You must be in a lobby to do this."));
+            return true;
+        }
+
+        gm = gl.getGameManager();
+        wm = gl.getWorldManager();
 
         Player player = (Player) sender;
 

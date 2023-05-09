@@ -55,7 +55,7 @@ public class ProtSpiritAbility extends KitAbility {
                     return;
 
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
-                new ProtSpiritHandler(player).runTaskTimerAsynchronously(gm.getPlugin(), 0, 10);
+                new ProtSpiritHandler(player, gm).runTaskTimerAsynchronously(gm.getPlugin(), 0, 10);
                 startCooldown(player);
             }
         }

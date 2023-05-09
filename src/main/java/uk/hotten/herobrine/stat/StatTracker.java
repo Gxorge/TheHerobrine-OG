@@ -29,7 +29,7 @@ public class StatTracker implements Listener {
         stat = new HashMap<>();
     }
 
-    public void start() { Console.debug(displayName + " tracking STARTED."); Bukkit.getServer().getPluginManager().registerEvents(this, GameManager.get().getPlugin()); }
+    public void start() { Console.debug(displayName + " tracking STARTED."); Bukkit.getServer().getPluginManager().registerEvents(this, sm.getPlugin()); }
     public void stop() { Console.debug(displayName + " tracking STOPPED."); HandlerList.unregisterAll(this); }
     public void reset() { Console.debug(displayName + " tracking RESET."); stat.clear(); }
 

@@ -47,7 +47,7 @@ public class GMListener implements Listener {
     public void onJoin(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
 
-        if (!player.getWorld().getName().startsWith(gameLobby.getLobbyId()))
+        if (!player.getWorld().getName().equals(gameLobby.getLobbyId() + "-hub"))
             return;
 
         if (gameManager.getSurvivors().size() >= gameManager.getMaxPlayers()) {
@@ -66,7 +66,7 @@ public class GMListener implements Listener {
 
         gameLobby.getPlayers().add(player);
 
-        StatManager.get().check(player.getUniqueId());
+        gameLobby.getStatManager().check(player.getUniqueId());
 
         gameManager.getScoreboards().put(player, ScoreboardLib.createScoreboard(player).setHandler(new ScoreboardHandler() {
             @Override
@@ -77,10 +77,10 @@ public class GMListener implements Listener {
             @Override
             public List<Entry> getEntries(Player player) {
                 return new EntryBuilder()
-                        .next(ChatColor.AQUA + "Points: " + ChatColor.RESET + StatManager.get().getPoints().get(player.getUniqueId()))
-                        .next(ChatColor.AQUA + "Captures: " + ChatColor.RESET + StatManager.get().getCaptures().get(player.getUniqueId()))
-                        .next(ChatColor.AQUA + "Kills: " + ChatColor.RESET + StatManager.get().getKills().get(player.getUniqueId()))
-                        .next(ChatColor.AQUA + "Deaths: " + ChatColor.RESET + StatManager.get().getDeaths().get(player.getUniqueId()))
+                        .next(ChatColor.AQUA + "Points: " + ChatColor.RESET + gameLobby.getStatManager().getPoints().get(player.getUniqueId()))
+                        .next(ChatColor.AQUA + "Captures: " + ChatColor.RESET + gameLobby.getStatManager().getCaptures().get(player.getUniqueId()))
+                        .next(ChatColor.AQUA + "Kills: " + ChatColor.RESET + gameLobby.getStatManager().getKills().get(player.getUniqueId()))
+                        .next(ChatColor.AQUA + "Deaths: " + ChatColor.RESET + gameLobby.getStatManager().getDeaths().get(player.getUniqueId()))
                         .build();
             }
         }).setUpdateInterval(1));
@@ -99,8 +99,8 @@ public class GMListener implements Listener {
         gameManager.getSurvivors().add(player);
         gameManager.startCheck();
 
-        WorldManager.getInstance().getPlayerVotes().put(player, 0);
-        WorldManager.getInstance().sendVotingMessage(player);
+        gameLobby.getWorldManager().getPlayerVotes().put(player, 0);
+        gameLobby.getWorldManager().sendVotingMessage(player);
         gameManager.hubInventory(player);
         gameManager.setKit(event.getPlayer(), gameManager.getSavedKit(player), true);
         player.setHealth(20);
@@ -123,7 +123,13 @@ public class GMListener implements Listener {
     public void onLeaveViaWorld(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
 
-        if (player.getWorld().getName().contains(gameLobby.getLobbyId()))
+        if (player.getWorld().getName().startsWith(gameLobby.getLobbyId()) && event.getFrom().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
+        if (player.getWorld().getName().startsWith(gameLobby.getLobbyId()) && !event.getFrom().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
+        if (!event.getFrom().getName().startsWith(gameLobby.getLobbyId()))
             return;
 
         onLeaveLogic(player);
@@ -140,7 +146,7 @@ public class GMListener implements Listener {
         gameManager.getTeamPrefixes().remove(player);
         gameManager.getTeamColours().remove(player);
 
-        WorldManager wm = WorldManager.getInstance();
+        WorldManager wm = gameLobby.getWorldManager();
         if (wm.getPlayerVotes().getOrDefault(player, 0) != 0)
             wm.getVotingMaps().get(wm.getPlayerVotes().get(player)).decrementVotes();
         wm.getPlayerVotes().remove(player);
@@ -148,7 +154,7 @@ public class GMListener implements Listener {
 
         if (gameManager.getGameState() == GameState.LIVE) {
             if (player == gameManager.getShardCarrier()) {
-                ShardHandler.drop(player.getLocation());
+                gameManager.getShardHandler().drop(player.getLocation());
             }
 
             // If ran straight away, it still thinks THB is online if they were the quitter
@@ -193,11 +199,11 @@ public class GMListener implements Listener {
             PlayerUtil.sendTitle(p, "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Help them return it!", 5, 60, 5);
         }
         PlayerUtil.sendTitle(gameManager.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
-        ShardHandler.shardTitle.remove();
+        gameManager.getShardHandler().getShardTitle().remove();
         gameManager.setShardState(ShardState.CARRYING);
         gameManager.setShardCarrier(player);
         gameManager.setTags(player, "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Shard: ", ChatColor.LIGHT_PURPLE, GameManager.ScoreboardUpdateAction.UPDATE);
-        PlayerUtil.broadcastSound(Sound.ENTITY_BAT_DEATH, 1f, 0f);
+        PlayerUtil.broadcastSound(gameLobby, Sound.ENTITY_BAT_DEATH, 1f, 0f);
         PlayerUtil.addEffect(player, PotionEffectType.BLINDNESS, 100, 1, false, false);
         PlayerUtil.addEffect(player, PotionEffectType.SLOW, 600, 2, false, false);
         PlayerUtil.addEffect(player, PotionEffectType.CONFUSION, 300, 1, false, false);
@@ -245,9 +251,9 @@ public class GMListener implements Listener {
                     return;
 
                 if (gameManager.getGameState() == GameState.WAITING || gameManager.getGameState() == GameState.STARTING) {
-                    new KitGui(gameManager.getPlugin(), player).open(false);
+                    new KitGui(gameManager.getPlugin(), player, gameManager).open(false);
                 } else if (gameManager.getGameState() == GameState.LIVE && gameManager.getSpectators().contains(player)) {
-                        new SpectatorGui(gameManager.getPlugin(), player).open(true);
+                        new SpectatorGui(gameManager.getPlugin(), player, gameManager).open(true);
                 } else {
                     return;
                 }
@@ -268,7 +274,7 @@ public class GMListener implements Listener {
                 if (p != event.getPlayer())
                     p.setCompassTarget(event.getPlayer().getLocation());
                 else
-                    p.setCompassTarget(WorldManager.getInstance().alter);
+                    p.setCompassTarget(gameLobby.getWorldManager().alter);
             }
         }
     }
@@ -437,7 +443,7 @@ public class GMListener implements Listener {
         if (player == gameManager.getHerobrine()) {
             if (player.getKiller() != null) {
                 Message.broadcast(gameLobby, Message.format(ChatColor.AQUA + player.getKiller().getName() + ChatColor.GREEN + " has defeated " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
-                StatManager.get().getPointsTracker().increment(player.getKiller().getUniqueId(), 30);
+                gameLobby.getStatManager().getPointsTracker().increment(player.getKiller().getUniqueId(), 30);
             }
             PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_WITHER_HURT, 1f, 1f);
             gameManager.end(WinType.SURVIVORS);
@@ -445,14 +451,14 @@ public class GMListener implements Listener {
             gameManager.getSurvivors().remove(player);
             if ((player.getKiller() != null && player.getKiller() == gameManager.getHerobrine()) || gameManager.getHbLastHit().contains(player)) {
                 Message.broadcast(gameLobby, Message.format(ChatColor.AQUA + player.getName() + ChatColor.YELLOW + " was killed by " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
-                StatManager.get().getPointsTracker().increment(gameManager.getHerobrine().getUniqueId(), 5);
+                gameLobby.getStatManager().getPointsTracker().increment(gameManager.getHerobrine().getUniqueId(), 5);
             }
 
             if (player == gameManager.getShardCarrier()) {
                 if (player.getLastDamageCause() != null && player.getLastDamageCause().getCause() == EntityDamageEvent.DamageCause.VOID) {
-                    ShardHandler.destroy();
+                    gameManager.getShardHandler().destroy();
                 } else {
-                    ShardHandler.drop(player.getLocation().add(0, 1, 0));
+                    gameManager.getShardHandler().drop(player.getLocation().add(0, 1, 0));
                 }
             }
 
@@ -466,7 +472,7 @@ public class GMListener implements Listener {
             return;
 
         if (gameManager.getGameState() == GameState.LIVE || gameManager.getGameState() == GameState.ENDING) {
-            event.setRespawnLocation(WorldManager.getInstance().survivorSpawn);
+            event.setRespawnLocation(gameLobby.getWorldManager().survivorSpawn);
             gameManager.makeSpectator(event.getPlayer());
         }
     }
@@ -515,7 +521,7 @@ public class GMListener implements Listener {
 
         event.setCancelled(true);
 
-        StatManager sm = StatManager.get();
+        StatManager sm = gameLobby.getStatManager();
         Player player = event.getPlayer();
         GameRank rank = sm.getGameRank(player.getUniqueId());
         int points = sm.getPoints().get(player.getUniqueId());

@@ -14,16 +14,19 @@ import java.util.concurrent.TimeUnit;
 
 public class CaptureSequence extends BukkitRunnable {
 
-    Player player;
-    GameManager gm = GameManager.get();
+    private Player player;
+    private GameManager gm;
+    private WorldManager wm;
 
-    public CaptureSequence(Player player) {
+    public CaptureSequence(Player player, GameManager gm, WorldManager wm) {
         this.player = player;
+        this.gm = gm;
+        this.wm = wm;
     }
 
     @Override
     public void run() {
-        Location l = WorldManager.getInstance().alter;
+        Location l = wm.alter;
 
         PlayerUtil.broadcastTitle("" + ChatColor.AQUA + ChatColor.BOLD + "Shard Captured", ChatColor.YELLOW + "by " + ChatColor.BOLD + player.getName(), 10, 60, 20);
         if (gm.getShardCount() == 3)
@@ -32,7 +35,7 @@ public class CaptureSequence extends BukkitRunnable {
             Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.AQUA + "" + gm.getShardCount() + ChatColor.GRAY + "/3 Shards Captured!"));
         PlayerUtil.playSoundAt(l, Sound.BLOCK_PORTAL_TRAVEL, 1f, 1f);
         PlayerUtil.playSoundAt(l, Sound.ENTITY_WITHER_DEATH, 0.5f, 1f);
-        PlayerUtil.broadcastSound(Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1f, 0f);
+        PlayerUtil.broadcastSound(gm.getGameLobby(), Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1f, 0f);
 
         try { TimeUnit.SECONDS.sleep(4); } catch (Exception e) { e.printStackTrace(); }
 

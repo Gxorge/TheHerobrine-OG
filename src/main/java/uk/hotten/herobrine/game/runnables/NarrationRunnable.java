@@ -10,8 +10,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class NarrationRunnable extends BukkitRunnable {
 
-    public static double timer = 0;
-    GameManager gm = GameManager.get();
+    public double timer = 0;
+    private GameManager gm;
+
+    public NarrationRunnable(GameManager gm) {
+        this.gm = gm;
+    }
 
     @Override
     public void run() {
@@ -61,7 +65,7 @@ public class NarrationRunnable extends BukkitRunnable {
     }
 
     private void all(String msg) {
-        PlayerUtil.broadcastActionbar(msg);
+        PlayerUtil.broadcastActionbar(gm.getGameLobby(), msg);
     }
 
     private void separate(String survivors, String herobrine, String spectators) {

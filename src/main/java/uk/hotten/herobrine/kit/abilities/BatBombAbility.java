@@ -64,7 +64,7 @@ public class BatBombAbility extends KitAbility {
 
                 Item coal = player.getWorld().dropItem(l, new ItemStack(Material.COAL));
                 coal.setVelocity(l.getDirection().normalize().multiply(2f));
-                new BatBombHandler(coal).runTaskAsynchronously(gm.getPlugin());
+                new BatBombHandler(coal, gm).runTaskAsynchronously(gm.getPlugin());
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
                 startCooldown(player);
             }

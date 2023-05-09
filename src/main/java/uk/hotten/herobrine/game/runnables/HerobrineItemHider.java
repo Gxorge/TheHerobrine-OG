@@ -17,12 +17,17 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class HerobrineItemHider extends BukkitRunnable {
 
-    GameManager gm = GameManager.get();
-    Player player = gm.getHerobrine();
-    ProtocolManager protocolManager = GameManager.get().getProtocolManager();
+    private GameManager gm;
+    private Player player;
+    private ProtocolManager protocolManager;
+
+    public HerobrineItemHider(GameManager gm) {
+        this.gm = gm;
+        this.player = gm.getHerobrine();
+        this.protocolManager = gm.getProtocolManager();
+    }
 
     @Override
     public void run() {

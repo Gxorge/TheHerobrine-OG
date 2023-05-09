@@ -10,13 +10,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class WisdomHandler extends BukkitRunnable {
 
-    Location location;
-    int time = 0;
-    BukkitTask wah;
+    private Location location;
+    private int time = 0;
+    private BukkitTask wah;
+    private GameManager gm;
 
-    public WisdomHandler(Location location) {
+    public WisdomHandler(Location location, GameManager gm) {
         this.location = location;
-        wah = new WisdomAnimationHandler(location).runTaskTimer(GameManager.get().getPlugin(), 0, 5);
+        this.gm = gm;
+        wah = new WisdomAnimationHandler(location).runTaskTimer(gm.getPlugin(), 0, 5);
     }
 
     @Override
@@ -27,7 +29,7 @@ public class WisdomHandler extends BukkitRunnable {
             return;
         }
 
-        for (Player p : GameManager.get().getSurvivors()) {
+        for (Player p : gm.getSurvivors()) {
             if (PlayerUtil.getDistance(p, location) <= 3) {
                 PlayerUtil.increaseHealth(p, 2);
                 PlayerUtil.playSound(p, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);

@@ -11,20 +11,24 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class StartingRunnable extends BukkitRunnable {
 
-    boolean ignorePlayerCount;
+    private boolean ignorePlayerCount;
+    private GameManager gm;
+    private WorldManager wm;
 
-    public StartingRunnable() {
+    public StartingRunnable(GameManager gm, WorldManager wm) {
         ignorePlayerCount = false;
+        this.gm = gm;
+        this.wm = wm;
     }
 
-    public StartingRunnable(boolean ignorePlayerCount) {
+    public StartingRunnable(GameManager gm, WorldManager wm, boolean ignorePlayerCount) {
         this.ignorePlayerCount = ignorePlayerCount;
+        this.gm = gm;
+        this.wm = wm;
     }
 
     @Override
     public void run() {
-        GameManager gm = GameManager.get();
-
         if ((gm.getRequiredToStart() > gm.getSurvivors().size() && !ignorePlayerCount) || (ignorePlayerCount && gm.getSurvivors().size() <= 1)) {
             Message.broadcast(gm.getGameLobby(), Message.format("" + ChatColor.RED + "Start cancelled! Waiting for players..."));
             gm.startWaiting();
@@ -41,8 +45,8 @@ public class StartingRunnable extends BukkitRunnable {
 
         gm.startTimer--;
 
-        if (gm.startTimer == WorldManager.getInstance().getEndVotingAt())
-            Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), () -> WorldManager.getInstance().selectAndLoadMapFromVote());
+        if (gm.startTimer == wm.getEndVotingAt())
+            Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), () -> wm.selectAndLoadMapFromVote());
 
         if (gm.startTimer == 0) {
             Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), gm::start);
@@ -52,14 +56,14 @@ public class StartingRunnable extends BukkitRunnable {
 
         String time = (gm.startTimer < 60 ? Message.formatTime(gm.startTimer) : Message.formatTimeFull(gm.startTimer));
         if (gm.startTimer > 5) {
-            PlayerUtil.broadcastActionbar("" + ChatColor.YELLOW + "Get ready! The game will start in " + ChatColor.GREEN + time);
+            PlayerUtil.broadcastActionbar(gm.getGameLobby(), "" + ChatColor.YELLOW + "Get ready! The game will start in " + ChatColor.GREEN + time);
         } else {
             if (gm.startTimer <= 5)
-                PlayerUtil.broadcastSound(Sound.BLOCK_NOTE_BLOCK_HAT, 1f, 1f);
+                PlayerUtil.broadcastSound(gm.getGameLobby(), Sound.BLOCK_NOTE_BLOCK_HAT, 1f, 1f);
             if (gm.startTimer <= 3)
-                PlayerUtil.broadcastSound(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
+                PlayerUtil.broadcastSound(gm.getGameLobby(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
 
-            PlayerUtil.broadcastActionbar("" + ChatColor.GREEN + "Get ready! The game will start in " + ChatColor.RED + time);
+            PlayerUtil.broadcastActionbar(gm.getGameLobby(), "" + ChatColor.GREEN + "Get ready! The game will start in " + ChatColor.RED + time);
         }
     }
 }

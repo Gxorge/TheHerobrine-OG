@@ -1,5 +1,6 @@
 networkName: Your Network # Name of your network
 networkWeb: yournetwork.org # Website of your network
+gamePrefix: "DEFAULT" # PLEASE PUT IN SPEECH MARKS! Set as "DEFAULT" for classic HiveMC, else it will be your own.
 
 minPlayers: 8 # Minimum players needed to start a game
 maxPlayers: 13 # Maximum players in a game

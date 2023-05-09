@@ -3,6 +3,7 @@ package uk.hotten.herobrine.stat;
 import lombok.Getter;
 import uk.hotten.herobrine.data.SqlManager;
 import uk.hotten.herobrine.game.GameManager;
+import uk.hotten.herobrine.lobby.GameLobby;
 import uk.hotten.herobrine.stat.trackers.CaptureTracker;
 import uk.hotten.herobrine.stat.trackers.DeathTracker;
 import uk.hotten.herobrine.stat.trackers.KillsTracker;
@@ -21,9 +22,9 @@ public class StatManager {
 
     private boolean nullBool;
 
-    private JavaPlugin plugin;
+    @Getter private JavaPlugin plugin;
+    private GameLobby gameLobby;
     private GameManager gm;
-    private static StatManager instance;
 
     @Getter private StatTracker pointsTracker;
 
@@ -36,17 +37,17 @@ public class StatManager {
     private String highestPlayerUUID;
     private int showDeathBringerAt;
 
-    public StatManager(JavaPlugin plugin, GameManager gm) {
+    public StatManager(JavaPlugin plugin, GameLobby gameLobby) {
         Console.info("Loading Stat Manager...");
         this.plugin = plugin;
-        this.gm = gm;
-        instance = this;
+        this.gameLobby = gameLobby;
+        this.gm = gameLobby.getGameManager();
 
         gm.setStatTrackers(new StatTracker[] {
                 new PointsTracker(this),
-                new CaptureTracker(this),
-                new KillsTracker(this),
-                new DeathTracker(this)
+                new CaptureTracker(this, gameLobby),
+                new KillsTracker(this, gameLobby),
+                new DeathTracker(this, gameLobby)
         });
 
         for (StatTracker tracker : gm.getStatTrackers()) {
@@ -71,8 +72,6 @@ public class StatManager {
 
         Console.info("Stat Manager is ready!");
     }
-
-    public static StatManager get() { return instance; }
 
     public void startTracking() {
         for (StatTracker tracker : gm.getStatTrackers()) {

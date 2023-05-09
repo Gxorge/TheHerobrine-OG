@@ -41,8 +41,8 @@ public class GameLobby {
     public void initialize() {
         Console.info("Initializing lobby " + lobbyId);
         worldManager = new WorldManager(plugin, this);
-        gameManager = new GameManager(plugin, this, worldManager, RedisManager.getInstance(), protocolManager);
-        statManager = new StatManager(plugin, gameManager);
+        gameManager = new GameManager(plugin, this, RedisManager.getInstance(), protocolManager);
+        statManager = new StatManager(plugin, this);
         players = new ArrayList<>();
 
         // Stops the eye of ender break SFX from the Notch's Wisdom and Totem of Healing abilities
@@ -63,14 +63,16 @@ public class GameLobby {
         Console.info("Lobby " + lobbyId + " is ready.");
     }
 
-    public void shutdown() {
+    public void shutdown(boolean removeSelf) {
         Console.info("Lobby " + lobbyId + " is shutting down...");
         HandlerList.unregisterAll(gameManager.getGmListener());
         HandlerList.unregisterAll(worldManager);
         gameManager.voidKits();
         statManager.stopTracking();
         worldManager.clean();
-        LobbyManager.getInstance().removeLobby(lobbyId);
+        worldManager.cleanHub();
+        if (removeSelf)
+            LobbyManager.getInstance().removeLobby(lobbyId);
         Console.info("Lobby " + lobbyId + " has shutdown.");
     }
 }

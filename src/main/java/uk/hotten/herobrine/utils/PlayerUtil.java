@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import uk.hotten.herobrine.lobby.GameLobby;
 
 import java.util.Random;
 
@@ -19,8 +20,8 @@ public class PlayerUtil {
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
     }
 
-    public static void broadcastActionbar(String message) {
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+    public static void broadcastActionbar(GameLobby gameLobby, String message) {
+        for (Player p : gameLobby.getPlayers()) {
             sendActionbar(p, message);
         }
     }
@@ -39,8 +40,8 @@ public class PlayerUtil {
         player.playSound(player.getLocation(), sound, volume, pitch);
     }
 
-    public static void broadcastSound(Sound sound, float volume, float pitch) {
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+    public static void broadcastSound(GameLobby gameLobby, Sound sound, float volume, float pitch) {
+        for (Player p : gameLobby.getPlayers()) {
             playSound(p, sound, volume, pitch);
         }
     }

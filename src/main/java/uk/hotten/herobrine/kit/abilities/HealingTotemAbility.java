@@ -49,7 +49,7 @@ public class HealingTotemAbility extends KitAbility {
             if (isOnCooldown(player))
                 return;
 
-            new HealingTotemHandler(event.getBlock()).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
+            new HealingTotemHandler(event.getBlock(), gm).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
             startCooldown(player);
         }
     }

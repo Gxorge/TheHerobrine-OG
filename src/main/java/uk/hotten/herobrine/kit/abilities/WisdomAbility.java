@@ -54,7 +54,7 @@ public class WisdomAbility extends KitAbility {
                     return;
 
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
-                new WisdomHandler(player.getLocation()).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
+                new WisdomHandler(player.getLocation(), gm).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);
                 startCooldown(player);
             }
         }

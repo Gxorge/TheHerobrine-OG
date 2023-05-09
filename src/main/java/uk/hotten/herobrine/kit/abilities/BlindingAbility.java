@@ -62,7 +62,7 @@ public class BlindingAbility extends KitAbility {
 
                 Item nugget = player.getWorld().dropItem(l, new ItemStack(Material.GOLD_NUGGET));
                 nugget.setVelocity(l.getDirection().normalize().multiply(2f));
-                new BlindingHandler(nugget).runTaskAsynchronously(gm.getPlugin());
+                new BlindingHandler(nugget, gm).runTaskAsynchronously(gm.getPlugin());
                 PlayerUtil.removeAmountOfItem(player, player.getInventory().getItemInMainHand(), 1);
                 startCooldown(player);
             }

@@ -1,10 +1,12 @@
 package uk.hotten.herobrine.game.runnables;
 
+import lombok.Getter;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
+import uk.hotten.herobrine.lobby.GameLobby;
 import uk.hotten.herobrine.utils.*;
 import uk.hotten.herobrine.world.WorldManager;
 import org.bukkit.entity.Item;
@@ -16,13 +18,19 @@ import java.util.Random;
 
 public class ShardHandler extends BukkitRunnable {
 
-    int timer = 30;
-    int despawnTimer = 300; // 5 minutes
-    Random random = new Random();
-    static Item shard;
-    public static ArmorStand shardTitle;
-    private static Location spawnLoc;
-    static GameManager gm = GameManager.get();
+    private int timer = 30;
+    private int despawnTimer = 300; // 5 minutes
+    private Random random = new Random();
+    private Item shard;
+    @Getter private ArmorStand shardTitle;
+    private Location spawnLoc;
+    private GameManager gm;
+    private WorldManager wm;
+    
+    public ShardHandler(GameLobby gl) {
+        this.gm = gl.getGameManager();
+        this.wm = gl.getWorldManager();
+    }
 
     @Override
     public void run() {
@@ -35,7 +43,7 @@ public class ShardHandler extends BukkitRunnable {
             case WAITING: {
                 despawnTimer = 300;
                 timer--;
-                for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(WorldManager.getInstance().alter);
+                for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(wm.alter);
                 if (timer == 0)
                     spawn();
                 break;
@@ -61,7 +69,7 @@ public class ShardHandler extends BukkitRunnable {
 
     private void spawn() {
         Random rand = new Random();
-        spawnLoc = WorldManager.getInstance().shardSpawns.get(rand.nextInt(WorldManager.getInstance().shardSpawns.size()));
+        spawnLoc = wm.shardSpawns.get(rand.nextInt(wm.shardSpawns.size()));
 
         shard = spawnLoc.getWorld().dropItem(spawnLoc.add(0, 1, 0), createShard());
         shard.setInvulnerable(true);
@@ -78,7 +86,7 @@ public class ShardHandler extends BukkitRunnable {
         Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.LIGHT_PURPLE  + "A new shard has " + ChatColor.AQUA + ChatColor.BOLD + "been SUMMONED!"));
     }
 
-    public static void drop(Location loc) {
+    public void drop(Location loc) {
         shard = loc.getWorld().dropItem(loc.add(0, 1, 0), createShard());
         spawnLoc = shard.getLocation();
         shard.setInvulnerable(true);
@@ -92,7 +100,7 @@ public class ShardHandler extends BukkitRunnable {
         PlayerUtil.broadcastTitle("", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "dropped!", 10, 60, 10);
     }
 
-    public static void destroy() {
+    public void destroy() {
         gm.setShardPreviousDestroyed(true);
         gm.setShardState(ShardState.WAITING);
         gm.setShardCarrier(null);
@@ -113,7 +121,7 @@ public class ShardHandler extends BukkitRunnable {
         return shardItem.build();
     }
 
-    private static void spawnShardTitle() {
+    private void spawnShardTitle() {
         shardTitle = (ArmorStand) shard.getWorld().spawnEntity(shard.getLocation().subtract(0, 1.5, 0), EntityType.ARMOR_STAND);
         shardTitle.setVisible(false);
         shardTitle.setCustomName(ChatColor.AQUA + "The Shard");
@@ -122,7 +130,7 @@ public class ShardHandler extends BukkitRunnable {
     }
 
     private void checkShardLoc() {
-        if (shard.getLocation().getY() < WorldManager.getInstance().getGameMapData().getShardMin() || shard.getLocation().getY() > WorldManager.getInstance().getGameMapData().getShardMax()) {
+        if (shard.getLocation().getY() < wm.getGameMapData().getShardMin() || shard.getLocation().getY() > wm.getGameMapData().getShardMax()) {
             destroy();
             return;
         }

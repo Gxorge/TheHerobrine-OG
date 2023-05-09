@@ -33,3 +33,7 @@ commands:
     description: Vote for a map.
     usage: /<command> <map number>
     aliases: [v]
+
+  hbjoin:
+    description: Join a lobby.
+    usage: /command <lobby>

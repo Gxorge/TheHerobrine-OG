@@ -13,13 +13,15 @@ import java.util.Arrays;
 
 public class SpectatorGui extends GUIBase {
 
-    public SpectatorGui(JavaPlugin plugin, Player player) {
+    private GameManager gm;
+
+    public SpectatorGui(JavaPlugin plugin, Player player, GameManager gm) {
         super(plugin, player, ChatColor.DARK_GRAY + "Spectator Menu", 18, false);
+        this.gm = gm;
     }
 
     @Override
     public void setupItems() {
-        GameManager gm = GameManager.get();
         int current = 0;
         ArrayList<Player> players = new ArrayList<>(gm.getSurvivors());
         players.add(0, gm.getHerobrine());

@@ -1,6 +1,5 @@
 package uk.hotten.herobrine.utils;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import uk.hotten.herobrine.lobby.GameLobby;
@@ -8,13 +7,14 @@ import uk.hotten.herobrine.lobby.LobbyManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.StringTokenizer;
 
 public class Message {
 
+    public static String prefix;
+
     public static String format(String body) {
-        return "" + ChatColor.DARK_GRAY + "▍ " + ChatColor.DARK_AQUA + "TheHerobrine " + ChatColor.DARK_GRAY + "▏ " + ChatColor.RESET + body;
+        return prefix + " " + ChatColor.RESET + body;
     }
 
     public static void broadcast(GameLobby lobby, String message) {

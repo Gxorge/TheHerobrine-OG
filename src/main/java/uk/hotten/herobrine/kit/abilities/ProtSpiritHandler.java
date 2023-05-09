@@ -10,17 +10,19 @@ import java.util.Random;
 
 public class ProtSpiritHandler extends BukkitRunnable {
 
-    Player player;
-    int time = 0;
-    Random random = new Random();
+    private Player player;
+    private int time = 0;
+    private Random random = new Random();
+    private GameManager gm;
 
-    public ProtSpiritHandler(Player player) {
+    public ProtSpiritHandler(Player player, GameManager gm) {
         this.player = player;
+        this.gm = gm;
     }
 
     @Override
     public void run() {
-        if (!GameManager.get().getSurvivors().contains(player)) {
+        if (!gm.getSurvivors().contains(player)) {
             cancel();
             return;
         }

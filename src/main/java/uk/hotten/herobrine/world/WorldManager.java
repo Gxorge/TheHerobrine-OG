@@ -2,15 +2,17 @@ package uk.hotten.herobrine.world;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import uk.hotten.herobrine.events.GameStateUpdateEvent;
-import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.game.runnables.MapVotingRunnable;
 import uk.hotten.herobrine.lobby.GameLobby;
+import uk.hotten.herobrine.lobby.LobbyManager;
 import uk.hotten.herobrine.utils.Console;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
@@ -31,13 +33,14 @@ import java.util.*;
 public class WorldManager implements Listener {
 
     private JavaPlugin plugin;
-    @Getter private static WorldManager instance;
     private GameLobby gameLobby;
+    @Getter private MVWorldManager mvWorldManager;
 
     private String fileBase;
     @Getter private MapBase availableMaps;
     @Getter private MapData gameMapData;
     @Getter private World gameWorld;
+    @Getter private MultiverseWorld hubWorld;
 
     @Getter private HashMap<Integer, VotingMap> votingMaps;
     @Getter private HashMap<Player, Integer> playerVotes;
@@ -56,8 +59,8 @@ public class WorldManager implements Listener {
     public WorldManager(JavaPlugin plugin, GameLobby gameLobby) {
         Console.info("Loading World Manager...");
         this.plugin = plugin;
-        instance = this;
         this.gameLobby = gameLobby;
+        mvWorldManager = LobbyManager.getInstance().getMultiverseCore().getMVWorldManager();
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
@@ -72,6 +75,7 @@ public class WorldManager implements Listener {
 
         noUnload = new ArrayList<>();
 
+        loadHubMap();
         loadMapBase();
         Console.info("World manager is ready!");
     }
@@ -93,7 +97,6 @@ public class WorldManager implements Listener {
             return;
         }
         Console.info("Map base loaded!");
-        pickVotingMaps();
     }
 
     public void pickVotingMaps() {
@@ -124,7 +127,7 @@ public class WorldManager implements Listener {
             reps++;
         }
         votingRunning = true;
-        new MapVotingRunnable().runTaskTimerAsynchronously(plugin, 0, 20);
+        //new MapVotingRunnable(gameLobby).runTaskTimerAsynchronously(plugin, 0, 20);
         Console.info("Picked voting maps!");
     }
 
@@ -174,7 +177,7 @@ public class WorldManager implements Listener {
         File toCopy;
 
         toCopy = new File(fileBase + "/" + map.getInternalName());
-        currentDir = new File(map.getInternalName());
+        currentDir = new File(gameLobby.getLobbyId() + "-" + map.getInternalName());
         currentDir.mkdir();
         try {
             FileUtils.copyDirectory(toCopy, currentDir);
@@ -183,7 +186,7 @@ public class WorldManager implements Listener {
             Console.error("Error copying directory!");
         }
 
-        gameWorld = Bukkit.getServer().createWorld(new WorldCreator(map.getInternalName()));
+        gameWorld = Bukkit.getServer().createWorld(new WorldCreator(gameLobby.getLobbyId() + "-" + map.getInternalName()));
 
         gameWorld.setGameRule(GameRule.DO_FIRE_TICK, false);
         gameWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
@@ -224,6 +227,38 @@ public class WorldManager implements Listener {
         Console.info("Finished loading!");
     }
 
+    public void loadHubMap() {
+        Console.info("Loading hub for " + gameLobby.getLobbyId());
+        File currentDir;
+        File toCopy;
+
+        toCopy = new File(fileBase + "/hub");
+        currentDir = new File(gameLobby.getLobbyId() + "-hub");
+        currentDir.mkdir();
+        try {
+            FileUtils.copyDirectory(toCopy, currentDir);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Console.error("Error copying directory!");
+        }
+
+        mvWorldManager.addWorld(
+                gameLobby.getLobbyId() + "-hub",
+                World.Environment.NORMAL,
+                null,
+                WorldType.NORMAL,
+                false,
+                null
+        );
+        hubWorld = mvWorldManager.getMVWorld(gameLobby.getLobbyId() + "-hub");
+
+        hubWorld.setAllowAnimalSpawn(false);
+        hubWorld.setAllowMonsterSpawn(false);
+        hubWorld.setDifficulty(Difficulty.PEACEFUL);
+        hubWorld.setTime("midnight");
+        Console.info("Finished loading!");
+    }
+
     @EventHandler
     public void gameStart(GameStateUpdateEvent event) {
         if (!gameLobby.getLobbyId().equals(event.getLobbyId()))
@@ -240,39 +275,54 @@ public class WorldManager implements Listener {
     public void clean() { clean(true); }
 
     public void clean(boolean clearVotes) {
-        if (gameWorld != null) {
-            Console.info("Cleaning the map...");
-            for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                if (p.getWorld() == gameWorld) {
-                    p.teleport(Bukkit.getServer().getWorld("world").getSpawnLocation());
-                }
-            }
+        if (gameWorld == null)
+            return;
 
-            Bukkit.getServer().unloadWorld(gameWorld, false);
-            try {
-                FileUtils.deleteDirectory(new File(gameWorld.getName()));
-            } catch (Exception e) {
-                e.printStackTrace();
-                Console.error("Error deleting world folder. Please do it manually.");
+        Console.info("Cleaning the map...");
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            if (p.getWorld() == gameWorld) {
+                p.teleport(Bukkit.getServer().getWorld("world").getSpawnLocation());
             }
-
-            gameWorld = null;
-            gameMapData = null;
-            survivorSpawn = null;
-            herobrineSpawn = null;
-            alter = null;
-            shardSpawns = new ArrayList<>();
-            noUnload = new ArrayList<>();
-            if (clearVotes) {
-                votingMaps = new HashMap<>();
-                playerVotes = new HashMap<>();
-            } else {
-                if (GameManager.get().getGameState() == GameState.WAITING) {
-                    votingRunning = true;
-                    new MapVotingRunnable().runTaskTimerAsynchronously(plugin, 0, 20);
-                }
-            }
-            Console.info("Cleaned!");
         }
+
+        Bukkit.getServer().unloadWorld(gameWorld, false);
+        try {
+            FileUtils.deleteDirectory(new File(gameWorld.getName()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Console.error("Error deleting world folder. Please do it manually.");
+        }
+
+        gameWorld = null;
+        gameMapData = null;
+        survivorSpawn = null;
+        herobrineSpawn = null;
+        alter = null;
+        shardSpawns = new ArrayList<>();
+        noUnload = new ArrayList<>();
+        if (clearVotes) {
+            votingMaps = new HashMap<>();
+            playerVotes = new HashMap<>();
+        } else {
+            if (gameLobby.getGameManager().getGameState() == GameState.WAITING) {
+                votingRunning = true;
+                new MapVotingRunnable(gameLobby).runTaskTimerAsynchronously(plugin, 0, 20);
+            }
+        }
+        Console.info("Cleaned!");
+    }
+
+
+    public void cleanHub() {
+        if (hubWorld == null)
+            return;
+
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            if (p.getWorld() == gameWorld) {
+                p.teleport(Bukkit.getServer().getWorld("world").getSpawnLocation());
+            }
+        }
+
+        mvWorldManager.deleteWorld(hubWorld.getName());
     }
 }

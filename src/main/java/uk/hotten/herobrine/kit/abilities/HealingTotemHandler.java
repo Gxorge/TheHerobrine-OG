@@ -12,19 +12,21 @@ import uk.hotten.herobrine.utils.PlayerUtil;
 
 public class HealingTotemHandler extends BukkitRunnable {
 
-    Block block;
-    int time = 0;
-    BukkitTask wah;
+    private Block block;
+    private int time = 0;
+    private BukkitTask wah;
+    private GameManager gm;
 
-    public HealingTotemHandler(Block block) {
+    public HealingTotemHandler(Block block, GameManager gm) {
         this.block = block;
-        wah = new WisdomAnimationHandler(block.getLocation().add(0, 1, 0)).runTaskTimer(GameManager.get().getPlugin(), 0, 5);
+        this.gm = gm;
+        wah = new WisdomAnimationHandler(block.getLocation().add(0, 1, 0)).runTaskTimer(gm.getPlugin(), 0, 5);
     }
 
     @Override
     public void run() {
         if (time > 30) {
-            Bukkit.getServer().getScheduler().runTask(GameManager.get().getPlugin(), () -> block.setType(Material.AIR));
+            Bukkit.getServer().getScheduler().runTask(gm.getPlugin(), () -> block.setType(Material.AIR));
             wah.cancel();
             cancel();
             return;
@@ -32,7 +34,7 @@ public class HealingTotemHandler extends BukkitRunnable {
 
         PlayerUtil.playSoundAt(block.getLocation(), Sound.ENTITY_CAT_PURREOW, 1f, 1f);
 
-        for (Player p : GameManager.get().getSurvivors()) {
+        for (Player p : gm.getSurvivors()) {
             if (PlayerUtil.getDistance(p, block.getLocation()) <= 6) {
                 PlayerUtil.increaseHealth(p, 2);
                 PlayerUtil.playSound(p, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);

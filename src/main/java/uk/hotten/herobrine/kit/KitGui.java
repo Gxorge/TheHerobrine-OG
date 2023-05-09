@@ -12,15 +12,16 @@ import uk.hotten.herobrine.utils.Message;
 public class KitGui extends GUIBase {
 
     private Player assignedPlayer;
+    private GameManager gm;
 
-    public KitGui(JavaPlugin plugin, Player player) {
+    public KitGui(JavaPlugin plugin, Player player, GameManager gm) {
         super(plugin, player, ChatColor.DARK_GRAY + "Pick your class", 9, false);
         assignedPlayer = player;
+        this.gm = gm;
     }
 
     @Override
     public void setupItems() {
-        GameManager gm = GameManager.get();
         int curr = 0;
         for (Kit kit : gm.getKits()) {
             GUIItem item = kit.getDisplayItem().duplicateByConstructor();
@@ -29,7 +30,7 @@ public class KitGui extends GUIBase {
                 @Override
                 public boolean leftClick() {
                     if (kit.getPermission() == null || (!kit.isRequirePermission() || assignedPlayer.hasPermission(kit.getPermission()))) {
-                        GameManager.get().setKit(assignedPlayer, kit, true);
+                        gm.setKit(assignedPlayer, kit, true);
                         assignedPlayer.closeInventory();
                     }
                     else {

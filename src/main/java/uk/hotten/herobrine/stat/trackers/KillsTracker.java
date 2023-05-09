@@ -1,6 +1,7 @@
 package uk.hotten.herobrine.stat.trackers;
 
 import uk.hotten.herobrine.game.GameManager;
+import uk.hotten.herobrine.lobby.GameLobby;
 import uk.hotten.herobrine.stat.StatManager;
 import uk.hotten.herobrine.stat.StatTracker;
 import uk.hotten.herobrine.utils.GameState;
@@ -11,15 +12,21 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 
 public class KillsTracker extends StatTracker {
 
-    public KillsTracker(StatManager sm) {
+    private GameLobby gameLobby;
+
+    public KillsTracker(StatManager sm, GameLobby gameLobby) {
         super(sm, "Kills", "kills", "How many kills you got!");
+        this.gameLobby = gameLobby;
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void death(PlayerDeathEvent event) {
+        if (!event.getEntity().getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
         Player player = event.getEntity();
 
-        GameManager gm = GameManager.get();
+        GameManager gm = gameLobby.getGameManager();
         if (gm.getGameState() != GameState.LIVE)
             return;
 

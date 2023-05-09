@@ -47,7 +47,6 @@ public class GameManager {
 
     @Getter private JavaPlugin plugin;
 
-    private static GameManager instance;
     private WorldManager worldManager;
     private RedisManager redis;
     @Getter private ProtocolManager protocolManager;
@@ -73,6 +72,7 @@ public class GameManager {
     @Getter private ArrayList<Player> hbLastHit;
     @Getter @Setter private Player passUser;
 
+    @Getter private ShardHandler shardHandler;
     @Getter @Setter private boolean shardPreviousDestroyed;
     @Getter public int shardCount;
     @Getter @Setter private Player shardCarrier;
@@ -82,6 +82,7 @@ public class GameManager {
     public boolean stFull = false;
     public boolean timerPaused = false;
     private BukkitTask waitingRunnable;
+    private NarrationRunnable narrationRunnable;
 
     @Getter private Kit[] kits;
     @Getter private Kit defaultKit;
@@ -94,14 +95,13 @@ public class GameManager {
     @Getter private HashMap<Player, ChatColor> teamColours = new HashMap<>();
     private ScoreboardHandler gameScoreboardHandler;
 
-    public GameManager(JavaPlugin plugin, GameLobby gameLobby, WorldManager worldManager, RedisManager redis, ProtocolManager protocolManager) {
+    public GameManager(JavaPlugin plugin, GameLobby gameLobby, RedisManager redis, ProtocolManager protocolManager) {
         Console.info("Loading Game Manager...");
         this.plugin = plugin;
-        instance = this;
-        this.worldManager = worldManager;
+        this.gameLobby = gameLobby;
+        this.worldManager = gameLobby.getWorldManager();
         this.redis = redis;
         this.protocolManager = protocolManager;
-        this.gameLobby = gameLobby;
         gmListener = new GMListener(this, gameLobby);
         plugin.getServer().getPluginManager().registerEvents(gmListener, plugin);
 
@@ -164,11 +164,11 @@ public class GameManager {
             }
         };
 
+        gameLobby.getWorldManager().pickVotingMaps();
+
         startWaiting();
         Console.info("Game Manager is ready!");
     }
-
-    public static GameManager get() { return instance; }
 
     public void setGameState(GameState newState) {
         new BukkitRunnable() {
@@ -196,7 +196,7 @@ public class GameManager {
                 Console.debug("Shard state updated to " + newState.toString() + "(from " + old.toString() + ")!");
                 plugin.getServer().getPluginManager().callEvent(new ShardStateUpdateEvent(old, newState, gameLobby.getLobbyId()));
                 if (gameState == GameState.LIVE)
-                    NarrationRunnable.timer = 0;
+                    narrationRunnable.timer = 0;
             }
         }.runTask(plugin);
     }
@@ -206,17 +206,17 @@ public class GameManager {
         if (waitingRunnable != null) waitingRunnable.cancel();
 
         // In case the timer decreased from players leaving and a world was loaded
-        Bukkit.getServer().getScheduler().runTask(plugin, () -> WorldManager.getInstance().clean(false));
+        Bukkit.getServer().getScheduler().runTask(plugin, () -> gameLobby.getWorldManager().clean(false));
         startTimer = plugin.getConfig().getInt("startTime");
 
-        waitingRunnable = new WaitingRunnable().runTaskTimerAsynchronously(plugin, 0, 10);
+        waitingRunnable = new WaitingRunnable(this).runTaskTimerAsynchronously(plugin, 0, 10);
     }
 
     public void startCheck() {
         if (getSurvivors().size() >= getRequiredToStart() && !timerPaused) {
             if (getGameState() != GameState.STARTING) {
                 setGameState(GameState.STARTING);
-                new StartingRunnable().runTaskTimerAsynchronously(getPlugin(), 0, 20);
+                new StartingRunnable(this, gameLobby.getWorldManager()).runTaskTimerAsynchronously(getPlugin(), 0, 20);
             } else {
                 if (getSurvivors().size() >= getMaxPlayers()-3 && !stAlmost && startTimer > 30) {
                     Message.broadcast(gameLobby, Message.format("" + ChatColor.GREEN + "We almost have a full server! Shortening timer to 30 seconds!"));
@@ -233,9 +233,10 @@ public class GameManager {
 
     public void start() {
         setGameState(GameState.LIVE);
-        new NarrationRunnable().runTaskTimerAsynchronously(plugin, 0, 10); // has to run before the shardstate updates
+        narrationRunnable = new NarrationRunnable(this);
+        narrationRunnable.runTaskTimerAsynchronously(plugin, 0, 10); // has to run before the shardstate updates
         setShardState(ShardState.WAITING);
-        StatManager.get().startTracking();
+        gameLobby.getStatManager().startTracking();
         if (passUser != null) {
             herobrine = passUser;
             passUser = null;
@@ -245,17 +246,18 @@ public class GameManager {
         survivors.remove(herobrine);
         setupHerobrine();
         setupSurvivors();
-        new HerobrineSetup().runTaskAsynchronously(plugin);
+        new HerobrineSetup(herobrine).runTaskAsynchronously(plugin);
         setTags(herobrine, "" + ChatColor.RED + ChatColor.BOLD + "HEROBRINE ", ChatColor.RED, ScoreboardUpdateAction.UPDATE);
         for (Player p : survivors) {
             setTags(p, null, ChatColor.DARK_GREEN, ScoreboardUpdateAction.UPDATE);
             new SurvivorSetup(p).runTaskAsynchronously(plugin);
         }
-        new ShardHandler().runTaskTimer(plugin, 0, 20);
-        new HerobrineItemHider().runTaskTimer(plugin, 0, 1);
-        new HerobrineSmokeRunnable().runTaskTimer(plugin, 0, 10);
+        shardHandler = new ShardHandler(gameLobby);
+        shardHandler.runTaskTimer(plugin, 0, 20);
+        new HerobrineItemHider(this).runTaskTimer(plugin, 0, 1);
+        new HerobrineSmokeRunnable(this).runTaskTimer(plugin, 0, 10);
 
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+        for (Player p : gameLobby.getPlayers()) {
             scoreboards.get(p).setHandler(gameScoreboardHandler);
             p.setHealth(20);
             p.setFoodLevel(20);
@@ -379,14 +381,8 @@ public class GameManager {
         PlayerUtil.clearEffects(player);
 
         spectators.add(player);
+        PlayerUtil.addEffect(player, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
 
-        for (Player p : spectators) {
-            p.showPlayer(plugin, player);
-            player.showPlayer(plugin, p);
-        }
-
-        for (Player p : survivors)
-            p.hidePlayer(plugin, player);
         herobrine.hidePlayer(plugin, player);
 
         player.setGameMode(GameMode.SURVIVAL);
@@ -405,13 +401,14 @@ public class GameManager {
         setGameState(GameState.ENDING);
         setShardState(ShardState.INACTIVE);
         voidKits();
+
         if (type == WinType.SURVIVORS) {
             PlayerUtil.broadcastTitle(ChatColor.GREEN + "SURVIVORS WIN!", "", 20, 60, 20);
             Message.broadcast(gameLobby, Message.format("" + ChatColor.GREEN + ChatColor.BOLD + "The Survivors " + ChatColor.YELLOW + "have defeated " + ChatColor.RED + ChatColor.BOLD + "The Herobrine!"));
             Message.broadcast(gameLobby, Message.format(type.getDesc()));
-            PlayerUtil.broadcastSound(Sound.ENTITY_WITHER_DEATH, 1f, 1f);
+            PlayerUtil.broadcastSound(gameLobby, Sound.ENTITY_WITHER_DEATH, 1f, 1f);
             for (Player p : survivors)
-                StatManager.get().getPointsTracker().increment(p.getUniqueId(), 10);
+                gameLobby.getStatManager().getPointsTracker().increment(p.getUniqueId(), 10);
 
             herobrine.getWorld().strikeLightningEffect(herobrine.getLocation().add(0, 0.5, 0));
             Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -429,14 +426,14 @@ public class GameManager {
             PlayerUtil.broadcastTitle(ChatColor.RED + "HEROBRINE" + ChatColor.GREEN + " WINS!", "", 20, 60, 20);
             Message.broadcast(gameLobby, Message.format("" + ChatColor.RED + ChatColor.BOLD + "The Herobrine " + ChatColor.YELLOW + "has defeated all the survivors."));
             Message.broadcast(gameLobby, Message.format(type.getDesc()));
-            PlayerUtil.broadcastSound(Sound.ENTITY_ENDER_DRAGON_HURT, 1f, 1f);
-            StatManager.get().getPointsTracker().increment(herobrine.getUniqueId(), 10);
+            PlayerUtil.broadcastSound(gameLobby, Sound.ENTITY_ENDER_DRAGON_HURT, 1f, 1f);
+            gameLobby.getStatManager().getPointsTracker().increment(herobrine.getUniqueId(), 10);
         }
 
-        StatManager.get().stopTracking();
-        StatManager.get().push();
+        gameLobby.getStatManager().stopTracking();
+        gameLobby.getStatManager().push();
         Message.broadcast(gameLobby, Message.format(ChatColor.GRAY + "The lobby will shutdown in 15 seconds."));
-        Bukkit.getServer().getScheduler().runTaskLater(plugin, gameLobby::shutdown, 300);
+        Bukkit.getServer().getScheduler().runTaskLater(plugin, () -> gameLobby.shutdown(true), 300);
     }
 
     public void endCheck() {
@@ -467,7 +464,7 @@ public class GameManager {
         }
         else
             setShardState(ShardState.WAITING);
-        new CaptureSequence(player).runTaskAsynchronously(plugin);
+        new CaptureSequence(player, this, gameLobby.getWorldManager()).runTaskAsynchronously(plugin);
         updateHerobrine();
         Bukkit.getServer().getPluginManager().callEvent(new ShardCaptureEvent(player, gameLobby.getLobbyId()));
     }
