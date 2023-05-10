@@ -53,7 +53,7 @@ public class HerobrineItemHider extends BukkitRunnable {
             try {
                 protocolManager.sendServerPacket(p, hideItem);
             } catch (Exception e) {
-                Console.error("Failed to hide Herobrine's items from " + p.getName());
+                Console.error(gm.getGameLobby(), "Failed to hide Herobrine's items from " + p.getName());
                 e.printStackTrace();
             }
         }

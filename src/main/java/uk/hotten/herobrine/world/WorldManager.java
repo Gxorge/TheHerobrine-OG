@@ -57,7 +57,7 @@ public class WorldManager implements Listener {
 
 
     public WorldManager(JavaPlugin plugin, GameLobby gameLobby) {
-        Console.info("Loading World Manager...");
+        Console.info(gameLobby, "Loading World Manager...");
         this.plugin = plugin;
         this.gameLobby = gameLobby;
         mvWorldManager = LobbyManager.getInstance().getMultiverseCore().getMVWorldManager();
@@ -77,13 +77,13 @@ public class WorldManager implements Listener {
 
         loadHubMap();
         loadMapBase();
-        Console.info("World manager is ready!");
+        Console.info(gameLobby, "World manager is ready!");
     }
 
     public void loadMapBase() {
         File file = new File(fileBase + "/maps.yaml");
         if (!file.exists()) {
-            Console.error("No maps.yaml found at " + file.getPath() + "!");
+            Console.error(gameLobby, "No maps.yaml found at " + file.getPath() + "!");
             plugin.getServer().shutdown();
             return;
         }
@@ -92,11 +92,11 @@ public class WorldManager implements Listener {
             availableMaps = mapper.readValue(file, MapBase.class);
         } catch (Exception e) {
             e.printStackTrace();
-            Console.error("Error parsing maps.yaml! Is it correctly formatted?");
+            Console.error(gameLobby, "Error parsing maps.yaml! Is it correctly formatted?");
             plugin.getServer().shutdown();
             return;
         }
-        Console.info("Map base loaded!");
+        Console.info(gameLobby, "Map base loaded!");
     }
 
     public void pickVotingMaps() {
@@ -105,7 +105,7 @@ public class WorldManager implements Listener {
         while (reps < maxVotingMaps) {
             Random rand = new Random();
             String map = maps.get(rand.nextInt(maps.size()));
-            Console.debug("Map -> " + map);
+            Console.debug(gameLobby, "Map -> " + map);
 
             // Parse the map
             File file = new File(fileBase + "/" + map + "/mapdata.yaml");
@@ -114,10 +114,10 @@ public class WorldManager implements Listener {
             MapData mapData;
             try {
                 mapData = mapper.readValue(file, MapData.class);
-                Console.debug("Parsed map data id " + (reps+1));
+                Console.debug(gameLobby, "Parsed map data id " + (reps+1));
             } catch (Exception e) {
                 e.printStackTrace();
-                Console.error("Error parsing mapdata.yaml! Is it correctly formatted?");
+                Console.error(gameLobby, "Error parsing mapdata.yaml! Is it correctly formatted?");
                 return;
             }
 
@@ -128,7 +128,7 @@ public class WorldManager implements Listener {
         }
         votingRunning = true;
         //new MapVotingRunnable(gameLobby).runTaskTimerAsynchronously(plugin, 0, 20);
-        Console.info("Picked voting maps!");
+        Console.info(gameLobby, "Picked voting maps!");
     }
 
     public void sendVotingMessage(Player player) {
@@ -139,14 +139,14 @@ public class WorldManager implements Listener {
             toSend.add(player);
 
         for (Player p : toSend) {
-            p.sendMessage(Message.format(ChatColor.GOLD + "Vote for a map with /vote #."));
+            p.sendMessage(Message.format(ChatColor.GOLD + "Vote for a map with /hbv #."));
             p.sendMessage(Message.format(ChatColor.GOLD + "Map choices up for voting:"));
             int current = 1;
             for (Map.Entry<Integer, VotingMap> e : votingMaps.entrySet()) {
                 TextComponent textComponent = new TextComponent(Message.format("" + ChatColor.GOLD + ChatColor.BOLD + current + ". "
                         + ChatColor.GOLD + e.getValue().getMapData().getName() + " (" + ChatColor.AQUA + e.getValue().getVotes() + ChatColor.GOLD + " votes)"));
                 textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GOLD + "Click here to vote for " + ChatColor.AQUA + e.getValue().getMapData().getName())));
-                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote " + current));
+                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hbv " + current));
                 p.spigot().sendMessage(textComponent);
                 current++;
             }
@@ -164,7 +164,7 @@ public class WorldManager implements Listener {
             }
         }
 
-        Console.debug("Selected highest voted map -> " + highest.getMapData().getName());
+        Console.debug(gameLobby, "Selected highest voted map -> " + highest.getMapData().getName());
         Message.broadcast(gameLobby, Message.format(ChatColor.GOLD + "Voting has ended! The map " + ChatColor.AQUA + highest.getMapData().getName() + ChatColor.GOLD + " has won!"));
         votingRunning = false;
 
@@ -172,7 +172,7 @@ public class WorldManager implements Listener {
     }
 
     public void loadMap(VotingMap map) {
-        Console.info("Loading map " + map.getMapData().getName());
+        Console.info(gameLobby, "Loading map " + map.getMapData().getName());
         File currentDir;
         File toCopy;
 
@@ -183,7 +183,7 @@ public class WorldManager implements Listener {
             FileUtils.copyDirectory(toCopy, currentDir);
         } catch (Exception e) {
             e.printStackTrace();
-            Console.error("Error copying directory!");
+            Console.error(gameLobby, "Error copying directory!");
         }
 
         mvWorldManager.addWorld(
@@ -232,11 +232,11 @@ public class WorldManager implements Listener {
                     break;
             }
         }
-        Console.info("Finished loading!");
+        Console.info(gameLobby, "Finished loading!");
     }
 
     public void loadHubMap() {
-        Console.info("Loading hub for " + gameLobby.getLobbyId());
+        Console.info(gameLobby, "Loading hub for " + gameLobby.getLobbyId());
         File currentDir;
         File toCopy;
 
@@ -247,7 +247,7 @@ public class WorldManager implements Listener {
             FileUtils.copyDirectory(toCopy, currentDir);
         } catch (Exception e) {
             e.printStackTrace();
-            Console.error("Error copying directory!");
+            Console.error(gameLobby, "Error copying directory!");
         }
 
         mvWorldManager.addWorld(
@@ -264,7 +264,7 @@ public class WorldManager implements Listener {
         hubWorld.setAllowMonsterSpawn(false);
         hubWorld.setDifficulty(Difficulty.PEACEFUL);
         hubWorld.setTime("midnight");
-        Console.info("Finished loading!");
+        Console.info(gameLobby, "Finished loading!");
     }
 
     @EventHandler
@@ -286,7 +286,7 @@ public class WorldManager implements Listener {
         if (gameWorld == null)
             return;
 
-        Console.info("Cleaning the map...");
+        Console.info(gameLobby, "Cleaning the map...");
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             if (p.getWorld() == gameWorld) {
                 p.teleport(Bukkit.getServer().getWorld("world").getSpawnLocation());
@@ -311,7 +311,7 @@ public class WorldManager implements Listener {
                 new MapVotingRunnable(gameLobby).runTaskTimerAsynchronously(plugin, 0, 20);
             }
         }
-        Console.info("Cleaned!");
+        Console.info(gameLobby, "Cleaned!");
     }
 
 

@@ -96,7 +96,7 @@ public class GameManager {
     private ScoreboardHandler gameScoreboardHandler;
 
     public GameManager(JavaPlugin plugin, GameLobby gameLobby, RedisManager redis, ProtocolManager protocolManager) {
-        Console.info("Loading Game Manager...");
+        Console.info(gameLobby, "Loading Game Manager...");
         this.plugin = plugin;
         this.gameLobby = gameLobby;
         this.worldManager = gameLobby.getWorldManager();
@@ -167,7 +167,7 @@ public class GameManager {
         gameLobby.getWorldManager().pickVotingMaps();
 
         startWaiting();
-        Console.info("Game Manager is ready!");
+        Console.info(gameLobby, "Game Manager is ready!");
     }
 
     public void setGameState(GameState newState) {
@@ -178,7 +178,7 @@ public class GameManager {
                 if (old == null) old = GameState.UNKNOWN;
 
                 gameState = newState;
-                Console.debug("Game state updated to " + newState.toString() + "(from " + old.toString() + ")!");
+                Console.debug(gameLobby, "Game state updated to " + newState.toString() + "(from " + old.toString() + ")!");
                 plugin.getServer().getPluginManager().callEvent(new GameStateUpdateEvent(old, newState, gameLobby.getLobbyId()));
             }
         }.runTask(plugin);
@@ -193,7 +193,7 @@ public class GameManager {
                 if (old == null) old = ShardState.UNKNOWN;
 
                 shardState = newState;
-                Console.debug("Shard state updated to " + newState.toString() + "(from " + old.toString() + ")!");
+                Console.debug(gameLobby, "Shard state updated to " + newState.toString() + "(from " + old.toString() + ")!");
                 plugin.getServer().getPluginManager().callEvent(new ShardStateUpdateEvent(old, newState, gameLobby.getLobbyId()));
                 if (gameState == GameState.LIVE)
                     narrationRunnable.timer = 0;
@@ -366,14 +366,15 @@ public class GameManager {
     }
 
     public void setupSurvivors() {
-        setupKits();
-        applyKits();
         for (Player p : survivors) {
             p.teleport(worldManager.survivorSpawn);
             p.setHealth(20);
             p.setFoodLevel(20);
             PlayerUtil.addEffect(p, PotionEffectType.BLINDNESS, 60, 1, false, false);
         }
+
+        setupKits();
+        applyKits();
     }
 
     public void makeSpectator(Player player) {
@@ -440,12 +441,12 @@ public class GameManager {
         if (gameState != GameState.LIVE)
             return;
         
-        Console.debug("=== END CHECK ===");
-        Console.debug("Survivors: " + getSurvivors().size());
-        Console.debug("Herobrine: " + (getHerobrine().isOnline() ? "Online" : "Offline"));
+        Console.debug(gameLobby, "=== END CHECK ===");
+        Console.debug(gameLobby, "Survivors: " + getSurvivors().size());
+        Console.debug(gameLobby, "Herobrine: " + (getHerobrine().isOnline() ? "Online" : "Offline"));
         if (getHerobrine().isOnline())
-            Console.debug("Herobrine World: " + getHerobrine().getWorld().getName());
-        Console.debug("======");
+            Console.debug(gameLobby, "Herobrine World: " + getHerobrine().getWorld().getName());
+        Console.debug(gameLobby, "======");
 
         if (getSurvivors().size() == 0) {
             end(WinType.HEROBRINE);

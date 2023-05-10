@@ -80,7 +80,7 @@ public class ShardHandler extends BukkitRunnable {
         spawnLoc.getWorld().strikeLightningEffect(spawnLoc.add(0, 1, 0));
         gm.setShardState(ShardState.SPAWNED);
         timer = random.nextInt(16) + 30; // random number between 30 and 45 for the next shard spawn
-        Console.debug("Next shard time to be " + timer);
+        Console.debug(gm.getGameLobby(), "Next shard time to be " + timer);
 
         PlayerUtil.broadcastTitle(gm.getGameLobby(), "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "A Shard has spawned!", ChatColor.AQUA + "Use your compass to find it!", 10, 60, 10);
         Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.LIGHT_PURPLE  + "A new shard has " + ChatColor.AQUA + ChatColor.BOLD + "been SUMMONED!"));

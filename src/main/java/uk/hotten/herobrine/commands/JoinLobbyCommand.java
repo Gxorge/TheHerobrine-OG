@@ -6,7 +6,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import uk.hotten.herobrine.lobby.GameLobby;
 import uk.hotten.herobrine.lobby.LobbyManager;
+import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
 
 public class JoinLobbyCommand implements CommandExecutor {
@@ -19,13 +21,27 @@ public class JoinLobbyCommand implements CommandExecutor {
         }
 
         Player player = (Player) sender;
+        LobbyManager lm = LobbyManager.getInstance();
 
         if (args == null || args.length == 0) {
-            LobbyManager.getInstance().sendLobbyMessage(player);
+            lm.sendLobbyMessage(player);
             return true;
         }
 
-        player.teleport(Bukkit.getWorld(args[0] + "-hub").getSpawnLocation());
+        GameLobby gl = lm.getLobby(args[0]);
+        if (gl == null) {
+            player.sendMessage(Message.format(ChatColor.RED + args[0] + " does not exist."));
+            return true;
+        }
+
+        GameState currentState = gl.getGameManager().getGameState();
+        if (currentState == GameState.ENDING || currentState == GameState.DEAD || currentState == GameState.BOOTING || currentState == GameState.UNKNOWN) {
+            player.sendMessage(Message.format(ChatColor.RED + "This lobby cannot be joined right now."));
+            return true;
+        }
+
+        player.sendMessage(Message.format(ChatColor.GREEN + "Joining " + gl.getLobbyId() + "..."));
+        player.teleport(Bukkit.getWorld(gl.getLobbyId() + "-hub").getSpawnLocation());
 
         return true;
     }

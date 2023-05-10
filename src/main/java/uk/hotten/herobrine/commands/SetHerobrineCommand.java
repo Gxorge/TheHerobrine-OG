@@ -38,7 +38,7 @@ public class SetHerobrineCommand implements CommandExecutor {
 
         if (args == null || args.length == 0) {
             if (gm.getPassUser() == null)
-                sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /setherobrine <player>"));
+                sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /hbsetherobrine <player>"));
             else {
                 sender.sendMessage(Message.format(ChatColor.YELLOW + gm.getPassUser().getName() + ChatColor.RESET + " will no-longer be Herobrine."));
                 gm.setPassUser(null);

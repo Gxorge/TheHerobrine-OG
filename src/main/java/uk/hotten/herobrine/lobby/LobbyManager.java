@@ -2,6 +2,10 @@ package uk.hotten.herobrine.lobby;
 
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import lombok.Getter;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -37,16 +41,21 @@ public class LobbyManager {
 
         int autoStartup = plugin.getConfig().getInt("lobbyAutoStartAmount");
         for (int i = 0; i < autoStartup; i++) {
-            String lobbyId = generateLobbyId();
-            if (lobbyId == null) {
-                Console.error("Failed to generate lobby ID.");
-                return;
-            }
-
-            GameLobby gl = new GameLobby(plugin, lobbyId);
-            gl.initialize();
-            gameLobbies.put(lobbyId, gl);
+            createLobby();
         }
+    }
+
+    public String createLobby() {
+        String lobbyId = generateLobbyId();
+        if (lobbyId == null) {
+            Console.error("Failed to generate lobby ID.");
+            return null;
+        }
+
+        GameLobby gl = new GameLobby(plugin, lobbyId);
+        gl.initialize();
+        gameLobbies.put(lobbyId, gl);
+        return lobbyId;
     }
 
     private String generateLobbyId() {
@@ -71,6 +80,10 @@ public class LobbyManager {
         }
 
         return null;
+    }
+
+    public List<String> getLobbyIds() {
+        return gameLobbies.keySet().stream().toList();
     }
 
     public void removeLobby(String lobbyId) {
@@ -110,7 +123,15 @@ public class LobbyManager {
             else
                 sb.append(fullOrOverfill);
 
-            player.sendMessage(Message.format(sb.toString()));
+            TextComponent textComponent = new TextComponent(Message.format(sb.toString()));
+            if (sb.toString().contains("JOIN")) {
+                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GOLD + "Click here to join " + ChatColor.AQUA + gameLobby.getLobbyId())));
+                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hbjoin " + gameLobby.getLobbyId()));
+            } else {
+                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.RED + "This lobby is full.")));
+            }
+
+            player.spigot().sendMessage(textComponent);
         }
     }
 

@@ -28,12 +28,17 @@ public class HerobrinePluginOG extends JavaPlugin {
         RedisManager redisManager = new RedisManager(this);
         LobbyManager lobbyManager = new LobbyManager(this);
 
-        getCommand("setherobrine").setExecutor(new SetHerobrineCommand());
-        getCommand("forcestart").setExecutor(new ForceStartCommand());
-        getCommand("dropshard").setExecutor(new DropShardCommand());
-        getCommand("pausetimer").setExecutor(new PauseTimerCommand());
-        getCommand("vote").setExecutor(new VoteCommand());
+        getCommand("hbsetherobrine").setExecutor(new SetHerobrineCommand());
+        getCommand("hbforcestart").setExecutor(new ForceStartCommand());
+        getCommand("hbdropshard").setExecutor(new DropShardCommand());
+        getCommand("hbpausetimer").setExecutor(new PauseTimerCommand());
+        getCommand("hbvote").setExecutor(new VoteCommand());
+        getCommand("hbvote").setTabCompleter(new VoteCompleter());
         getCommand("hbjoin").setExecutor(new JoinLobbyCommand());
+        getCommand("hbjoin").setTabCompleter(new JoinLobbyCompleter());
+        getCommand("hbcreatelobby").setExecutor(new CreateLobbyCommand());
+        getCommand("hbdeletelobby").setExecutor(new DeleteLobbyCommand());
+        getCommand("hbdeletelobby").setTabCompleter(new DeleteLobbyCompleter());
 
         ScoreboardLib.setPluginInstance(this);
 

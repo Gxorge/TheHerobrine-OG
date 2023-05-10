@@ -48,7 +48,7 @@ public class VoteCommand implements CommandExecutor {
         try {
             map = Integer.parseInt(args[0]);
         } catch (Exception e) {
-            player.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /vote <map number>"));
+            player.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /hbvote <map number>"));
             wm.sendVotingMessage(player);
             return true;
         }

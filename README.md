@@ -16,10 +16,13 @@ Within the configured database, you should have a table called `hb_stat`. Within
 The plugin currently does not generate this automatically and therefore it must be done manually.
 
 ## Commands and Permissions
-- /vote [map id] - allows players to vote for a map - no permission
-- /setherobrone <player> - set the player to be herobrine - theherobrine.command.setherobrine
-- /forcestart [time] - force the game to start at a specified time - theherobrine.command.forcestart
-- /dropshard - force the shard carrier to drop the shard +10 blocks on the x-axis - theherobrine.command.dropshard
+- /hbvote [map id] - allows players to vote for a map - no permission
+- /hbsetherobrone [player] - set the player to be herobrine - theherobrine.command.setherobrine
+- /hbforcestart [time] - force the game to start at a specified time - theherobrine.command.forcestart
+- /hbdropshard - force the shard carrier to drop the shard +10 blocks on the x-axis - theherobrine.command.dropshard
+- /hbjoin [lobby id] - allows players to join a lobby - no permission
+- /hbcreatelobby - create a new lobby - theherobrine.command.createlobby
+- /hbdeletelobby <lobby id> - delete a lobby - theherobrine.command.deletelobby
 
 ### Kit Permissions
 Requiring permissions for classic and unlockable kits can be set in the config.yml.

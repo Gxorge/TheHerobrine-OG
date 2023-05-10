@@ -9,31 +9,41 @@ depend:
   - Multiverse-Core
 
 commands:
-  setherobrine:
+  hbsetherobrine:
     description: Select a player to be Herobrine.
     permission: theherobrine.command.setherobrine
     usage: /<command> <player>
 
-  forcestart:
+  hbforcestart:
     description: Force start the game.
     permission: theherobrine.command.forcestart
     usage: /<command> [time]
 
-  dropshard:
+  hbdropshard:
     description: Drop the shard from the shard holder.
     permission: theherobrine.command.dropshard
     usage: /<command>
 
-  pausetimer:
+  hbpausetimer:
     description: Pause the start timer.
     permission: theherobrine.command.pausetimer
     usage: /<command>
 
-  vote:
+  hbvote:
     description: Vote for a map.
     usage: /<command> <map number>
-    aliases: [v]
+    aliases: [hbv]
 
   hbjoin:
     description: Join a lobby.
-    usage: /command <lobby>
+    usage: /<command> <lobby>
+
+  hbcreatelobby:
+    description: Create a lobby.
+    permission: theherobrine.command.createlobby
+    usage: /<command>
+
+  hbdeletelobby:
+    description: Delete a lobby.
+    permission: theherobrine.command.deletelobby
+    usage: /<command> <lobby id>

@@ -46,7 +46,7 @@ public class ForceStartCommand implements CommandExecutor {
             try {
                 startTime = Integer.parseInt(args[0]);
             } catch (Exception e) {
-                sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /forcestart [time]"));
+                sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /hbforcestart [time]"));
                 return true;
             }
         }

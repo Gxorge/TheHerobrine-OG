@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.Console;
 
 import java.util.HashMap;
@@ -29,14 +28,14 @@ public class StatTracker implements Listener {
         stat = new HashMap<>();
     }
 
-    public void start() { Console.debug(displayName + " tracking STARTED."); Bukkit.getServer().getPluginManager().registerEvents(this, sm.getPlugin()); }
-    public void stop() { Console.debug(displayName + " tracking STOPPED."); HandlerList.unregisterAll(this); }
-    public void reset() { Console.debug(displayName + " tracking RESET."); stat.clear(); }
+    public void start() { Console.debug(sm.getGameLobby(), displayName + " tracking STARTED."); Bukkit.getServer().getPluginManager().registerEvents(this, sm.getPlugin()); }
+    public void stop() { Console.debug(sm.getGameLobby(), displayName + " tracking STOPPED."); HandlerList.unregisterAll(this); }
+    public void reset() { Console.debug(sm.getGameLobby(), displayName + " tracking RESET."); stat.clear(); }
 
     public void increment(UUID uuid, int by) {
         if (!stat.containsKey(uuid)) {
             stat.put(uuid, by);
-            Console.debug("Stat " + displayName + " for " + uuid.toString() + " has been incremented by " + by);
+            Console.debug(sm.getGameLobby(), "Stat " + displayName + " for " + uuid.toString() + " has been incremented by " + by);
             return;
         }
 
@@ -44,7 +43,7 @@ public class StatTracker implements Listener {
         int updated = old + by;
 
         stat.put(uuid, updated);
-        Console.debug("Stat " + displayName + " for " + uuid.toString() + " has been incremented by " + by);
+        Console.debug(sm.getGameLobby(), "Stat " + displayName + " for " + uuid.toString() + " has been incremented by " + by);
     }
 
 }
