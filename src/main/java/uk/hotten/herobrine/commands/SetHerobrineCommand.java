@@ -53,6 +53,11 @@ public class SetHerobrineCommand implements CommandExecutor {
             return true;
         }
 
+        if (!gm.getGameLobby().getPlayers().contains(player)) {
+            sender.sendMessage(Message.format(ChatColor.RED + player.getName() + " is not in your lobby."));
+            return true;
+        }
+
         gm.setPassUser(player);
         sender.sendMessage(Message.format(ChatColor.YELLOW + player.getName() + ChatColor.RESET + " will be Herobrine."));
         return true;

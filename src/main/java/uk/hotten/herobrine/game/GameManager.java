@@ -377,6 +377,8 @@ public class GameManager {
     }
 
     public void makeSpectator(Player player) {
+        player.teleport(worldManager.survivorSpawn);
+
         PlayerUtil.clearInventory(player);
         PlayerUtil.clearEffects(player);
 
@@ -388,11 +390,11 @@ public class GameManager {
         player.setFlying(true);
         player.setHealth(20);
         player.setFoodLevel(20);
-        player.teleport(worldManager.survivorSpawn);
         player.getInventory().setItem(0, new GUIItem(Material.COMPASS).displayName(ChatColor.YELLOW + "Spectator Menu").build());
 
         setTags(player, null, ChatColor.GRAY, ScoreboardUpdateAction.UPDATE);
         updateTags(ScoreboardUpdateAction.UPDATE);
+        scoreboards.get(player).setHandler(gameScoreboardHandler);
     }
 
     public void end(WinType type) {
@@ -441,11 +443,13 @@ public class GameManager {
         Console.debug("=== END CHECK ===");
         Console.debug("Survivors: " + getSurvivors().size());
         Console.debug("Herobrine: " + (getHerobrine().isOnline() ? "Online" : "Offline"));
+        if (getHerobrine().isOnline())
+            Console.debug("Herobrine World: " + getHerobrine().getWorld().getName());
         Console.debug("======");
 
         if (getSurvivors().size() == 0) {
             end(WinType.HEROBRINE);
-        } else if (!getHerobrine().isOnline()) {
+        } else if (!getHerobrine().getWorld().getName().startsWith(gameLobby.getLobbyId()) || !getHerobrine().isOnline()) {
             end(WinType.SURVIVORS);
         }
     }
