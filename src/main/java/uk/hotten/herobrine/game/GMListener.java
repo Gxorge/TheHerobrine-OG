@@ -137,8 +137,10 @@ public class GMListener implements Listener {
 
     private void onLeaveLogic(Player player) {
         gameLobby.getPlayers().remove(player);
-        Message.broadcast(gameLobby, Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
+        if (!gameManager.getSpectators().contains(player))
+            Message.broadcast(gameLobby, Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
         gameManager.getSurvivors().remove(player);
+        gameManager.getSpectators().remove(player);
 
         if (gameManager.getScoreboards().containsKey(player))
             gameManager.getScoreboards().get(player).deactivate();
@@ -194,7 +196,7 @@ public class GMListener implements Listener {
             return;
         }
 
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+        for (Player p : gameLobby.getPlayers()) {
             if (p == gameManager.getHerobrine()) continue;
             PlayerUtil.sendTitle(p, "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Help them return it!", 5, 60, 5);
         }
@@ -270,7 +272,7 @@ public class GMListener implements Listener {
             return;
 
         if (event.getPlayer() == gameManager.getShardCarrier()) {
-            for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            for (Player p : gameLobby.getPlayers()) {
                 if (p != event.getPlayer())
                     p.setCompassTarget(event.getPlayer().getLocation());
                 else
@@ -372,7 +374,7 @@ public class GMListener implements Listener {
             double damage = gameManager.getHerobrineHitDamage(attacker.getInventory().getItemInMainHand().getType(), attacker.hasPotionEffect(PotionEffectType.INCREASE_DAMAGE));
             if (damage != -1) event.setDamage(damage);
 
-            PlayerUtil.animateHbHit(player.getLocation());
+            PlayerUtil.animateHbHit(gameLobby, player.getLocation());
 
             // Delay the velocity change by a tick so it actually works
             Bukkit.getServer().getScheduler().runTaskLater(gameManager.getPlugin(), () -> player.setVelocity(new Vector(0, 0, 0)), 1);

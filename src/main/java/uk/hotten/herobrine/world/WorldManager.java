@@ -39,7 +39,7 @@ public class WorldManager implements Listener {
     private String fileBase;
     @Getter private MapBase availableMaps;
     @Getter private MapData gameMapData;
-    @Getter private World gameWorld;
+    @Getter private MultiverseWorld gameWorld;
     @Getter private MultiverseWorld hubWorld;
 
     @Getter private HashMap<Integer, VotingMap> votingMaps;
@@ -186,21 +186,29 @@ public class WorldManager implements Listener {
             Console.error("Error copying directory!");
         }
 
-        gameWorld = Bukkit.getServer().createWorld(new WorldCreator(gameLobby.getLobbyId() + "-" + map.getInternalName()));
+        mvWorldManager.addWorld(
+                gameLobby.getLobbyId() + "-" + map.getInternalName(),
+                World.Environment.NORMAL,
+                null,
+                WorldType.NORMAL,
+                false,
+                null
+        );
+        gameWorld = mvWorldManager.getMVWorld(gameLobby.getLobbyId() + "-" + map.getInternalName());
 
-        gameWorld.setGameRule(GameRule.DO_FIRE_TICK, false);
-        gameWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-        gameWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        gameWorld.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false); // Hides wolf death messages
+        gameWorld.setAllowAnimalSpawn(false);
+        gameWorld.setAllowMonsterSpawn(false);
         gameWorld.setDifficulty(Difficulty.NORMAL);
-        gameWorld.setTime(18000);
-
+        gameWorld.setTime("midnight");
+        gameWorld.getCBWorld().setGameRule(GameRule.DO_FIRE_TICK, false);
+        gameWorld.getCBWorld().setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        gameWorld.getCBWorld().setGameRule(GameRule.SHOW_DEATH_MESSAGES, false); // Hides wolf death messages
 
         // Load data points
         gameMapData = map.getMapData();
 
         for (Datapoint dp : gameMapData.getDatapoints()) {
-            Location dLoc = new Location(gameWorld, dp.getX(), dp.getY(), dp.getZ());
+            Location dLoc = new Location(gameWorld.getCBWorld(), dp.getX(), dp.getY(), dp.getZ());
             switch (dp.getType()) {
                 case SURVIVOR_SPAWN:
                     survivorSpawn = dLoc;
@@ -285,13 +293,7 @@ public class WorldManager implements Listener {
             }
         }
 
-        Bukkit.getServer().unloadWorld(gameWorld, false);
-        try {
-            FileUtils.deleteDirectory(new File(gameWorld.getName()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            Console.error("Error deleting world folder. Please do it manually.");
-        }
+        mvWorldManager.deleteWorld(gameWorld.getName());
 
         gameWorld = null;
         gameMapData = null;

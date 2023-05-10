@@ -43,7 +43,7 @@ public class ProtSpiritHandler extends BukkitRunnable {
 
         PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 1f, 0.5f);
 
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+        for (Player p : gm.getGameLobby().getPlayers()) {
             p.spawnParticle(Particle.FIREWORKS_SPARK, player.getLocation(), 20);
         }
 

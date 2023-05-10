@@ -48,7 +48,7 @@ public class HerobrineItemHider extends BukkitRunnable {
         hideItem.getIntegers().write(0, player.getEntityId());
         hideItem.getSlotStackPairLists().write(0, hideList);
 
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+        for (Player p : gm.getGameLobby().getPlayers()) {
             if (p == player) continue;
             try {
                 protocolManager.sendServerPacket(p, hideItem);

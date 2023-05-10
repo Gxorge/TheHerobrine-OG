@@ -43,7 +43,7 @@ public class ShardHandler extends BukkitRunnable {
             case WAITING: {
                 despawnTimer = 300;
                 timer--;
-                for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(wm.alter);
+                for (Player p : gm.getGameLobby().getPlayers()) p.setCompassTarget(wm.alter);
                 if (timer == 0)
                     spawn();
                 break;
@@ -75,14 +75,14 @@ public class ShardHandler extends BukkitRunnable {
         shard.setInvulnerable(true);
         spawnShardTitle();
 
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(shard.getLocation());
+        for (Player p : gm.getGameLobby().getPlayers()) p.setCompassTarget(shard.getLocation());
 
         spawnLoc.getWorld().strikeLightningEffect(spawnLoc.add(0, 1, 0));
         gm.setShardState(ShardState.SPAWNED);
         timer = random.nextInt(16) + 30; // random number between 30 and 45 for the next shard spawn
         Console.debug("Next shard time to be " + timer);
 
-        PlayerUtil.broadcastTitle("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "A Shard has spawned!", ChatColor.AQUA + "Use your compass to find it!", 10, 60, 10);
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "A Shard has spawned!", ChatColor.AQUA + "Use your compass to find it!", 10, 60, 10);
         Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.LIGHT_PURPLE  + "A new shard has " + ChatColor.AQUA + ChatColor.BOLD + "been SUMMONED!"));
     }
 
@@ -92,12 +92,12 @@ public class ShardHandler extends BukkitRunnable {
         shard.setInvulnerable(true);
         spawnShardTitle();
         loc.getWorld().strikeLightningEffect(loc.add(0, 1, 0));
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) p.setCompassTarget(shard.getLocation());
+        for (Player p : gm.getGameLobby().getPlayers()) p.setCompassTarget(shard.getLocation());
         gm.setTags(gm.getShardCarrier(), null, ChatColor.DARK_GREEN, GameManager.ScoreboardUpdateAction.UPDATE);
 
         gm.setShardState(ShardState.SPAWNED);
         gm.setShardCarrier(null);
-        PlayerUtil.broadcastTitle("", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "dropped!", 10, 60, 10);
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "dropped!", 10, 60, 10);
     }
 
     public void destroy() {
@@ -111,7 +111,7 @@ public class ShardHandler extends BukkitRunnable {
         if (shardTitle != null)
             shardTitle.remove();
 
-        PlayerUtil.broadcastTitle("", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "destroyed!", 10, 60, 10);
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "destroyed!", 10, 60, 10);
         Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.GRAY + "The shard has been DESTROYED! A new one shall be summoned soon..."));
     }
 

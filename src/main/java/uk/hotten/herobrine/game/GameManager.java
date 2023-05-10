@@ -241,7 +241,7 @@ public class GameManager {
             herobrine = passUser;
             passUser = null;
         } else {
-            herobrine = PlayerUtil.randomPlayer();
+            herobrine = PlayerUtil.randomPlayer(gameLobby);
         }
         survivors.remove(herobrine);
         setupHerobrine();
@@ -383,8 +383,6 @@ public class GameManager {
         spectators.add(player);
         PlayerUtil.addEffect(player, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
 
-        herobrine.hidePlayer(plugin, player);
-
         player.setGameMode(GameMode.SURVIVAL);
         player.setAllowFlight(true);
         player.setFlying(true);
@@ -403,7 +401,7 @@ public class GameManager {
         voidKits();
 
         if (type == WinType.SURVIVORS) {
-            PlayerUtil.broadcastTitle(ChatColor.GREEN + "SURVIVORS WIN!", "", 20, 60, 20);
+            PlayerUtil.broadcastTitle(gameLobby, ChatColor.GREEN + "SURVIVORS WIN!", "", 20, 60, 20);
             Message.broadcast(gameLobby, Message.format("" + ChatColor.GREEN + ChatColor.BOLD + "The Survivors " + ChatColor.YELLOW + "have defeated " + ChatColor.RED + ChatColor.BOLD + "The Herobrine!"));
             Message.broadcast(gameLobby, Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(gameLobby, Sound.ENTITY_WITHER_DEATH, 1f, 1f);
@@ -423,7 +421,7 @@ public class GameManager {
                 }
             });
         } else {
-            PlayerUtil.broadcastTitle(ChatColor.RED + "HEROBRINE" + ChatColor.GREEN + " WINS!", "", 20, 60, 20);
+            PlayerUtil.broadcastTitle(gameLobby, ChatColor.RED + "HEROBRINE" + ChatColor.GREEN + " WINS!", "", 20, 60, 20);
             Message.broadcast(gameLobby, Message.format("" + ChatColor.RED + ChatColor.BOLD + "The Herobrine " + ChatColor.YELLOW + "has defeated all the survivors."));
             Message.broadcast(gameLobby, Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(gameLobby, Sound.ENTITY_ENDER_DRAGON_HURT, 1f, 1f);
@@ -598,7 +596,7 @@ public class GameManager {
 
 
     public void updateTags(ScoreboardUpdateAction action) {
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+        for (Player p : gameLobby.getPlayers()) {
             setTags(p, getTeamPrefixes().get(p), getTeamColours().get(p), action);
         }
     }

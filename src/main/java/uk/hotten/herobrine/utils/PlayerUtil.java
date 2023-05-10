@@ -30,8 +30,8 @@ public class PlayerUtil {
         player.sendTitle(top, bottom, fadeIn, stay, fadeOut);
     }
 
-    public static void broadcastTitle(String top, String bottom, int fadeIn, int stay, int fadeOut) {
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+    public static void broadcastTitle(GameLobby gameLobby, String top, String bottom, int fadeIn, int stay, int fadeOut) {
+        for (Player p : gameLobby.getPlayers()) {
             p.sendTitle((top.equals("") ? ChatColor.RESET + "" : top), bottom, fadeIn, stay, fadeOut);
         }
     }
@@ -69,11 +69,11 @@ public class PlayerUtil {
         player.addPotionEffect(effect);
     }
 
-    public static Player randomPlayer() {
+    public static Player randomPlayer(GameLobby gameLobby) {
 
         Random random = new Random();
-        Player player = (Player) Bukkit.getOnlinePlayers().toArray()
-                [random.nextInt(Bukkit.getOnlinePlayers().size())];
+        Player player = (Player) gameLobby.getPlayers().toArray()
+                [random.nextInt(gameLobby.getPlayers().size())];
 
         return player;
     }
@@ -104,11 +104,11 @@ public class PlayerUtil {
         }
     }
 
-    public static void animateHbHit(Location loc) {
+    public static void animateHbHit(GameLobby gameLobby, Location loc) {
         PlayerUtil.playSoundAt(loc, Sound.ENTITY_BLAZE_HURT, 1f, 1f);
         PlayerUtil.playSoundAt(loc, Sound.ENTITY_IRON_GOLEM_ATTACK, 1f, 1f);
 
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+        for (Player p : gameLobby.getPlayers()) {
             p.spawnParticle(Particle.BLOCK_DUST, loc.add(0, 0.75, 0), 25, Material.ORANGE_WOOL.createBlockData());
         }
     }
