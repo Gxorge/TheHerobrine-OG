@@ -23,6 +23,7 @@ The plugin currently does not generate this automatically and therefore it must 
 - /hbjoin [lobby id] - allows players to join a lobby - no permission
 - /hbcreatelobby - create a new lobby - theherobrine.command.createlobby
 - /hbdeletelobby <lobby id> - delete a lobby - theherobrine.command.deletelobby
+- /hbspectate - switch from playing to spectating whilst in-lobby - theherobrine.command.spectate
 
 ### Kit Permissions
 Requiring permissions for classic and unlockable kits can be set in the config.yml.
