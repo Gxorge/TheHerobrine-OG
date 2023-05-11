@@ -164,8 +164,6 @@ public class GameManager {
             }
         };
 
-        gameLobby.getWorldManager().pickVotingMaps();
-
         startWaiting();
         Console.info(gameLobby, "Game Manager is ready!");
     }
@@ -212,6 +210,20 @@ public class GameManager {
         waitingRunnable = new WaitingRunnable(this).runTaskTimerAsynchronously(plugin, 0, 10);
     }
 
+    public boolean canJoin(Player player) {
+        if (getSurvivors().size() >= getMaxPlayers()) {
+            if (isAllowOverfill()) {
+                if (!player.hasPermission("theherobrine.overfill")) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public void startCheck() {
         if (getSurvivors().size() >= getRequiredToStart() && !timerPaused) {
             if (getGameState() != GameState.STARTING) {
@@ -246,6 +258,7 @@ public class GameManager {
         survivors.remove(herobrine);
         setupHerobrine();
         setupSurvivors();
+        spectators.forEach(this::makeSpectator);
         new HerobrineSetup(herobrine).runTaskAsynchronously(plugin);
         setTags(herobrine, "" + ChatColor.RED + ChatColor.BOLD + "HEROBRINE ", ChatColor.RED, ScoreboardUpdateAction.UPDATE);
         for (Player p : survivors) {
@@ -379,16 +392,18 @@ public class GameManager {
 
     public void makeSpectator(Player player) {
         player.teleport(worldManager.survivorSpawn);
+        player.sendMessage(Message.format(ChatColor.GRAY + "You are out of the game! Left-click to open the spectator menu."));
 
         PlayerUtil.clearInventory(player);
         PlayerUtil.clearEffects(player);
 
-        spectators.add(player);
+        if (!spectators.contains(player))
+            spectators.add(player);
+
         PlayerUtil.addEffect(player, PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false);
 
-        player.setGameMode(GameMode.SURVIVAL);
-        player.setAllowFlight(true);
-        player.setFlying(true);
+        player.setGameMode(GameMode.SPECTATOR);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> player.setGameMode(GameMode.SPECTATOR), 20);
         player.setHealth(20);
         player.setFoodLevel(20);
         player.getInventory().setItem(0, new GUIItem(Material.COMPASS).displayName(ChatColor.YELLOW + "Spectator Menu").build());
@@ -433,8 +448,8 @@ public class GameManager {
 
         gameLobby.getStatManager().stopTracking();
         gameLobby.getStatManager().push();
-        Message.broadcast(gameLobby, Message.format(ChatColor.GRAY + "The lobby will shutdown in 15 seconds."));
-        Bukkit.getServer().getScheduler().runTaskLater(plugin, () -> gameLobby.shutdown(true), 300);
+        Message.broadcast(gameLobby, Message.format(ChatColor.GRAY + "The lobby will restart in 15 seconds."));
+        Bukkit.getServer().getScheduler().runTaskLater(plugin, () -> gameLobby.shutdown(true, true), 300);
     }
 
     public void endCheck() {

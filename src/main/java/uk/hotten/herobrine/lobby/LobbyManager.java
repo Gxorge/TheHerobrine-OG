@@ -92,7 +92,7 @@ public class LobbyManager {
 
     public void shutdown() {
         for (Map.Entry<String, GameLobby> entry : gameLobbies.entrySet()) {
-            entry.getValue().shutdown(false);
+            entry.getValue().shutdown(false, false);
         }
         gameLobbies.clear();
     }
@@ -116,7 +116,7 @@ public class LobbyManager {
                     : "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "STARTING ") + ChatColor.RESET;
 
             StringBuilder sb = new StringBuilder("" + ChatColor.AQUA + gameLobby.getLobbyId() + ": " +
-                    ChatColor.YELLOW + gameLobby.getPlayers().size() + "/" + gm.getMaxPlayers() + ChatColor.DARK_GRAY + " - " + ChatColor.RESET);
+                    ChatColor.YELLOW + gm.getSurvivors().size() + "/" + gm.getMaxPlayers() + ChatColor.DARK_GRAY + " - " + ChatColor.RESET);
 
             if (gameLobby.getPlayers().size() < gm.getMaxPlayers())
                 sb.append(startingStatus + ChatColor.GREEN + "(JOIN)");

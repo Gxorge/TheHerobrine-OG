@@ -6,12 +6,14 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import lombok.Getter;
+import me.tigerhix.lib.scoreboard.type.Scoreboard;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import uk.hotten.herobrine.data.RedisManager;
 import uk.hotten.herobrine.game.GameManager;
+import uk.hotten.herobrine.game.runnables.MapVotingRunnable;
 import uk.hotten.herobrine.stat.StatManager;
 import uk.hotten.herobrine.utils.Console;
 import uk.hotten.herobrine.world.WorldManager;
@@ -60,13 +62,20 @@ public class GameLobby {
         };
 
         protocolManager.addPacketListener(enderEyeSfxFix);
+
+        // Start it here so game manager isn't null.
+        new MapVotingRunnable(this).runTaskTimerAsynchronously(plugin, 0, 20);
+
         Console.info("Lobby " + lobbyId + " is ready.");
     }
 
-    public void shutdown(boolean removeSelf) {
+    public void shutdown(boolean removeSelf, boolean recreate) {
         Console.info("Lobby " + lobbyId + " is shutting down...");
         HandlerList.unregisterAll(gameManager.getGmListener());
         HandlerList.unregisterAll(worldManager);
+        gameManager.updateTags(GameManager.ScoreboardUpdateAction.BEGONETHOT);
+        gameManager.getScoreboards().values().forEach(Scoreboard::deactivate);
+        gameManager.getScoreboards().clear();
         gameManager.voidKits();
         statManager.stopTracking();
         worldManager.clean();
@@ -74,5 +83,8 @@ public class GameLobby {
         if (removeSelf)
             LobbyManager.getInstance().removeLobby(lobbyId);
         Console.info("Lobby " + lobbyId + " has shutdown.");
+
+        if (recreate)
+            LobbyManager.getInstance().createLobby();
     }
 }

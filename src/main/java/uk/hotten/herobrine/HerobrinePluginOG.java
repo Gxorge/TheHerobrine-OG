@@ -39,6 +39,7 @@ public class HerobrinePluginOG extends JavaPlugin {
         getCommand("hbcreatelobby").setExecutor(new CreateLobbyCommand());
         getCommand("hbdeletelobby").setExecutor(new DeleteLobbyCommand());
         getCommand("hbdeletelobby").setTabCompleter(new DeleteLobbyCompleter());
+        getCommand("hbspectate").setExecutor(new SpectateCommand());
 
         ScoreboardLib.setPluginInstance(this);
 

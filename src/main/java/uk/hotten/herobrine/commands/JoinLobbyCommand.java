@@ -40,6 +40,17 @@ public class JoinLobbyCommand implements CommandExecutor {
             return true;
         }
 
+        if (!gl.getGameManager().canJoin(player)) {
+            player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
+            return true;
+        }
+
+        GameLobby playerLobby = LobbyManager.getInstance().getLobby(player);
+        if (playerLobby != null && playerLobby == gl) {
+            player.sendMessage(Message.format(ChatColor.RED + "You're already in this lobby!"));
+            return true;
+        }
+
         player.sendMessage(Message.format(ChatColor.GREEN + "Joining " + gl.getLobbyId() + "..."));
         player.teleport(Bukkit.getWorld(gl.getLobbyId() + "-hub").getSpawnLocation());
 

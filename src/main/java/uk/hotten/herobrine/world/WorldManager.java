@@ -97,9 +97,10 @@ public class WorldManager implements Listener {
             return;
         }
         Console.info(gameLobby, "Map base loaded!");
+        pickVotingMaps(false);
     }
 
-    public void pickVotingMaps() {
+    public void pickVotingMaps(boolean startRunnable) {
         List<String> maps = availableMaps.getMaps();
         int reps = 0;
         while (reps < maxVotingMaps) {
@@ -127,7 +128,8 @@ public class WorldManager implements Listener {
             reps++;
         }
         votingRunning = true;
-        //new MapVotingRunnable(gameLobby).runTaskTimerAsynchronously(plugin, 0, 20);
+        if (startRunnable)
+            new MapVotingRunnable(gameLobby).runTaskTimerAsynchronously(plugin, 0, 20);
         Console.info(gameLobby, "Picked voting maps!");
     }
 

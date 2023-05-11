@@ -24,7 +24,7 @@ public class DeleteLobbyCommand implements CommandExecutor {
         }
 
         sender.sendMessage(Message.format("Shutting down " + gl.getLobbyId() + "..."));
-        gl.shutdown(true);
+        gl.shutdown(true, false);
         sender.sendMessage(Message.format(ChatColor.GREEN + "Lobby " + gl.getLobbyId() + " has been shutdown."));
 
         return true;

@@ -72,8 +72,8 @@ public class PlayerUtil {
     public static Player randomPlayer(GameLobby gameLobby) {
 
         Random random = new Random();
-        Player player = (Player) gameLobby.getPlayers().toArray()
-                [random.nextInt(gameLobby.getPlayers().size())];
+        Player player = (Player) gameLobby.getGameManager().getSurvivors().toArray()
+                [random.nextInt(gameLobby.getGameManager().getSurvivors().size())];
 
         return player;
     }

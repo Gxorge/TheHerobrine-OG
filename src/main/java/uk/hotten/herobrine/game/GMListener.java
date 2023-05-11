@@ -6,7 +6,6 @@ import me.tigerhix.lib.scoreboard.common.EntryBuilder;
 import me.tigerhix.lib.scoreboard.type.Entry;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
 import org.bukkit.entity.*;
-import uk.hotten.herobrine.game.runnables.ShardHandler;
 import uk.hotten.herobrine.kit.KitGui;
 import uk.hotten.herobrine.lobby.GameLobby;
 import uk.hotten.herobrine.lobby.LobbyManager;
@@ -28,7 +27,6 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class GMListener implements Listener {
 
@@ -50,18 +48,11 @@ public class GMListener implements Listener {
         if (!player.getWorld().getName().equals(gameLobby.getLobbyId() + "-hub"))
             return;
 
-        if (gameManager.getSurvivors().size() >= gameManager.getMaxPlayers()) {
-            if (gameManager.isAllowOverfill()) {
-                if (!player.hasPermission("theherobrine.overfill")) {
-                    player.teleport(mvWorldManager.getSpawnWorld().getSpawnLocation());
-                    player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
-                    return;
-                }
-            } else {
-                player.teleport(mvWorldManager.getSpawnWorld().getSpawnLocation());
-                player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
-                return;
-            }
+
+        if (!gameManager.canJoin(player)) {
+            player.teleport(mvWorldManager.getSpawnWorld().getSpawnLocation());
+            player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
+            return;
         }
 
         gameLobby.getPlayers().add(player);
@@ -166,7 +157,7 @@ public class GMListener implements Listener {
 
         if (gameManager.getPassUser() == player) {
             gameManager.setPassUser(null);
-            Message.broadcast(Message.format(ChatColor.GOLD + player.getName() + " has left and will no-longer be Herobrine."), "theherobrine.command.setherobrine");
+            Message.broadcast(gameManager.getGameLobby(), Message.format(ChatColor.GOLD + player.getName() + " has left and will no-longer be Herobrine."), "theherobrine.command.setherobrine");
         }
     }
 
@@ -228,6 +219,11 @@ public class GMListener implements Listener {
         Player player = event.getPlayer();
 
         if (gameManager.getGameState() == GameState.LIVE) {
+            if ((event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_AIR) && gameManager.getSpectators().contains(player)) {
+                new SpectatorGui(gameManager.getPlugin(), player, gameManager).open(true);
+                return;
+            }
+
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 if (event.getClickedBlock() == null)
                     return;

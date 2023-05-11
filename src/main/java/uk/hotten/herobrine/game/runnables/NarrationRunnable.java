@@ -35,7 +35,7 @@ public class NarrationRunnable extends BukkitRunnable {
                 if (firstMsg())
                     all(ChatColor.AQUA + "Shard " + (gm.getShardCount() + 1) + " shall be summoned soon!");
                 else
-                    separate(ChatColor.RED + "BEWARE: The Herobrine is still a cloud of smoke!", ChatColor.AQUA + "Try eliminate all the Survivors", ChatColor.YELLOW + "You are out of the game!");
+                    separate(ChatColor.RED + "BEWARE: The Herobrine is still a cloud of smoke!", ChatColor.AQUA + "Try eliminate all the Survivors", ChatColor.YELLOW + "You're out of the game! Left-click to spectate.");
                 break;
             }
             case SPAWNED: {
@@ -46,14 +46,14 @@ public class NarrationRunnable extends BukkitRunnable {
                 if (firstMsg())
                     all("" + ChatColor.GREEN + ChatColor.BOLD + gm.getShardCarrier().getName() + ChatColor.DARK_AQUA + " has the shard!");
                 else
-                    separate(ChatColor.GREEN + "Protect your shard carrier", ChatColor.AQUA + "Kill the shard carrier first!", ChatColor.YELLOW + "Haunt the Herobrine...");
+                    separate(ChatColor.GREEN + "Protect your shard carrier", ChatColor.AQUA + "Kill the shard carrier first!", ChatColor.YELLOW + "You're out of the game! Left-click to spectate.");
                 break;
             }
             case INACTIVE: {
                 if (gm.getShardCount() != 3)
                     return;
 
-                separate(ChatColor.RED + "Kill the Herobrine!", ChatColor.AQUA + "You are now visible!", ChatColor.YELLOW + "The next game will start soon...");
+                separate(ChatColor.RED + "Kill the Herobrine!", ChatColor.AQUA + "You are now visible!", ChatColor.YELLOW + "You're out of the game! Left-click to spectate.");
                 break;
             }
         }
