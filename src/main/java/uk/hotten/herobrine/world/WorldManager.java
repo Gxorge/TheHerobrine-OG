@@ -65,8 +65,8 @@ public class WorldManager implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
         fileBase = plugin.getConfig().getString("mapBase");
-        maxVotingMaps = plugin.getConfig().getInt("votingMaps");
-        endVotingAt = plugin.getConfig().getInt("endVotingAt");
+        maxVotingMaps = gameLobby.getLobbyConfig().getVotingMaps();
+        endVotingAt = gameLobby.getLobbyConfig().getEndVotingAt();
 
         votingMaps = new HashMap<>();
         playerVotes = new HashMap<>();
@@ -81,9 +81,9 @@ public class WorldManager implements Listener {
     }
 
     public void loadMapBase() {
-        File file = new File(fileBase + "/maps.yaml");
+        File file = new File(fileBase + File.separator + gameLobby.getLobbyConfig().getId() + ".yaml");
         if (!file.exists()) {
-            Console.error(gameLobby, "No maps.yaml found at " + file.getPath() + "!");
+            Console.error(gameLobby, "No " + gameLobby.getLobbyConfig().getId() + ".yaml found at " + file.getPath() + "!");
             plugin.getServer().shutdown();
             return;
         }
@@ -103,13 +103,19 @@ public class WorldManager implements Listener {
     public void pickVotingMaps(boolean startRunnable) {
         List<String> maps = availableMaps.getMaps();
         int reps = 0;
+
+        if (maps.size() < maxVotingMaps) {
+            Console.error("Your config '" + gameLobby.getLobbyConfig().getId() + "' is misconfigured. Please ensure 'votingMaps' does not exceed the maximum amount of maps you have for this configuration. You have a maximum of " + maps.size() + " configured.");
+            maxVotingMaps = maps.size();
+        }
+
         while (reps < maxVotingMaps) {
             Random rand = new Random();
             String map = maps.get(rand.nextInt(maps.size()));
             Console.debug(gameLobby, "Map -> " + map);
 
             // Parse the map
-            File file = new File(fileBase + "/" + map + "/mapdata.yaml");
+            File file = new File(fileBase + File.separator + map + File.separator + "mapdata.yaml");
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
             MapData mapData;
@@ -178,7 +184,7 @@ public class WorldManager implements Listener {
         File currentDir;
         File toCopy;
 
-        toCopy = new File(fileBase + "/" + map.getInternalName());
+        toCopy = new File(fileBase + File.separator + map.getInternalName());
         currentDir = new File(gameLobby.getLobbyId() + "-" + map.getInternalName());
         currentDir.mkdir();
         try {
@@ -242,7 +248,7 @@ public class WorldManager implements Listener {
         File currentDir;
         File toCopy;
 
-        toCopy = new File(fileBase + "/hub");
+        toCopy = new File(fileBase + File.separator + "hub");
         currentDir = new File(gameLobby.getLobbyId() + "-hub");
         currentDir.mkdir();
         try {

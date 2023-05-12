@@ -14,8 +14,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import uk.hotten.herobrine.data.RedisManager;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.game.runnables.MapVotingRunnable;
+import uk.hotten.herobrine.lobby.data.LobbyConfig;
 import uk.hotten.herobrine.stat.StatManager;
 import uk.hotten.herobrine.utils.Console;
+import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.world.WorldManager;
 
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ public class GameLobby {
 
     private JavaPlugin plugin;
 
+    @Getter private LobbyConfig lobbyConfig;
     @Getter private String lobbyId;
 
     @Getter private GameManager gameManager;
@@ -35,8 +38,9 @@ public class GameLobby {
 
     @Getter private ArrayList<Player> players;
 
-    public GameLobby(JavaPlugin plugin, String lobbyId) {
+    public GameLobby(JavaPlugin plugin, LobbyConfig lobbyConfig, String lobbyId) {
         this.plugin = plugin;
+        this.lobbyConfig = lobbyConfig;
         this.lobbyId = lobbyId;
     }
 
@@ -73,6 +77,7 @@ public class GameLobby {
         Console.info("Lobby " + lobbyId + " is shutting down...");
         HandlerList.unregisterAll(gameManager.getGmListener());
         HandlerList.unregisterAll(worldManager);
+        gameManager.setGameStateSilently(GameState.DEAD);
         gameManager.updateTags(GameManager.ScoreboardUpdateAction.BEGONETHOT);
         gameManager.getScoreboards().values().forEach(Scoreboard::deactivate);
         gameManager.getScoreboards().clear();
@@ -85,6 +90,6 @@ public class GameLobby {
         Console.info("Lobby " + lobbyId + " has shutdown.");
 
         if (recreate)
-            LobbyManager.getInstance().createLobby();
+            LobbyManager.getInstance().createLobby(lobbyConfig);
     }
 }

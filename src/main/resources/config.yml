@@ -1,25 +1,13 @@
 networkName: Your Network # Name of your network
 networkWeb: yournetwork.org # Website of your network
 gamePrefix: "DEFAULT" # PLEASE PUT IN SPEECH MARKS! Set as "DEFAULT" for classic HiveMC, else it will be your own.
-
-minPlayers: 8 # Minimum players needed to start a game
-maxPlayers: 13 # Maximum players in a game
-startTime: 90 # How many seconds till the game will start when the minimum is reached
-allowOverfill: false # Allow more than the max players to join
-
 mapBase: "maps" # Folder where the map base and maps folder is.
-votingMaps: 3 # How many maps should be chosen for players to vote on. Don't go over the amount of maps you have
-endVotingAt: 10 # Stops the vote at the set remaining seconds until the game starts
 
 lockClassicKits: false # Do you want to lock classic kits such as Archer and Scout behind their permission?
 lockUnlockableKits: true # Do you want to lock unlockable kits such as Mage and Sorcerer behind their permission?
 showDeathBringerAt: 100000 # How many points must the top player surpass for the Death Bringer rank to show?
 
 showDebugMessages: false # Show debug messages?
-
-## Lobbies
-lobbyPrefix: "HB" # Prefix of lobby IDs
-lobbyAutoStartAmount: 1 # How many lobbies will be started on server boot
 
 ## Redis Configuration
 redisHost: "localhost"

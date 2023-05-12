@@ -1,24 +1,32 @@
 package uk.hotten.herobrine.lobby;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import lombok.Getter;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import uk.hotten.herobrine.game.GameManager;
+import uk.hotten.herobrine.lobby.data.LobbyConfig;
 import uk.hotten.herobrine.utils.Console;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 public class LobbyManager {
 
@@ -27,7 +35,7 @@ public class LobbyManager {
 
     @Getter private MultiverseCore multiverseCore;
 
-    private String lobbyPrefix;
+    private HashMap<String, LobbyConfig> lobbyConfigs;
     private HashMap<String, GameLobby> gameLobbies;
 
     public LobbyManager(JavaPlugin plugin) {
@@ -36,41 +44,89 @@ public class LobbyManager {
 
         multiverseCore = (MultiverseCore) Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Core");
 
-        lobbyPrefix = plugin.getConfig().getString("lobbyPrefix");
+        lobbyConfigs = new HashMap<>();
         gameLobbies = new HashMap<>();
 
-        int autoStartup = plugin.getConfig().getInt("lobbyAutoStartAmount");
-        for (int i = 0; i < autoStartup; i++) {
-            createLobby();
+        try {
+            checkAndLoadConfigs(true);
+        } catch (Exception e) {
+            Console.error("Failed to load config files.");
+            e.printStackTrace();
         }
     }
 
-    public String createLobby() {
-        String lobbyId = generateLobbyId();
+    public void checkAndLoadConfigs(boolean autoStart) throws Exception {
+        Console.info("Loading lobby configs...");
+        lobbyConfigs.clear();
+        Path path = Path.of(plugin.getDataFolder() + File.separator + "lobbies");
+        if (!Files.exists(path)) {
+            Console.error("No lobbies file found, creating...");
+            new File(path.toUri()).mkdir();
+        }
+
+        Collection<File> files = FileUtils.listFiles(path.toFile(), new RegexFileFilter("\\w+\\.yaml$"), DirectoryFileFilter.DIRECTORY);
+        if (files.isEmpty()) {
+            Console.error("No lobby config files detected. Creating the default...");
+
+            LobbyConfig defaultConfig = new LobbyConfig("default", "HB", 8, 13, 90, false, 3, 10, 1);
+
+            ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+
+            objectMapper.writeValue(new File(path + File.separator + "default.yaml"), defaultConfig);
+
+            Console.info("Default config file written. Please change!!");
+
+            files.add(new File(path + File.separator + "default.yaml"));
+        }
+
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        files.forEach(file -> {
+            try {
+                Console.info("Loading lobby config " + file.getName());
+                LobbyConfig lobbyConfig = mapper.readValue(file, LobbyConfig.class);
+
+                lobbyConfigs.put(lobbyConfig.getId(), lobbyConfig);
+
+                if (autoStart) {
+                    for (int i = 0; i < lobbyConfig.getAutoStartAmount(); i++) {
+                        createLobby(lobbyConfig);
+                    }
+                }
+
+                Console.info("Successfully loaded configuration ID " + lobbyConfig.getId());
+            } catch (IOException e) {
+                Console.error("Failed to load config file " + file.getName());
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public String createLobby(LobbyConfig lobbyConfig) {
+        String lobbyId = generateLobbyId(lobbyConfig);
         if (lobbyId == null) {
             Console.error("Failed to generate lobby ID.");
             return null;
         }
 
-        GameLobby gl = new GameLobby(plugin, lobbyId);
+        GameLobby gl = new GameLobby(plugin, lobbyConfig, lobbyId);
         gl.initialize();
         gameLobbies.put(lobbyId, gl);
         return lobbyId;
     }
 
-    private String generateLobbyId() {
+    private String generateLobbyId(LobbyConfig lobbyConfig) {
         for (int i = 1; i <= 100; i++) {
-            if (gameLobbies.containsKey(lobbyPrefix + i))
+            if (gameLobbies.containsKey(lobbyConfig.getPrefix() + i))
                 continue;
 
-            return lobbyPrefix + i;
+            return lobbyConfig.getPrefix() + i;
         }
 
         return null;
     }
 
     public GameLobby getLobby(String lobbyId) {
-        return gameLobbies.get(lobbyId);
+        return gameLobbies.getOrDefault(lobbyId, null);
     }
 
     public GameLobby getLobby(Player player) {
@@ -90,6 +146,14 @@ public class LobbyManager {
         gameLobbies.remove(lobbyId);
     }
 
+    public LobbyConfig getLobbyConfig(String configId) {
+        return lobbyConfigs.getOrDefault(configId, null);
+    }
+
+    public List<String> getLobbyConfigsIds() {
+        return lobbyConfigs.keySet().stream().toList();
+    }
+
     public void shutdown() {
         for (Map.Entry<String, GameLobby> entry : gameLobbies.entrySet()) {
             entry.getValue().shutdown(false, false);
@@ -105,9 +169,23 @@ public class LobbyManager {
                 (player.hasPermission("theherobrine.overfill") ? ChatColor.GREEN + "(JOIN)"
                         : "");
 
+        int sent = 0;
         for (Map.Entry<String, GameLobby> entry : gameLobbies.entrySet()) {
             GameLobby gameLobby = entry.getValue();
             GameManager gm = gameLobby.getGameManager();
+
+            if (gm.getGameState() == GameState.LIVE) {
+                StringBuilder sb = new StringBuilder("" + ChatColor.AQUA + gameLobby.getLobbyId() + ": " +
+                        ChatColor.YELLOW + gm.getSurvivors().size() + " remaining" + ChatColor.DARK_GRAY + " - " + ChatColor.AQUA + ChatColor.BOLD + "LIVE " + ChatColor.DARK_GREEN + "(SPECTATE)");
+
+                TextComponent textComponent = new TextComponent(Message.format(sb.toString()));
+                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GOLD + "Click here to spectate " + ChatColor.AQUA + gameLobby.getLobbyId())));
+                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hbjoin " + gameLobby.getLobbyId()));
+
+                player.spigot().sendMessage(textComponent);
+                sent++;
+                continue;
+            }
 
             if (gm.getGameState() != GameState.WAITING && gm.getGameState() != GameState.STARTING)
                 continue;
@@ -132,6 +210,11 @@ public class LobbyManager {
             }
 
             player.spigot().sendMessage(textComponent);
+            sent++;
+        }
+
+        if (sent == 0) {
+            player.sendMessage(Message.format(ChatColor.RED + "There are no lobbies available."));
         }
     }
 

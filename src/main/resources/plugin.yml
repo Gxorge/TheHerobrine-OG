@@ -1,6 +1,6 @@
 name: TheHerobrine-OG
 main: uk.hotten.herobrine.HerobrinePluginOG
-version: 1.3.1-1.0
+version: 1.3.1-1.1
 api-version: 1.18
 author: Gxorge
 description: Remake of "The Herobrine!" v2 from HiveMC.
@@ -41,7 +41,7 @@ commands:
   hbcreatelobby:
     description: Create a lobby.
     permission: theherobrine.command.createlobby
-    usage: /<command>
+    usage: /<command> <configuration id>
 
   hbdeletelobby:
     description: Delete a lobby.
@@ -51,4 +51,9 @@ commands:
   hbspectate:
     description: Toggle spectator mode for a round.
     permission: theherobrine.command.spectate
+    usage: /<command>
+
+  hbreloadconfigs:
+    description: Reload the lobby configuration files.
+    permission: theherobrine.command.reloadconfigs
     usage: /<command>

@@ -108,10 +108,10 @@ public class GameManager {
         gameState = GameState.BOOTING;
         shardState = ShardState.WAITING;
 
-        requiredToStart = plugin.getConfig().getInt("minPlayers");
-        maxPlayers = plugin.getConfig().getInt("maxPlayers");
-        startTimer = plugin.getConfig().getInt("startTime");
-        allowOverfill = plugin.getConfig().getBoolean("allowOverfill");
+        requiredToStart = gameLobby.getLobbyConfig().getMinPlayers();
+        maxPlayers = gameLobby.getLobbyConfig().getMaxPlayers();
+        startTimer = gameLobby.getLobbyConfig().getStartTime();
+        allowOverfill = gameLobby.getLobbyConfig().isAllowOverfill();
         networkName = plugin.getConfig().getString("networkName");
         networkWeb = plugin.getConfig().getString("networkWeb");
         boolean lockClassicKits = plugin.getConfig().getBoolean("lockClassicKits");
@@ -182,6 +182,13 @@ public class GameManager {
         }.runTask(plugin);
     }
 
+    // Should only be used in GameLobby's shutdown to force the state to dead.
+    public void setGameStateSilently(GameState newState) {
+        GameState old = gameState;
+        gameState = newState;
+        Console.debug(gameLobby, "Game state silently updated to " + newState.toString() + "(from " + old.toString() + ")!");
+    }
+
     public void setShardState(ShardState newState) {
         new BukkitRunnable() {
 
@@ -205,7 +212,7 @@ public class GameManager {
 
         // In case the timer decreased from players leaving and a world was loaded
         Bukkit.getServer().getScheduler().runTask(plugin, () -> gameLobby.getWorldManager().clean(false));
-        startTimer = plugin.getConfig().getInt("startTime");
+        startTimer = getGameLobby().getLobbyConfig().getStartTime();
 
         waitingRunnable = new WaitingRunnable(this).runTaskTimerAsynchronously(plugin, 0, 10);
     }
