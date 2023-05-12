@@ -24,7 +24,7 @@ The plugin currently does not generate this automatically and therefore it must 
 - /hbcreatelobby <configuration id> - create a new lobby - theherobrine.command.createlobby
 - /hbdeletelobby <lobby id> - delete a lobby - theherobrine.command.deletelobby
 - /hbspectate - switch from playing to spectating whilst in-lobby - theherobrine.command.spectate
-- /hbreloadconfigs - reload lobby configs - theherobrine.reloadconfigs
+- /hbreloadconfigs - reload lobby configs - theherobrine.command.reloadconfigs
 
 ### Kit Permissions
 Requiring permissions for classic and unlockable kits can be set in the config.yml.
