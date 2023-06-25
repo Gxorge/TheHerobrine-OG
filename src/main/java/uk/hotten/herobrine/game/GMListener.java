@@ -477,7 +477,7 @@ public class GMListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onRespawn(PlayerRespawnEvent event) {
         if (!gameLobby.getPlayers().contains(event.getPlayer()))
             return;
