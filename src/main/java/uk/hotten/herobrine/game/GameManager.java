@@ -218,6 +218,9 @@ public class GameManager {
     }
 
     public boolean canJoin(Player player) {
+        if (gameState == GameState.LIVE)
+            return true;
+
         if (getSurvivors().size() >= getMaxPlayers()) {
             if (isAllowOverfill()) {
                 if (!player.hasPermission("theherobrine.overfill")) {

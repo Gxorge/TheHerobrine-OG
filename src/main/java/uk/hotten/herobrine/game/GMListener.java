@@ -42,13 +42,26 @@ public class GMListener implements Listener {
     }
 
     @EventHandler
-    public void onJoin(PlayerChangedWorldEvent event) {
+    public void onJoinViaWorld(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
 
-        if (!player.getWorld().getName().equals(gameLobby.getLobbyId() + "-hub"))
+        if (!player.getWorld().getName().startsWith(gameLobby.getLobbyId()))
             return;
 
+        onJoinLogic(player);
+    }
 
+    @EventHandler
+    public void onJoinViaLogin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        if (!player.getWorld().getName().startsWith(gameLobby.getLobbyId()))
+            return;
+
+        onJoinLogic(player);
+    }
+
+    private void onJoinLogic(Player player) {
         if (!gameManager.canJoin(player)) {
             player.teleport(mvWorldManager.getSpawnWorld().getSpawnLocation());
             player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
@@ -93,7 +106,7 @@ public class GMListener implements Listener {
         gameLobby.getWorldManager().getPlayerVotes().put(player, 0);
         gameLobby.getWorldManager().sendVotingMessage(player);
         gameManager.hubInventory(player);
-        gameManager.setKit(event.getPlayer(), gameManager.getSavedKit(player), true);
+        gameManager.setKit(player, gameManager.getSavedKit(player), true);
         player.setHealth(20);
         player.setFoodLevel(20);
         player.setGameMode(GameMode.SURVIVAL);
