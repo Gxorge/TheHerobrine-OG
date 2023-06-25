@@ -55,7 +55,7 @@ maps:
   - map3
 ```
 
-In your `maps` directory, there should be a folder with the name listed in `<config id>.yaml` with the world data and a file called `mapdata.yaml`.
+In your `maps` directory put your world folders, with the folder name being what is set in the above mentioned map's `<config id>.yaml`. Within the world folder, a `mapdata.yaml` is required.
 This files contains map information and the location of the survivor's spawn, herobrine's spawn, the alter location and the shard location.
 This is what an example file should look like:
 ```yaml
