@@ -58,7 +58,7 @@ public class GameLobby {
                 if (!gameManager.getSurvivors().contains(event.getPlayer()) && gameManager.getHerobrine() != event.getPlayer())
                     return;
 
-                Sound effectId = event.getPacket().getSoundEffects().read(0);
+                Sound effectId = event.getPacket().getSoundEffects().readSafely(0);
                 if (effectId == Sound.ENTITY_ENDER_EYE_DEATH) {
                     event.setCancelled(true);
                 }

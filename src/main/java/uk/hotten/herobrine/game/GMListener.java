@@ -48,7 +48,7 @@ public class GMListener implements Listener {
         if (!player.getWorld().getName().startsWith(gameLobby.getLobbyId()))
             return;
 
-        onJoinLogic(player);
+        onJoinLogic(player, player.getWorld().getName());
     }
 
     @EventHandler
@@ -58,13 +58,21 @@ public class GMListener implements Listener {
         if (!player.getWorld().getName().startsWith(gameLobby.getLobbyId()))
             return;
 
-        onJoinLogic(player);
+        onJoinLogic(player, player.getWorld().getName());
     }
 
-    private void onJoinLogic(Player player) {
+    private void onJoinLogic(Player player, String worldName) {
         if (!gameManager.canJoin(player)) {
             player.teleport(mvWorldManager.getSpawnWorld().getSpawnLocation());
             player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
+            return;
+        }
+
+        if (!worldName.contains("hub")) {
+            if (gameManager.getGameState() == GameState.LIVE) {
+                gameManager.makeSpectator(player);
+            }
+
             return;
         }
 
