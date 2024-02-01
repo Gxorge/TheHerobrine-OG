@@ -1,7 +1,6 @@
 package uk.hotten.herobrine.utils;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -12,12 +11,13 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import uk.hotten.herobrine.lobby.GameLobby;
 
+import java.time.Duration;
 import java.util.Random;
 
 public class PlayerUtil {
 
     public static void sendActionbar(Player player, String message) {
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
+        player.sendActionBar(Message.legacySerializerAnyCase(message));
     }
 
     public static void broadcastActionbar(GameLobby gameLobby, String message) {
@@ -27,12 +27,14 @@ public class PlayerUtil {
     }
 
     public static void sendTitle(Player player, String top, String bottom, int fadeIn, int stay, int fadeOut) {
-        player.sendTitle(top, bottom, fadeIn, stay, fadeOut);
+        Title.Times times = Title.Times.times(Duration.ofSeconds(fadeIn/20), Duration.ofSeconds(stay/20), Duration.ofSeconds(fadeOut/20));
+        Title title = Title.title(Message.legacySerializerAnyCase(top), Message.legacySerializerAnyCase(bottom), times);
+        player.showTitle(title);
     }
 
     public static void broadcastTitle(GameLobby gameLobby, String top, String bottom, int fadeIn, int stay, int fadeOut) {
         for (Player p : gameLobby.getPlayers()) {
-            p.sendTitle((top.equals("") ? ChatColor.RESET + "" : top), bottom, fadeIn, stay, fadeOut);
+            sendTitle(p, top, bottom, fadeIn, stay, fadeOut);
         }
     }
 

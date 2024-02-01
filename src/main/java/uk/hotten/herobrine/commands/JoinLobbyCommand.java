@@ -1,7 +1,6 @@
 package uk.hotten.herobrine.commands;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,7 +15,7 @@ public class JoinLobbyCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(Message.format(ChatColor.RED + "You are unable to use this command."));
+            Message.send(sender, Message.format("&cYou are unable to use this command."));
             return true;
         }
 
@@ -30,28 +29,28 @@ public class JoinLobbyCommand implements CommandExecutor {
 
         GameLobby gl = lm.getLobby(args[0]);
         if (gl == null) {
-            player.sendMessage(Message.format(ChatColor.RED + args[0] + " does not exist."));
+            Message.send(player, Message.format("&a" + args[0] + " does not exist."));
             return true;
         }
 
         GameState currentState = gl.getGameManager().getGameState();
         if (currentState == GameState.ENDING || currentState == GameState.DEAD || currentState == GameState.BOOTING || currentState == GameState.UNKNOWN) {
-            player.sendMessage(Message.format(ChatColor.RED + "This lobby cannot be joined right now."));
+            Message.send(player, Message.format("&cThis lobby cannot be joined right now."));
             return true;
         }
 
         if (!gl.getGameManager().canJoin(player)) {
-            player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
+            Message.send(player, Message.format("&cThis lobby is full."));
             return true;
         }
 
         GameLobby playerLobby = LobbyManager.getInstance().getLobby(player);
         if (playerLobby != null && playerLobby == gl) {
-            player.sendMessage(Message.format(ChatColor.RED + "You're already in this lobby!"));
+            Message.send(player, Message.format("&cYou're already in this lobby!"));
             return true;
         }
 
-        player.sendMessage(Message.format(ChatColor.GREEN + "Joining " + gl.getLobbyId() + "..."));
+        Message.send(player, Message.format("&aJoining " + gl.getLobbyId() + "..."));
         player.teleport(Bukkit.getWorld(gl.getLobbyId() + "-hub").getSpawnLocation());
 
         return true;

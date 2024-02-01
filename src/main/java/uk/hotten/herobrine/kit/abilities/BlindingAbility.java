@@ -6,7 +6,6 @@ import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
@@ -31,8 +30,8 @@ public class BlindingAbility extends KitAbility {
     @Override
     public void apply(Player player) {
         this.player = player;
-        GUIItem charge = new GUIItem(Material.GOLD_NUGGET).displayName(ChatColor.GOLD + "Charge of " + ChatColor.BOLD + "Blinding!").amount(amount);
-        charge.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "Launches a charge that blinds survivors within a 6 block radius", "" + ChatColor.GRAY + ChatColor.ITALIC));
+        GUIItem charge = new GUIItem(Material.GOLD_NUGGET).displayName("&6Charge of &lBlinding!").amount(amount);
+        charge.lore(Message.addLinebreaks("&7&oLaunches a charge that blinds survivors within a 6 block radius", "&7&o"));
 
         if (slot == -1)
             player.getInventory().addItem(charge.build());

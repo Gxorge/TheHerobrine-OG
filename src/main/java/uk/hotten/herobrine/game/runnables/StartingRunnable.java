@@ -5,7 +5,6 @@ import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
 import uk.hotten.herobrine.world.WorldManager;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -30,14 +29,14 @@ public class StartingRunnable extends BukkitRunnable {
     @Override
     public void run() {
         if ((gm.getRequiredToStart() > gm.getSurvivors().size() && !ignorePlayerCount) || (ignorePlayerCount && gm.getSurvivors().size() <= 1)) {
-            Message.broadcast(gm.getGameLobby(), Message.format("" + ChatColor.RED + "Start cancelled! Waiting for players..."));
+            Message.broadcast(gm.getGameLobby(), Message.format("&cStart cancelled! Waiting for players..."));
             gm.startWaiting();
             cancel();
             return;
         }
 
         if (gm.timerPaused) {
-            Message.broadcast(gm.getGameLobby(), Message.format("" + ChatColor.RED + "Start cancelled! Waiting for server operator..."));
+            Message.broadcast(gm.getGameLobby(), Message.format("&cStart cancelled! Waiting for server operator..."));
             gm.startWaiting();
             cancel();
             return;
@@ -56,14 +55,14 @@ public class StartingRunnable extends BukkitRunnable {
 
         String time = (gm.startTimer < 60 ? Message.formatTime(gm.startTimer) : Message.formatTimeFull(gm.startTimer));
         if (gm.startTimer > 5) {
-            PlayerUtil.broadcastActionbar(gm.getGameLobby(), "" + ChatColor.YELLOW + "Get ready! The game will start in " + ChatColor.GREEN + time);
+            PlayerUtil.broadcastActionbar(gm.getGameLobby(), "&eGet ready! The game will start in &a" + time);
         } else {
             if (gm.startTimer <= 5)
                 PlayerUtil.broadcastSound(gm.getGameLobby(), Sound.BLOCK_NOTE_BLOCK_HAT, 1f, 1f);
             if (gm.startTimer <= 3)
                 PlayerUtil.broadcastSound(gm.getGameLobby(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
 
-            PlayerUtil.broadcastActionbar(gm.getGameLobby(), "" + ChatColor.GREEN + "Get ready! The game will start in " + ChatColor.RED + time);
+            PlayerUtil.broadcastActionbar(gm.getGameLobby(), "&aGet ready! The game will start in &c" + time);
         }
     }
 }

@@ -4,7 +4,6 @@ import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
 import uk.hotten.herobrine.world.WorldManager;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -28,11 +27,11 @@ public class CaptureSequence extends BukkitRunnable {
     public void run() {
         Location l = wm.alter;
 
-        PlayerUtil.broadcastTitle(gm.getGameLobby(), "" + ChatColor.AQUA + ChatColor.BOLD + "Shard Captured", ChatColor.YELLOW + "by " + ChatColor.BOLD + player.getName(), 10, 60, 20);
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "&b&lShard Captured", "&eby &l" + player.getName(), 10, 60, 20);
         if (gm.getShardCount() == 3)
-            Message.broadcast(gm.getGameLobby(), Message.format("" + ChatColor.RED + ChatColor.BOLD + "Herobrine " + ChatColor.YELLOW + "is now " + ChatColor.GREEN + "Visible!"));
+            Message.broadcast(gm.getGameLobby(), Message.format("&c&lHerobrine &eis now &aVisible!"));
         else
-            Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.AQUA + "" + gm.getShardCount() + ChatColor.GRAY + "/3 Shards Captured!"));
+            Message.broadcast(gm.getGameLobby(), Message.format("&b" + gm.getShardCount() + "&7/3 Shards Captured!"));
         PlayerUtil.playSoundAt(l, Sound.BLOCK_PORTAL_TRAVEL, 1f, 1f);
         PlayerUtil.playSoundAt(l, Sound.ENTITY_WITHER_DEATH, 0.5f, 1f);
         PlayerUtil.broadcastSound(gm.getGameLobby(), Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1f, 0f);

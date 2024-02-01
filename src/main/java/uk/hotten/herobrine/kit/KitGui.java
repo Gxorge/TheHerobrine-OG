@@ -4,7 +4,6 @@ import uk.hotten.gxui.GUIBase;
 import uk.hotten.gxui.GUIButton;
 import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import uk.hotten.herobrine.utils.Message;
@@ -15,7 +14,7 @@ public class KitGui extends GUIBase {
     private GameManager gm;
 
     public KitGui(JavaPlugin plugin, Player player, GameManager gm) {
-        super(plugin, player, ChatColor.DARK_GRAY + "Pick your class", 9, false);
+        super(plugin, player, "&8Pick your class", 9, false);
         assignedPlayer = player;
         this.gm = gm;
     }
@@ -34,7 +33,7 @@ public class KitGui extends GUIBase {
                         assignedPlayer.closeInventory();
                     }
                     else {
-                        assignedPlayer.sendMessage(Message.format(ChatColor.RED + "You haven't unlocked this kit yet!"));
+                        Message.send(assignedPlayer, Message.format("&cYou haven't unlocked this kit yet!"));
                         return false;
                     }
                     return true;

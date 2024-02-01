@@ -1,6 +1,5 @@
 package uk.hotten.herobrine.kit.abilities;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,8 +27,8 @@ public class ProtSpiritAbility extends KitAbility {
     @Override
     public void apply(Player player) {
         this.player = player;
-        GUIItem item = new GUIItem(Material.ENDER_PEARL).displayName(ChatColor.AQUA + "Protection " + ChatColor.BOLD + "Spirit!").amount(amount);
-        item.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "Protect yourself with a spirit of rapid healing for 12 seconds", "" + ChatColor.GRAY + ChatColor.ITALIC));
+        GUIItem item = new GUIItem(Material.ENDER_PEARL).displayName("&bProtection &lSpirit!").amount(amount);
+        item.lore(Message.addLinebreaks("&7&oProtect yourself with a spirit of rapid healing for 12 seconds", "&7&o"));
 
         player.getInventory().setItem(slot, item.build());
     }

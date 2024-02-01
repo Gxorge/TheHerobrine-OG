@@ -1,6 +1,5 @@
 package uk.hotten.herobrine.commands;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,31 +12,31 @@ public class CreateLobbyCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args == null || args.length == 0) {
-            sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /hbcreatelobby <configuration id>"));
+            Message.send(sender, Message.format("&cCorrect Usage: /hbcreatelobby <configuration id>"));
             sendAvailable(sender);
             return true;
         }
 
         LobbyConfig lobbyConfig = LobbyManager.getInstance().getLobbyConfig(args[0]);
         if (lobbyConfig == null) {
-            sender.sendMessage(Message.format(ChatColor.RED + args[0] + " is not a valid configuration."));
+            Message.send(sender, Message.format("&c" + args[0] + " is not a valid configuration."));
             sendAvailable(sender);
             return true;
         }
 
-        sender.sendMessage(Message.format("Creating lobby from config '" + lobbyConfig.getId() + "'..."));
+        Message.send(sender, "Creating lobby from config '" + lobbyConfig.getId() + "'...");
         String lobby = LobbyManager.getInstance().createLobby(lobbyConfig);
         if (lobby == null) {
-            sender.sendMessage(Message.format(ChatColor.RED + "Failed to create lobby, please contact your administrator."));
+            Message.send(sender, Message.format("&cFailed to create lobby, please contact your administrator."));
             return true;
         }
 
-        sender.sendMessage(Message.format(ChatColor.GREEN + "Lobby " + lobby + " created successfully."));
+        Message.send(sender, Message.format("&aLobby " + lobby + " created successfully."));
         return true;
     }
 
     private void sendAvailable(CommandSender sender) {
-        sender.sendMessage(Message.format(ChatColor.RED + "The following types are available:"));
-        LobbyManager.getInstance().getLobbyConfigsIds().forEach(id -> sender.sendMessage(Message.format(ChatColor.RED + " - " + id)));
+        Message.send(sender, Message.format("&cThe following types are available:"));
+        LobbyManager.getInstance().getLobbyConfigsIds().forEach(id -> Message.send(sender, Message.format("&c - " + id)));
     }
 }

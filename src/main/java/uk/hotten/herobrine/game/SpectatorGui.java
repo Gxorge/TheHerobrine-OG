@@ -1,6 +1,5 @@
 package uk.hotten.herobrine.game;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -9,14 +8,13 @@ import uk.hotten.gxui.GUIButton;
 import uk.hotten.gxui.GUIItem;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class SpectatorGui extends GUIBase {
 
     private GameManager gm;
 
     public SpectatorGui(JavaPlugin plugin, Player player, GameManager gm) {
-        super(plugin, player, ChatColor.DARK_GRAY + "Spectator Menu", 18, false);
+        super(plugin, player, "&8Spectator Menu", 18, false);
         this.gm = gm;
     }
 

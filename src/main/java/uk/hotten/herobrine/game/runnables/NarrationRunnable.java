@@ -4,7 +4,6 @@ import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.PlayerUtil;
 import uk.hotten.herobrine.utils.ShardState;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -33,27 +32,27 @@ public class NarrationRunnable extends BukkitRunnable {
         switch (gm.getShardState()) {
             case WAITING: {
                 if (firstMsg())
-                    all(ChatColor.AQUA + "Shard " + (gm.getShardCount() + 1) + " shall be summoned soon!");
+                    all("&bShard " + (gm.getShardCount() + 1) + " shall be summoned soon!");
                 else
-                    separate(ChatColor.RED + "BEWARE: The Herobrine is still a cloud of smoke!", ChatColor.AQUA + "Try eliminate all the Survivors", ChatColor.YELLOW + "You're out of the game! Left-click to spectate.");
+                    separate("&cBEWARE: The Herobrine is still a cloud of smoke!", "&bTry eliminate all the Survivors", "&eYou're out of the game! Left-click to spectate.");
                 break;
             }
             case SPAWNED: {
-                all(ChatColor.AQUA + "Use your compass to find the shard!");
+                all("&bUse your compass to find the shard!");
                 break;
             }
             case CARRYING: {
                 if (firstMsg())
-                    all("" + ChatColor.GREEN + ChatColor.BOLD + gm.getShardCarrier().getName() + ChatColor.DARK_AQUA + " has the shard!");
+                    all("&a&l" + gm.getShardCarrier().getName() + "&3 has the shard!");
                 else
-                    separate(ChatColor.GREEN + "Protect your shard carrier", ChatColor.AQUA + "Kill the shard carrier first!", ChatColor.YELLOW + "You're out of the game! Left-click to spectate.");
+                    separate("&aProtect your shard carrier", "&bKill the shard carrier first!", "&eYou're out of the game! Left-click to spectate.");
                 break;
             }
             case INACTIVE: {
                 if (gm.getShardCount() != 3)
                     return;
 
-                separate(ChatColor.RED + "Kill the Herobrine!", ChatColor.AQUA + "You are now visible!", ChatColor.YELLOW + "You're out of the game! Left-click to spectate.");
+                separate("&cKill the Herobrine!", "&aYou are now visible!", "&eYou're out of the game! Left-click to spectate.");
                 break;
             }
         }

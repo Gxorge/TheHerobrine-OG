@@ -6,7 +6,6 @@ import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
@@ -30,8 +29,8 @@ public class WooflessAbility extends KitAbility {
     public void apply(Player player) {
         this.player = player;
 
-        GUIItem bone = new GUIItem(Material.BONE).displayName(ChatColor.AQUA + "Summon Woofless");
-        bone.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "It's dangerous to go alone, take a friend!", "" + ChatColor.GRAY + ChatColor.ITALIC));
+        GUIItem bone = new GUIItem(Material.BONE).displayName("&bSummon Woofless");
+        bone.lore(Message.addLinebreaks("&7&oIt's dangerous to go alone, take a friend!", "&7&o"));
 
         player.getInventory().setItem(slot, bone.build());
     }

@@ -1,10 +1,8 @@
 package uk.hotten.herobrine.commands;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.game.runnables.StartingRunnable;
@@ -19,7 +17,7 @@ public class ForceStartCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(Message.format(ChatColor.RED + "You are unable to use this command."));
+            Message.send(sender, Message.format("&cYou are unable to use this command."));
             return true;
         }
 
@@ -27,7 +25,7 @@ public class ForceStartCommand implements CommandExecutor {
         WorldManager wm;
         GameLobby gl = LobbyManager.getInstance().getLobby((Player) sender);
         if (gl == null) {
-            sender.sendMessage(Message.format(ChatColor.RED + "You must be in a lobby to do this."));
+            Message.send(sender, Message.format("&cYou must be in a lobby to do this."));
             return true;
         }
 
@@ -35,7 +33,7 @@ public class ForceStartCommand implements CommandExecutor {
         wm = gl.getWorldManager();
 
         if (gm.getGameState() != GameState.WAITING) {
-            sender.sendMessage(Message.format(ChatColor.RED + "You cannot run this command right now."));
+            Message.send(sender, Message.format("&cYou cannot run this command right now."));
             return true;
         }
 
@@ -46,7 +44,7 @@ public class ForceStartCommand implements CommandExecutor {
             try {
                 startTime = Integer.parseInt(args[0]);
             } catch (Exception e) {
-                sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /hbforcestart [time]"));
+                Message.send(sender, Message.format("&cCorrect Usage: /hbforcestart [time]"));
                 return true;
             }
         }
@@ -54,7 +52,7 @@ public class ForceStartCommand implements CommandExecutor {
         if (startTime < wm.getEndVotingAt())
             startTime = wm.getEndVotingAt();
 
-        sender.sendMessage(Message.format(ChatColor.GREEN + "The game will start in " + startTime + " seconds unless the player count goes below 2."));
+        Message.send(sender, Message.format("&aThe game will start in " + startTime + " seconds unless the player count goes below 2."));
         gm.startTimer = startTime+1;
         gm.setGameState(GameState.STARTING);
         new StartingRunnable(gm, wm, true).runTaskTimerAsynchronously(gm.getPlugin(), 0, 20);

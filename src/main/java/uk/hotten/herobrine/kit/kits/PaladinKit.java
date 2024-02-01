@@ -1,6 +1,5 @@
 package uk.hotten.herobrine.kit.kits;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,21 +18,21 @@ public class PaladinKit extends Kit {
     public PaladinKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "paladin",
-                ChatColor.GOLD + "Paladin",
+                "&6Paladin",
                 "theherobrine.kit.unlockable.paladin",
                 requirePermission,
                 Message.createArray(
-                        ChatColor.DARK_GRAY + "- " + ChatColor.GREEN + "Paladin's Might" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (weapon)",
+                        "&8- &aPaladin's Might &8&o(weapon)",
                         "",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.AQUA + "Protection " + ChatColor.BOLD + "Spirit!" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x3)",
-                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "Protect yourself with a spirit of",
-                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "rapid healing for 12 seconds",
+                        "&8- &bProtection &lSpirit! &8&o(x3)",
+                        "   &7&oProtect yourself with a spirit of",
+                        "   &7&orapid healing for 12 seconds",
                         "",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.GREEN + "Notch's Wisdom" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x3)",
-                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "Creates an aura of health to",
-                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "heal survivors for 10 seconds"
+                        "&8- &aNotch's Wisdom &8&o(x3)",
+                        "   &7&oCreates an aura of health to",
+                        "   &7&oheal survivors for 10 seconds"
                 ),
-                new GUIItem(Material.ENDER_PEARL).displayName(ChatColor.GOLD + "Paladin")
+                new GUIItem(Material.ENDER_PEARL).displayName("&6Paladin")
         );
     }
 
@@ -46,7 +45,7 @@ public class PaladinKit extends Kit {
 
     @Override
     public void setupPlayer(Player player) {
-        GUIItem sword = new GUIItem(Material.IRON_SWORD).displayName(ChatColor.GREEN + "Paladin's Might").unbreakable(true);
+        GUIItem sword = new GUIItem(Material.IRON_SWORD).displayName("&aPaladin's Might").unbreakable(true);
 
         player.getInventory().setItem(0, sword.build());
 

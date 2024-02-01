@@ -4,7 +4,6 @@ import uk.hotten.gxui.GUIItem;
 import uk.hotten.herobrine.game.GameManager;
 import uk.hotten.herobrine.kit.Kit;
 import uk.hotten.herobrine.kit.abilities.LocatorAbility;
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -18,16 +17,16 @@ public class ArcherKit extends Kit {
     public ArcherKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "archer",
-                ChatColor.GREEN + "Archer",
+                "&aArcher",
                 "theherobrine.kit.classic.archer",
                 requirePermission,
                 Message.createArray(
-                        ChatColor.DARK_GRAY + "- " + ChatColor.GREEN + "Hatchet of War" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (weapon)",
+                        "&8- &aHatchet of War &8&o(weapon)",
                         "",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.YELLOW + "Phoenix Bow" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (bow)",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.GRAY + "Eagle Feather Quills" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x64)"
+                        "&8- &ePhoenix Bow &8&o(bow)",
+                        "&8- &7Eagle Feather Quills &8&o(x64)"
                 ),
-                new GUIItem(Material.BOW).displayName(ChatColor.GREEN + "Archer")
+                new GUIItem(Material.BOW).displayName("&aArcher")
         );
     }
 
@@ -39,9 +38,9 @@ public class ArcherKit extends Kit {
     @Override
     public void setupPlayer(Player player) {
         // Items
-        GUIItem bow = new GUIItem(Material.BOW).displayName(ChatColor.YELLOW + "Phoenix Bow").enchantment(Enchantment.ARROW_KNOCKBACK, 1).unbreakable(true);
-        GUIItem arrow = new GUIItem(Material.ARROW).displayName(ChatColor.GRAY + "Eagle Feather Quills").amount(64);
-        GUIItem axe = new GUIItem(Material.IRON_AXE).displayName(ChatColor.GREEN + "Hatchet of War").unbreakable(true);
+        GUIItem bow = new GUIItem(Material.BOW).displayName("&ePhoenix Bow").enchantment(Enchantment.ARROW_KNOCKBACK, 1).unbreakable(true);
+        GUIItem arrow = new GUIItem(Material.ARROW).displayName("&7Eagle Feather Quills").amount(64);
+        GUIItem axe = new GUIItem(Material.IRON_AXE).displayName("&aHatchet of War").unbreakable(true);
 
         player.getInventory().setItem(0, bow.build());
         player.getInventory().setItem(1, arrow.build());

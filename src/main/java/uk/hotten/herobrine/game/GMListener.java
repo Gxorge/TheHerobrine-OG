@@ -1,10 +1,12 @@
 package uk.hotten.herobrine.game;
 
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import me.tigerhix.lib.scoreboard.ScoreboardLib;
 import me.tigerhix.lib.scoreboard.common.EntryBuilder;
 import me.tigerhix.lib.scoreboard.type.Entry;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.*;
 import uk.hotten.herobrine.kit.KitGui;
 import uk.hotten.herobrine.lobby.GameLobby;
@@ -64,7 +66,7 @@ public class GMListener implements Listener {
     private void onJoinLogic(Player player, String worldName) {
         if (!gameManager.canJoin(player)) {
             player.teleport(mvWorldManager.getSpawnWorld().getSpawnLocation());
-            player.sendMessage(Message.format(ChatColor.RED + "This lobby is full."));
+            Message.send(player, Message.format("&cThis lobby is full."));
             return;
         }
 
@@ -83,16 +85,16 @@ public class GMListener implements Listener {
         gameManager.getScoreboards().put(player, ScoreboardLib.createScoreboard(player).setHandler(new ScoreboardHandler() {
             @Override
             public String getTitle(Player player) {
-                return "" + ChatColor.YELLOW + ChatColor.BOLD + "Your Stats";
+                return "&e&lYour Stats";
             }
 
             @Override
             public List<Entry> getEntries(Player player) {
                 return new EntryBuilder()
-                        .next(ChatColor.AQUA + "Points: " + ChatColor.RESET + gameLobby.getStatManager().getPoints().get(player.getUniqueId()))
-                        .next(ChatColor.AQUA + "Captures: " + ChatColor.RESET + gameLobby.getStatManager().getCaptures().get(player.getUniqueId()))
-                        .next(ChatColor.AQUA + "Kills: " + ChatColor.RESET + gameLobby.getStatManager().getKills().get(player.getUniqueId()))
-                        .next(ChatColor.AQUA + "Deaths: " + ChatColor.RESET + gameLobby.getStatManager().getDeaths().get(player.getUniqueId()))
+                        .next("&bPoints: &r" + gameLobby.getStatManager().getPoints().get(player.getUniqueId()))
+                        .next("&bCaptures: &r" + gameLobby.getStatManager().getCaptures().get(player.getUniqueId()))
+                        .next("&bKills: &r" + gameLobby.getStatManager().getKills().get(player.getUniqueId()))
+                        .next("&bDeaths: &r" + gameLobby.getStatManager().getDeaths().get(player.getUniqueId()))
                         .build();
             }
         }).setUpdateInterval(1));
@@ -107,7 +109,7 @@ public class GMListener implements Listener {
             return;
         }
 
-        Message.broadcast(gameLobby, Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has joined!"));
+        Message.broadcast(gameLobby, Message.format("&b" + player.getName() + " &ehas joined!"));
         gameManager.getSurvivors().add(player);
         gameManager.startCheck();
 
@@ -150,7 +152,7 @@ public class GMListener implements Listener {
     private void onLeaveLogic(Player player) {
         gameLobby.getPlayers().remove(player);
         if (!gameManager.getSpectators().contains(player))
-            Message.broadcast(gameLobby, Message.format("" + ChatColor.AQUA + player.getName() + " " + ChatColor.YELLOW + "has quit."));
+            Message.broadcast(gameLobby, Message.format("&b" + player.getName() + " &ehas quit."));
         gameManager.getSurvivors().remove(player);
         gameManager.getSpectators().remove(player);
 
@@ -178,7 +180,7 @@ public class GMListener implements Listener {
 
         if (gameManager.getPassUser() == player) {
             gameManager.setPassUser(null);
-            Message.broadcast(gameManager.getGameLobby(), Message.format(ChatColor.GOLD + player.getName() + " has left and will no-longer be Herobrine."), "theherobrine.command.setherobrine");
+            Message.broadcast(gameManager.getGameLobby(), Message.format("&6" + player.getName() + " has left and will no-longer be Herobrine."), "theherobrine.command.setherobrine");
         }
     }
 
@@ -210,18 +212,18 @@ public class GMListener implements Listener {
 
         for (Player p : gameLobby.getPlayers()) {
             if (p == gameManager.getHerobrine()) continue;
-            PlayerUtil.sendTitle(p, "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Help them return it!", 5, 60, 5);
+            PlayerUtil.sendTitle(p, "&a&l" + player.getName() + "&3 has picked up the shard!", "&eHelp them return it!", 5, 60, 5);
         }
-        PlayerUtil.sendTitle(gameManager.getHerobrine(), "" + ChatColor.GREEN + ChatColor.BOLD + player.getName() + ChatColor.DARK_AQUA + " has picked up the shard!", ChatColor.YELLOW + "Maybe target them first", 5, 60, 5);
+        PlayerUtil.sendTitle(gameManager.getHerobrine(), "&a&l" + player.getName() + "&3 has picked up the shard!", "&eMaybe target them first", 5, 60, 5);
         gameManager.getShardHandler().getShardTitle().remove();
         gameManager.setShardState(ShardState.CARRYING);
         gameManager.setShardCarrier(player);
-        gameManager.setTags(player, "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Shard: ", ChatColor.LIGHT_PURPLE, GameManager.ScoreboardUpdateAction.UPDATE);
+        gameManager.setTags(player, "&d&lShard: ", NamedTextColor.LIGHT_PURPLE, GameManager.ScoreboardUpdateAction.UPDATE);
         PlayerUtil.broadcastSound(gameLobby, Sound.ENTITY_BAT_DEATH, 1f, 0f);
         PlayerUtil.addEffect(player, PotionEffectType.BLINDNESS, 100, 1, false, false);
         PlayerUtil.addEffect(player, PotionEffectType.SLOW, 600, 2, false, false);
         PlayerUtil.addEffect(player, PotionEffectType.CONFUSION, 300, 1, false, false);
-        player.sendMessage(Message.format(ChatColor.GOLD + "You have a shard! Take it to the alter (Enchanting Table)!"));
+        player.sendMessage(Message.format("&6You have a shard! Take it to the alter (Enchanting Table)!"));
     }
 
     @EventHandler
@@ -449,7 +451,7 @@ public class GMListener implements Listener {
             return;
 
         Player player = event.getEntity();
-        event.setDeathMessage("");
+        event.deathMessage(Message.legacySerializerAnyCase(""));
         event.getDrops().clear();
 
         if (gameManager.getGameState() != GameState.LIVE) {
@@ -461,7 +463,7 @@ public class GMListener implements Listener {
 
         if (player == gameManager.getHerobrine()) {
             if (player.getKiller() != null) {
-                Message.broadcast(gameLobby, Message.format(ChatColor.AQUA + player.getKiller().getName() + ChatColor.GREEN + " has defeated " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
+                Message.broadcast(gameLobby, Message.format("&b" + player.getKiller().getName() + " &ahas defeated &c&lthe HEROBRINE!"));
                 gameLobby.getStatManager().getPointsTracker().increment(player.getKiller().getUniqueId(), 30);
             }
             PlayerUtil.playSoundAt(player.getLocation(), Sound.ENTITY_WITHER_HURT, 1f, 1f);
@@ -469,7 +471,7 @@ public class GMListener implements Listener {
         } else {
             gameManager.getSurvivors().remove(player);
             if ((player.getKiller() != null && player.getKiller() == gameManager.getHerobrine()) || gameManager.getHbLastHit().contains(player)) {
-                Message.broadcast(gameLobby, Message.format(ChatColor.AQUA + player.getName() + ChatColor.YELLOW + " was killed by " + ChatColor.RED + ChatColor.BOLD + "the HEROBRINE!"));
+                Message.broadcast(gameLobby, Message.format("&b" + player.getName() + "&e was killed by &c&lthe HEROBRINE!"));
                 gameLobby.getStatManager().getPointsTracker().increment(gameManager.getHerobrine().getUniqueId(), 5);
             }
 
@@ -534,7 +536,7 @@ public class GMListener implements Listener {
     }
 
     @EventHandler
-    public void onChat(AsyncPlayerChatEvent event) {
+    public void onChat(AsyncChatEvent event) {
         if (!event.getPlayer().getWorld().getName().startsWith(gameLobby.getLobbyId()))
             return;
 
@@ -545,15 +547,15 @@ public class GMListener implements Listener {
         GameRank rank = sm.getGameRank(player.getUniqueId());
         int points = sm.getPoints().get(player.getUniqueId());
 
-        String endMessage = ChatColor.BLUE + player.getDisplayName() + ChatColor.DARK_GRAY + " » " + ChatColor.RESET + event.getMessage();
+        String endMessage = "&9" + player.displayName() + "&8 » &r" + event.message();
 
         if (gameManager.getGameState() == GameState.WAITING || gameManager.getGameState() == GameState.STARTING) {
-            Message.broadcast(gameLobby, "" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▏ " + rank.getDisplay() + " " + endMessage);
+            Message.broadcast(gameLobby, "&e" + points + "&8 ▏ " + rank.getDisplay() + " " + endMessage);
         } else if (gameManager.getGameState() == GameState.LIVE || gameManager.getGameState() == GameState.ENDING) {
             if (player == gameManager.getHerobrine() || gameManager.getSurvivors().contains(player)) {
                 Message.broadcast(gameLobby, rank.getDisplay() + " " + endMessage);
             } else {
-                Message.broadcast(gameLobby, "" + ChatColor.YELLOW + points + ChatColor.DARK_GRAY + " ▍ " + ChatColor.DARK_RED + "DEAD " + ChatColor.DARK_GRAY + "▏ " + endMessage);
+                Message.broadcast(gameLobby, "&e" + points + "&8 ▍ &4DEAD &8▏ " + endMessage);
             }
         }
     }

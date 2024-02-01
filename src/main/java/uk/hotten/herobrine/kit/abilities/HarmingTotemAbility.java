@@ -1,6 +1,5 @@
 package uk.hotten.herobrine.kit.abilities;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,8 +24,8 @@ public class HarmingTotemAbility extends KitAbility {
     @Override
     public void apply(Player player) {
         this.player = player;
-        GUIItem item = new GUIItem(Material.NETHER_BRICK_FENCE).displayName("" + ChatColor.YELLOW + ChatColor.BOLD + "Totem: " + ChatColor.RED + "Pain");
-        item.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "Creates an aura of pain to damage The Herobrine for 60 seconds", "" + ChatColor.GRAY + ChatColor.ITALIC));
+        GUIItem item = new GUIItem(Material.NETHER_BRICK_FENCE).displayName("&e&lTotem: &cPain");
+        item.lore(Message.addLinebreaks("&7&oCreates an aura of pain to damage The Herobrine for 60 seconds", "&7&o"));
 
         player.getInventory().setItem(slot, item.build());
     }

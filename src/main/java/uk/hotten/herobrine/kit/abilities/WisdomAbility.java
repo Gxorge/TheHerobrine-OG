@@ -6,7 +6,6 @@ import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,8 +27,8 @@ public class WisdomAbility extends KitAbility {
     @Override
     public void apply(Player player) {
         this.player = player;
-        GUIItem wiz = new GUIItem(Material.BLAZE_POWDER).displayName(ChatColor.GREEN + "Notch's Wisdom").amount(amount);
-        wiz.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "Creates an aura of health to heal survivors for 10 seconds", "" + ChatColor.GRAY + ChatColor.ITALIC));
+        GUIItem wiz = new GUIItem(Material.BLAZE_POWDER).displayName("&aNotch's Wisdom").amount(amount);
+        wiz.lore(Message.addLinebreaks("&7&oCreates an aura of health to heal survivors for 10 seconds", "&7&o"));
 
         player.getInventory().setItem(slot, wiz.build());
     }

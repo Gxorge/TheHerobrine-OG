@@ -1,6 +1,5 @@
 package uk.hotten.herobrine.commands;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,19 +12,19 @@ public class DeleteLobbyCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args == null || args.length == 0) {
-            sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /hbdeletelobby <lobby>"));
+            Message.send(sender, Message.format("&cCorrect Usage: /hbdeletelobby <lobby>"));
             return true;
         }
 
         GameLobby gl = LobbyManager.getInstance().getLobby(args[0]);
         if (gl == null) {
-            sender.sendMessage(Message.format(ChatColor.RED + args[0] + " does not exist."));
+            Message.send(sender, Message.format("&c" + args[0] + " does not exist."));
             return true;
         }
 
-        sender.sendMessage(Message.format("Shutting down " + gl.getLobbyId() + "..."));
+        Message.send(sender, Message.format("Shutting down " + gl.getLobbyId() + "..."));
         gl.shutdown(true, false);
-        sender.sendMessage(Message.format(ChatColor.GREEN + "Lobby " + gl.getLobbyId() + " has been shutdown."));
+        Message.send(sender, Message.format("&aLobby " + gl.getLobbyId() + " has been shutdown."));
 
         return true;
     }

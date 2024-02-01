@@ -1,6 +1,7 @@
 package uk.hotten.herobrine.game.runnables;
 
 import lombok.Getter;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -59,7 +60,7 @@ public class ShardHandler extends BukkitRunnable {
                     shard.remove();
                     shardTitle.remove();
                     gm.setShardState(ShardState.WAITING);
-                    Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.GRAY + "The shard has been DESTROYED! Work faster next time..."));
+                    Message.broadcast(gm.getGameLobby(), Message.format("&7The shard has been DESTROYED! Work faster next time..."));
                 }
                 break;
             }
@@ -82,8 +83,8 @@ public class ShardHandler extends BukkitRunnable {
         timer = random.nextInt(16) + 30; // random number between 30 and 45 for the next shard spawn
         Console.debug(gm.getGameLobby(), "Next shard time to be " + timer);
 
-        PlayerUtil.broadcastTitle(gm.getGameLobby(), "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "A Shard has spawned!", ChatColor.AQUA + "Use your compass to find it!", 10, 60, 10);
-        Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.LIGHT_PURPLE  + "A new shard has " + ChatColor.AQUA + ChatColor.BOLD + "been SUMMONED!"));
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "&d&lA Shard has spawned!", "&bUse your compass to find it!", 10, 60, 10);
+        Message.broadcast(gm.getGameLobby(), Message.format("&dA new shard has &b&lbeen SUMMONED!"));
     }
 
     public void drop(Location loc) {
@@ -93,11 +94,11 @@ public class ShardHandler extends BukkitRunnable {
         spawnShardTitle();
         loc.getWorld().strikeLightningEffect(loc.add(0, 1, 0));
         for (Player p : gm.getGameLobby().getPlayers()) p.setCompassTarget(shard.getLocation());
-        gm.setTags(gm.getShardCarrier(), null, ChatColor.DARK_GREEN, GameManager.ScoreboardUpdateAction.UPDATE);
+        gm.setTags(gm.getShardCarrier(), null, NamedTextColor.DARK_GREEN, GameManager.ScoreboardUpdateAction.UPDATE);
 
         gm.setShardState(ShardState.SPAWNED);
         gm.setShardCarrier(null);
-        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "dropped!", 10, 60, 10);
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", "&bThe shard has been &c&ldropped!", 10, 60, 10);
     }
 
     public void destroy() {
@@ -111,20 +112,20 @@ public class ShardHandler extends BukkitRunnable {
         if (shardTitle != null)
             shardTitle.remove();
 
-        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", ChatColor.AQUA + "The shard has been " + ChatColor.RED + ChatColor.BOLD + "destroyed!", 10, 60, 10);
-        Message.broadcast(gm.getGameLobby(), Message.format(ChatColor.GRAY + "The shard has been DESTROYED! A new one shall be summoned soon..."));
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", "&bThe shard has been &c&ldestroyed!", 10, 60, 10);
+        Message.broadcast(gm.getGameLobby(), Message.format("&7The shard has been DESTROYED! A new one shall be summoned soon..."));
     }
 
     private static ItemStack createShard() {
         GUIItem shardItem = new GUIItem(Material.NETHER_STAR);
-        shardItem.displayName(ChatColor.RED + "Shard of " + ShardName.getRandom().getName());
+        shardItem.displayName("&cShard of " + ShardName.getRandom().getName());
         return shardItem.build();
     }
 
     private void spawnShardTitle() {
         shardTitle = (ArmorStand) shard.getWorld().spawnEntity(shard.getLocation().subtract(0, 1.5, 0), EntityType.ARMOR_STAND);
         shardTitle.setVisible(false);
-        shardTitle.setCustomName(ChatColor.AQUA + "The Shard");
+        shardTitle.customName(Message.legacySerializerAnyCase("&bThe Shard"));
         shardTitle.setCustomNameVisible(true);
         shardTitle.setGravity(false);
     }

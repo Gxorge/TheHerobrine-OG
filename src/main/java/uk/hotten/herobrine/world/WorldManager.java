@@ -5,10 +5,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import lombok.Getter;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import uk.hotten.herobrine.events.GameStateUpdateEvent;
 import uk.hotten.herobrine.game.runnables.MapVotingRunnable;
 import uk.hotten.herobrine.lobby.GameLobby;
@@ -147,15 +146,15 @@ public class WorldManager implements Listener {
             toSend.add(player);
 
         for (Player p : toSend) {
-            p.sendMessage(Message.format(ChatColor.GOLD + "Vote for a map with /hbv #."));
-            p.sendMessage(Message.format(ChatColor.GOLD + "Map choices up for voting:"));
+            Message.send(p, Message.format("&6Vote for a map with /hbv #."));
+            Message.send(p, Message.format("&6Map choices up for voting:"));
             int current = 1;
             for (Map.Entry<Integer, VotingMap> e : votingMaps.entrySet()) {
-                TextComponent textComponent = new TextComponent(Message.format("" + ChatColor.GOLD + ChatColor.BOLD + current + ". "
-                        + ChatColor.GOLD + e.getValue().getMapData().getName() + " (" + ChatColor.AQUA + e.getValue().getVotes() + ChatColor.GOLD + " votes)"));
-                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GOLD + "Click here to vote for " + ChatColor.AQUA + e.getValue().getMapData().getName())));
-                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hbv " + current));
-                p.spigot().sendMessage(textComponent);
+                TextComponent textComponent = Message.legacySerializerAnyCase(Message.format("&6&l" + current + ". &6"
+                        + e.getValue().getMapData().getName() + " (&b" + e.getValue().getVotes() + "&6 votes)"))
+                .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Message.legacySerializerAnyCase("&6Click here to vote for &b" + e.getValue().getMapData().getName())))
+                .clickEvent(ClickEvent.runCommand("/hbv " + current));
+                p.sendMessage(textComponent);
                 current++;
             }
             p.sendMessage(" ");
@@ -173,7 +172,7 @@ public class WorldManager implements Listener {
         }
 
         Console.debug(gameLobby, "Selected highest voted map -> " + highest.getMapData().getName());
-        Message.broadcast(gameLobby, Message.format(ChatColor.GOLD + "Voting has ended! The map " + ChatColor.AQUA + highest.getMapData().getName() + ChatColor.GOLD + " has won!"));
+        Message.broadcast(gameLobby, Message.format("&6Voting has ended! The map &b" + highest.getMapData().getName() + "&6 has won!"));
         votingRunning = false;
 
         loadMap(highest);

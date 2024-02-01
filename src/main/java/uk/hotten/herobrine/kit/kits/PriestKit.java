@@ -7,7 +7,6 @@ import uk.hotten.herobrine.kit.abilities.DreamweaverAbility;
 import uk.hotten.herobrine.kit.abilities.LocatorAbility;
 import uk.hotten.herobrine.kit.abilities.WisdomAbility;
 import uk.hotten.herobrine.kit.abilities.WooflessAbility;
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,23 +19,23 @@ public class PriestKit extends Kit {
     public PriestKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "priest",
-                ChatColor.WHITE + "Priest",
+                "&fPriest",
                 "theherobrine.kit.classic.priest",
                 requirePermission,
                 Message.createArray(
-                        ChatColor.DARK_GRAY + "- " + ChatColor.GREEN + "Blade of Heroism" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (weapon)",
+                        "&8- &aBlade of Heroism &8&o(weapon)",
                         "",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.GREEN + "Dreamweaver Bandage" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x2)",
-                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "Bandage yourself to full health",
+                        "&8- &aDreamweaver Bandage &8&o(x2)",
+                        "   &7&oBandage yourself to full health",
                         "   ",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.GREEN + "Notch's Wisdom" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x2)",
-                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "Creates an aura of health to",
-                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "heal survivors for 10 seconds",
+                        "&8- &aNotch's Wisdom &8&o(x2)",
+                        "   &7&oCreates an aura of health to",
+                        "   &7&oheal survivors for 10 seconds",
                         "",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.AQUA + "Summon Woofless" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x1)",
-                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "It's dangerous to go alone, take a friend!"
+                        "&8- &bSummon Woofless &8&o(x1)",
+                        "   &7&oIt's dangerous to go alone, take a friend!"
                 ),
-                new GUIItem(Material.BONE).displayName(ChatColor.WHITE + "Priest")
+                new GUIItem(Material.BONE).displayName("&fPriest")
         );
     }
 
@@ -51,7 +50,7 @@ public class PriestKit extends Kit {
     @Override
     public void setupPlayer(Player player) {
         // Items
-        GUIItem blade = new GUIItem(Material.STONE_SWORD).displayName(ChatColor.GREEN + "Blade of Heroism").unbreakable(true);
+        GUIItem blade = new GUIItem(Material.STONE_SWORD).displayName("&aBlade of Heroism").unbreakable(true);
 
         player.getInventory().setItem(0, blade.build());
 

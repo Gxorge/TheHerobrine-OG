@@ -6,7 +6,6 @@ import uk.hotten.herobrine.kit.KitAbility;
 import uk.hotten.herobrine.utils.GameState;
 import uk.hotten.herobrine.utils.Message;
 import uk.hotten.herobrine.utils.PlayerUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -29,8 +28,8 @@ public class DreamweaverAbility extends KitAbility {
     @Override
     public void apply(Player player) {
         this.player = player;
-        GUIItem item = new GUIItem(Material.MAGMA_CREAM).displayName(ChatColor.GREEN + "Dreamweaver Bandage").amount(amount);
-        item.lore(Message.addLinebreaks("" + ChatColor.GRAY + ChatColor.ITALIC + "Bandage yourself to full health", "" + ChatColor.GRAY + ChatColor.ITALIC));
+        GUIItem item = new GUIItem(Material.MAGMA_CREAM).displayName("&aDreamweaver Bandage").amount(amount);
+        item.lore(Message.addLinebreaks("&7&oBandage yourself to full health", "&7&o"));
 
         if (slot == -1)
             player.getInventory().addItem(item.build());

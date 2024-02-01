@@ -5,15 +5,13 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import lombok.Getter;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import uk.hotten.herobrine.game.GameManager;
@@ -162,11 +160,11 @@ public class LobbyManager {
     }
 
     public void sendLobbyMessage(Player player) {
-        player.sendMessage(Message.format(ChatColor.GOLD + "Join a lobby with /hbjoin <id>."));
-        player.sendMessage(Message.format(ChatColor.GOLD + "Lobbies available to join: "));
+        Message.send(player, Message.format("&6Join a lobby with /hbjoin <id>."));
+        Message.send(player, Message.format("&6Lobbies available to join: "));
 
-        String fullOrOverfill = "" + ChatColor.RED + ChatColor.BOLD + "FULL " + ChatColor.RESET +
-                (player.hasPermission("theherobrine.overfill") ? ChatColor.GREEN + "(JOIN)"
+        String fullOrOverfill = "&c&lFULL &r" +
+                (player.hasPermission("theherobrine.overfill") ? "&a(JOIN)"
                         : "");
 
         int sent = 0;
@@ -175,14 +173,14 @@ public class LobbyManager {
             GameManager gm = gameLobby.getGameManager();
 
             if (gm.getGameState() == GameState.LIVE) {
-                StringBuilder sb = new StringBuilder("" + ChatColor.AQUA + gameLobby.getLobbyId() + ": " +
-                        ChatColor.YELLOW + gm.getSurvivors().size() + " remaining" + ChatColor.DARK_GRAY + " - " + ChatColor.AQUA + ChatColor.BOLD + "LIVE " + ChatColor.DARK_GREEN + "(SPECTATE)");
+                StringBuilder sb = new StringBuilder("&b" + gameLobby.getLobbyId() + ": &e" +
+                        gm.getSurvivors().size() + " remaining" + "&8 - &b&lLIVE &2(SPECTATE)");
 
-                TextComponent textComponent = new TextComponent(Message.format(sb.toString()));
-                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GOLD + "Click here to spectate " + ChatColor.AQUA + gameLobby.getLobbyId())));
-                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hbjoin " + gameLobby.getLobbyId()));
+                TextComponent textComponent = Message.legacySerializerAnyCase(Message.format(sb.toString()))
+                        .clickEvent(ClickEvent.runCommand("/hbjoin " + gameLobby.getLobbyId()))
+                        .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Message.legacySerializerAnyCase("&6Click here to spectate &b" + gameLobby.getLobbyId())));
 
-                player.spigot().sendMessage(textComponent);
+                player.sendMessage(textComponent);
                 sent++;
                 continue;
             }
@@ -190,31 +188,31 @@ public class LobbyManager {
             if (gm.getGameState() != GameState.WAITING && gm.getGameState() != GameState.STARTING)
                 continue;
 
-            String startingStatus = (gm.getGameState() == GameState.WAITING ? "" + ChatColor.YELLOW + ChatColor.BOLD + "WAITING "
-                    : "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "STARTING ") + ChatColor.RESET;
+            String startingStatus = (gm.getGameState() == GameState.WAITING ? "&e&lWAITING "
+                    : "&d&lSTARTING ") + "&r";
 
-            StringBuilder sb = new StringBuilder("" + ChatColor.AQUA + gameLobby.getLobbyId() + ": " +
-                    ChatColor.YELLOW + gm.getSurvivors().size() + "/" + gm.getMaxPlayers() + ChatColor.DARK_GRAY + " - " + ChatColor.RESET);
+            StringBuilder sb = new StringBuilder("&b" + gameLobby.getLobbyId() + ": &e" +
+                    gm.getSurvivors().size() + "/" + gm.getMaxPlayers() + "&7 - &r");
 
             if (gameLobby.getPlayers().size() < gm.getMaxPlayers())
-                sb.append(startingStatus + ChatColor.GREEN + "(JOIN)");
+                sb.append(startingStatus + "&a(JOIN)");
             else
                 sb.append(fullOrOverfill);
 
-            TextComponent textComponent = new TextComponent(Message.format(sb.toString()));
+            TextComponent textComponent = Message.legacySerializerAnyCase(Message.format(sb.toString()));
             if (sb.toString().contains("JOIN")) {
-                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GOLD + "Click here to join " + ChatColor.AQUA + gameLobby.getLobbyId())));
-                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hbjoin " + gameLobby.getLobbyId()));
+                textComponent = textComponent.hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Message.legacySerializerAnyCase("&6Click here to join &b" + gameLobby.getLobbyId())))
+                                .clickEvent(ClickEvent.runCommand("/hbjoin " + gameLobby.getLobbyId()));
             } else {
-                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.RED + "This lobby is full.")));
+                textComponent = textComponent.hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT, Message.legacySerializerAnyCase("&cThis lobby is full.")));
             }
 
-            player.spigot().sendMessage(textComponent);
+            player.sendMessage(textComponent);
             sent++;
         }
 
         if (sent == 0) {
-            player.sendMessage(Message.format(ChatColor.RED + "There are no lobbies available."));
+            Message.send(player, Message.format("&cThere are no lobbies available."));
         }
     }
 

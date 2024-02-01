@@ -1,7 +1,6 @@
 package uk.hotten.herobrine;
 
 import me.tigerhix.lib.scoreboard.ScoreboardLib;
-import org.bukkit.ChatColor;
 import uk.hotten.herobrine.commands.*;
 import uk.hotten.herobrine.data.SqlManager;
 import uk.hotten.herobrine.data.RedisManager;
@@ -20,9 +19,9 @@ public class HerobrinePluginOG extends JavaPlugin {
 
         Console.showDebug = getConfig().getBoolean("showDebugMessages");
         if (getConfig().getString("gamePrefix").toUpperCase().equals("DEFAULT"))
-            Message.prefix = "" + ChatColor.DARK_GRAY + "▍ " + ChatColor.DARK_AQUA + "TheHerobrine " + ChatColor.DARK_GRAY + "▏";
+            Message.prefix = Message.legacySerializerAnyCase("&8▍ &3TheHerobrine &8▏");
         else
-            Message.prefix = ChatColor.translateAlternateColorCodes('&', getConfig().getString("gamePrefix"));
+            Message.prefix = Message.legacySerializerAnyCase(getConfig().getString("gamePrefix"));
 
         SqlManager sqlManager = new SqlManager(this);
         RedisManager redisManager = new RedisManager(this);

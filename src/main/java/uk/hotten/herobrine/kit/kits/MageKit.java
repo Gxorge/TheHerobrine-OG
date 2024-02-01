@@ -1,6 +1,5 @@
 package uk.hotten.herobrine.kit.kits;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,19 +20,19 @@ public class MageKit extends Kit {
     public MageKit(GameManager gm, boolean requirePermission) {
         super(gm,
                 "mage",
-                ChatColor.AQUA + "Mage",
+                "&bMage",
                 "theherobrine.kit.unlockable.mage",
                 requirePermission,
                 Message.createArray(
-                        ChatColor.DARK_GRAY + "- " + ChatColor.GOLD + "Elder's Sword" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (weapon)",
+                        "&8- &6Elder's Sword &8&o(weapon)",
                         "",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.GREEN + "Water of " + ChatColor.BOLD + "Reckoning" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (bow)",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.AQUA + "Mana " + ChatColor.BOLD + "Arrow" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x32)",
+                        "&8- &aWater of &lReckoning &8&o(bow)",
+                        "&8- &bMana &lArrow &8&o(x32)",
                         "",
-                        ChatColor.DARK_GRAY + "- " + ChatColor.RED + "Overwhelming " + ChatColor.BOLD + "Love" + ChatColor.DARK_GRAY + ChatColor.ITALIC + " (x1)",
-                        "   " + ChatColor.GRAY + ChatColor.ITALIC + "Heal all your survivors 3 hearts"
+                        "&8- &cOverwhelming &lLove &8&o(x1)",
+                        "   &7&oHeal all your survivors 3 hearts"
                 ),
-                new GUIItem(Material.WOODEN_SWORD).displayName(ChatColor.AQUA + "Mage")
+                new GUIItem(Material.WOODEN_SWORD).displayName("&bMage")
         );
     }
 
@@ -45,14 +44,14 @@ public class MageKit extends Kit {
 
     @Override
     public void setupPlayer(Player player) {
-        GUIItem sword = new GUIItem(Material.WOODEN_SWORD).displayName(ChatColor.GOLD + "Elder's Sword").unbreakable(true);
-        GUIItem bow = new GUIItem(Material.BOW).displayName(ChatColor.GREEN + "Water of " + ChatColor.BOLD + "Reckoning").unbreakable(true);
-        GUIItem arrow = new GUIItem(Material.ARROW).displayName(ChatColor.AQUA + "Mana " + ChatColor.BOLD + "Arrow").amount(32);
+        GUIItem sword = new GUIItem(Material.WOODEN_SWORD).displayName("&6Elder's Sword").unbreakable(true);
+        GUIItem bow = new GUIItem(Material.BOW).displayName("&aWater of &lReckoning").unbreakable(true);
+        GUIItem arrow = new GUIItem(Material.ARROW).displayName("&bMana &lArrow").amount(32);
 
         ItemStack healing = new ItemStack(Material.POTION);
         PotionMeta pmHealing = (PotionMeta) healing.getItemMeta();
         pmHealing.setBasePotionData(new PotionData(PotionType.INSTANT_HEAL, false, true));
-        pmHealing.setDisplayName("" + ChatColor.YELLOW + ChatColor.BOLD + "Potion: " + ChatColor.AQUA + "Self Healing");
+        pmHealing.displayName(Message.legacySerializerAnyCase("&e&lPotion: &aSelf Healing"));
         healing.setItemMeta(pmHealing);
 
         player.getInventory().setItem(0, sword.build());
