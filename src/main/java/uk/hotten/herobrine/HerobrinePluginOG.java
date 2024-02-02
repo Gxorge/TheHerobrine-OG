@@ -19,9 +19,9 @@ public class HerobrinePluginOG extends JavaPlugin {
 
         Console.showDebug = getConfig().getBoolean("showDebugMessages");
         if (getConfig().getString("gamePrefix").toUpperCase().equals("DEFAULT"))
-            Message.prefix = Message.legacySerializerAnyCase("&8▍ &3TheHerobrine &8▏");
+            Message.prefix = "&8▍ &3TheHerobrine &8▏";
         else
-            Message.prefix = Message.legacySerializerAnyCase(getConfig().getString("gamePrefix"));
+            Message.prefix = getConfig().getString("gamePrefix");
 
         SqlManager sqlManager = new SqlManager(this);
         RedisManager redisManager = new RedisManager(this);

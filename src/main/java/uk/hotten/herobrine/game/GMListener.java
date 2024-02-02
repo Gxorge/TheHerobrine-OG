@@ -6,7 +6,9 @@ import me.tigerhix.lib.scoreboard.ScoreboardLib;
 import me.tigerhix.lib.scoreboard.common.EntryBuilder;
 import me.tigerhix.lib.scoreboard.type.Entry;
 import me.tigerhix.lib.scoreboard.type.ScoreboardHandler;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.*;
 import uk.hotten.herobrine.kit.KitGui;
 import uk.hotten.herobrine.lobby.GameLobby;
@@ -212,9 +214,9 @@ public class GMListener implements Listener {
 
         for (Player p : gameLobby.getPlayers()) {
             if (p == gameManager.getHerobrine()) continue;
-            PlayerUtil.sendTitle(p, "&a&l" + player.getName() + "&3 has picked up the shard!", "&eHelp them return it!", 5, 60, 5);
+            PlayerUtil.sendTitle(p, "&a&l" + player.getName() + "&3 has picked up the shard!", "&eHelp them return it!", 250, 3000, 250);
         }
-        PlayerUtil.sendTitle(gameManager.getHerobrine(), "&a&l" + player.getName() + "&3 has picked up the shard!", "&eMaybe target them first", 5, 60, 5);
+        PlayerUtil.sendTitle(gameManager.getHerobrine(), "&a&l" + player.getName() + "&3 has picked up the shard!", "&eMaybe target them first", 250, 3000, 250);
         gameManager.getShardHandler().getShardTitle().remove();
         gameManager.setShardState(ShardState.CARRYING);
         gameManager.setShardCarrier(player);
@@ -223,7 +225,7 @@ public class GMListener implements Listener {
         PlayerUtil.addEffect(player, PotionEffectType.BLINDNESS, 100, 1, false, false);
         PlayerUtil.addEffect(player, PotionEffectType.SLOW, 600, 2, false, false);
         PlayerUtil.addEffect(player, PotionEffectType.CONFUSION, 300, 1, false, false);
-        player.sendMessage(Message.format("&6You have a shard! Take it to the alter (Enchanting Table)!"));
+        Message.send(player, Message.format("&6You have a shard! Take it to the alter (Enchanting Table)!"));
     }
 
     @EventHandler
@@ -547,7 +549,7 @@ public class GMListener implements Listener {
         GameRank rank = sm.getGameRank(player.getUniqueId());
         int points = sm.getPoints().get(player.getUniqueId());
 
-        String endMessage = "&9" + player.displayName() + "&8 » &r" + event.message();
+        String endMessage = "&9" + PlainTextComponentSerializer.plainText().serialize(player.displayName()) + "&8 » &r" + PlainTextComponentSerializer.plainText().serialize(event.message());
 
         if (gameManager.getGameState() == GameState.WAITING || gameManager.getGameState() == GameState.STARTING) {
             Message.broadcast(gameLobby, "&e" + points + "&8 ▏ " + rank.getDisplay() + " " + endMessage);

@@ -83,7 +83,7 @@ public class ShardHandler extends BukkitRunnable {
         timer = random.nextInt(16) + 30; // random number between 30 and 45 for the next shard spawn
         Console.debug(gm.getGameLobby(), "Next shard time to be " + timer);
 
-        PlayerUtil.broadcastTitle(gm.getGameLobby(), "&d&lA Shard has spawned!", "&bUse your compass to find it!", 10, 60, 10);
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "&d&lA Shard has spawned!", "&bUse your compass to find it!", 500, 3000, 500);
         Message.broadcast(gm.getGameLobby(), Message.format("&dA new shard has &b&lbeen SUMMONED!"));
     }
 
@@ -98,7 +98,7 @@ public class ShardHandler extends BukkitRunnable {
 
         gm.setShardState(ShardState.SPAWNED);
         gm.setShardCarrier(null);
-        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", "&bThe shard has been &c&ldropped!", 10, 60, 10);
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", "&bThe shard has been &c&ldropped!", 500, 3000, 500);
     }
 
     public void destroy() {
@@ -112,7 +112,7 @@ public class ShardHandler extends BukkitRunnable {
         if (shardTitle != null)
             shardTitle.remove();
 
-        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", "&bThe shard has been &c&ldestroyed!", 10, 60, 10);
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "", "&bThe shard has been &c&ldestroyed!", 500, 3000, 500);
         Message.broadcast(gm.getGameLobby(), Message.format("&7The shard has been DESTROYED! A new one shall be summoned soon..."));
     }
 

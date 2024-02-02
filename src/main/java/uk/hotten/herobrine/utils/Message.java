@@ -13,7 +13,7 @@ import java.util.StringTokenizer;
 
 public class Message {
 
-    public static TextComponent prefix;
+    public static String prefix;
 
     public static String format(String body) {
         return prefix + " &r" + body;
@@ -93,7 +93,7 @@ public class Message {
     // Sends a formatted message to the player (including name replacement).
     public static void send(CommandSender p, String message) {
 
-        p.sendMessage(legacySerializerAnyCase(format(message)));
+        p.sendMessage(legacySerializerAnyCase(message).asComponent());
 
     }
 

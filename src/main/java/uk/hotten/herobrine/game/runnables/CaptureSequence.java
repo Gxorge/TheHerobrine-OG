@@ -27,7 +27,7 @@ public class CaptureSequence extends BukkitRunnable {
     public void run() {
         Location l = wm.alter;
 
-        PlayerUtil.broadcastTitle(gm.getGameLobby(), "&b&lShard Captured", "&eby &l" + player.getName(), 10, 60, 20);
+        PlayerUtil.broadcastTitle(gm.getGameLobby(), "&b&lShard Captured", "&eby &l" + player.getName(), 500, 3000, 1000);
         if (gm.getShardCount() == 3)
             Message.broadcast(gm.getGameLobby(), Message.format("&c&lHerobrine &eis now &aVisible!"));
         else

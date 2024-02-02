@@ -429,7 +429,7 @@ public class GameManager {
         voidKits();
 
         if (type == WinType.SURVIVORS) {
-            PlayerUtil.broadcastTitle(gameLobby, "&aSURVIVORS WIN!", "", 20, 60, 20);
+            PlayerUtil.broadcastTitle(gameLobby, "&aSURVIVORS WIN!", "", 1000, 3000, 1000);
             Message.broadcast(gameLobby, Message.format("&a&lThe Survivors &ehave defeated &c&lThe Herobrine!"));
             Message.broadcast(gameLobby, Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(gameLobby, Sound.ENTITY_WITHER_DEATH, 1f, 1f);
@@ -449,7 +449,7 @@ public class GameManager {
                 }
             });
         } else {
-            PlayerUtil.broadcastTitle(gameLobby, "&cHEROBRINE &aWINS!", "", 20, 60, 20);
+            PlayerUtil.broadcastTitle(gameLobby, "&cHEROBRINE &aWINS!", "", 1000, 3000, 1000);
             Message.broadcast(gameLobby, Message.format("&c&lThe Herobrine &ehas defeated all the survivors."));
             Message.broadcast(gameLobby, Message.format(type.getDesc()));
             PlayerUtil.broadcastSound(gameLobby, Sound.ENTITY_ENDER_DRAGON_HURT, 1f, 1f);

@@ -27,7 +27,7 @@ public class PlayerUtil {
     }
 
     public static void sendTitle(Player player, String top, String bottom, int fadeIn, int stay, int fadeOut) {
-        Title.Times times = Title.Times.times(Duration.ofSeconds(fadeIn/20), Duration.ofSeconds(stay/20), Duration.ofSeconds(fadeOut/20));
+        Title.Times times = Title.Times.times(Duration.ofMillis(fadeIn), Duration.ofMillis(stay), Duration.ofMillis(fadeOut));
         Title title = Title.title(Message.legacySerializerAnyCase(top), Message.legacySerializerAnyCase(bottom), times);
         player.showTitle(title);
     }
